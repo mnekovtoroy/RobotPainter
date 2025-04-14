@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotPainter.Calculations", "RobotPainter.Calculations\RobotPainter.Calculations.csproj", "{53A18F44-59D8-4A7E-8BA7-B2A2B3D56F94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotPainter.ConsoleTest", "RobotPainter.ConsoleTest\RobotPainter.ConsoleTest.csproj", "{737CA4D5-FF7E-4CD8-9DBB-063C54DD8E79}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53A18F44-59D8-4A7E-8BA7-B2A2B3D56F94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53A18F44-59D8-4A7E-8BA7-B2A2B3D56F94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53A18F44-59D8-4A7E-8BA7-B2A2B3D56F94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53A18F44-59D8-4A7E-8BA7-B2A2B3D56F94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{737CA4D5-FF7E-4CD8-9DBB-063C54DD8E79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{737CA4D5-FF7E-4CD8-9DBB-063C54DD8E79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{737CA4D5-FF7E-4CD8-9DBB-063C54DD8E79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{737CA4D5-FF7E-4CD8-9DBB-063C54DD8E79}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EC0C3E78-D865-44B3-ABB6-456B434427A2}
+	EndGlobalSection
+EndGlobal

@@ -72,5 +72,44 @@ namespace RobotPainter.Calculations
             }
             return (u, v);
         }
+
+        /// <summary>
+        /// Calculates rolling average
+        /// </summary>
+        /// <param name="x">Target matrix</param>
+        /// <param name="n">Rolling average will be calculated from (1+2*n)^2 cells around every cell</param>
+        /// <returns>Matrix of rolling averages</returns>
+        public static double[,] RollingAvg(double[,] x, int n)
+        {
+            int w = x.GetLength(0);
+            int h = x.GetLength(1);
+
+            double[,] avg = new double[w, h];
+
+            for(int i = 0; i < w; i++)
+            {
+                for(int j = 0; j < h; j++)
+                {
+                    int x_start = Math.Max(0, i - n);
+                    int x_end = Math.Min(w - 1, i + n);
+
+                    int y_start = Math.Max(0, j - n);
+                    int y_end = Math.Min(h - 1, j + n);
+
+                    double sum = 0.0;
+                    int count = 0;
+                    for (int u = x_start; u <= x_end; u++)
+                    {
+                        for(int v = y_start; v <= y_end; v++)
+                        {
+                            sum += x[u, v];
+                            count++;
+                        }
+                    }
+                    avg[i,j] = sum / count;
+                }
+            }
+            return avg;
+        }
     }
 }

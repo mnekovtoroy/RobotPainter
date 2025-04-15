@@ -1,6 +1,6 @@
 ﻿namespace RobotPainter.Calculations.Optimization
 {
-    public static class Optimizer
+    public class GradDescent : IOptimizer
     {
         private static (double, double) Grad(Func<double, double, double> function, double x, double y, double h)
         {
@@ -11,29 +11,47 @@
         }
 
         /// <summary>
+        /// Maximum iterations.
+        /// </summary>
+        public int kmax { get; set; } = 1000;
+        /// <summary>
+        /// Maximum step distance in a single iteration.
+        /// </summary>
+        public double max_step { get; set; } = 1.0;
+        /// <summary>
+        /// Tolerance condition to stop optimizing.
+        /// </summary>
+        public double tol { get; set; } = 1e-3;
+        /// <summary>
+        /// Alpha.
+        /// </summary>
+        public double a { get; set; } = 0.05;
+        /// <summary>
+        /// Rate of decrease of alpha.
+        /// </summary>
+        public double l { get; set; } = 1.2;
+        /// <summary>
+        /// h for finite differences to find gradient.
+        /// </summary>
+        public double h { get; set; } = 0.1;
+
+        public GradDescent()
+        {
+
+        }
+
+        /// <summary>
         /// Finds lowest point using gradient descent.
         /// </summary>
         /// <param name="function">Target function.</param>
         /// <param name="x0">Starting x.</param>
         /// <param name="y0">Starting y.</param>
-        /// <param name="kmax">Maximum iterations.</param>
-        /// <param name="max_step">Maximum step distance in a single iteration.</param>
-        /// <param name="tol">Tolerance condition to stop optimizing.</param>
-        /// <param name="a">Alpha.</param>
-        /// <param name="l">Rate of decrease of alpha.</param>
-        /// <param name="h">h for finite differences to find gradient.</param>
         /// <returns>(x, y) minimum point.</returns>
-        public static (double, double) GradDescent(
-            Func<double,double,double> function, 
-            double x0, double y0, 
-            int kmax = 1000, 
-            double max_step = 1.0,
-            double tol = 1e-3, 
-            double a = 0.05,
-            double l = 1.2,
-            double h = 0.1)
+        public (double, double) Optimize(Func<double,double,double> function, double x0, double y0)
         {
             double xc = x0, yc = y0;
+
+            double ac = a;
 
             for (int i = 0; i < kmax; i++)
             {
@@ -41,19 +59,19 @@
                 (xgrad, ygrad) = Grad(function, xc, yc, h);
                 
                 //checking for max step
-                if (Math.Sqrt(Math.Pow(a * xgrad, 2) + Math.Pow(a * ygrad, 2)) > max_step)
+                if (Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)) > max_step)
                 {
-                    xgrad = xgrad * (max_step / Math.Sqrt(Math.Pow(a * xgrad, 2) + Math.Pow(a * ygrad, 2)));
-                    ygrad = ygrad * (max_step / Math.Sqrt(Math.Pow(a * xgrad, 2) + Math.Pow(a * ygrad, 2)));
+                    xgrad = xgrad * (max_step / Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)));
+                    ygrad = ygrad * (max_step / Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)));
                 }
 
-                double xnext = xc + a * -xgrad;
-                double ynext = yc + a * -ygrad;
+                double xnext = xc + ac * -xgrad;
+                double ynext = yc + ac * -ygrad;
 
                 //decreasing step
                 if (function.Invoke(xnext, ynext) < function.Invoke(xc, yc))
                 {
-                    a /= l;
+                    ac /= l;
                 }
 
                 double delta = Math.Sqrt(Math.Pow(xnext - xc, 2) + Math.Pow(ynext - yc, 2));

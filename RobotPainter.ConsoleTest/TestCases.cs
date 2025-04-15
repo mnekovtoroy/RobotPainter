@@ -96,7 +96,18 @@ namespace RobotPainter.ConsoleTest
 
 
             double xopt, yopt;
-            (xopt, yopt) = Optimizer.GradDescent(func, x0, y0, kmax, max_step, tol, a, l, h);
+
+            IOptimizer optimizer = new GradDescent()
+            {
+                kmax = kmax,
+                max_step = max_step,
+                tol = tol,
+                a = a,
+                l = l,
+                h = h
+            };
+
+            (xopt, yopt) = optimizer.Optimize(func, x0, y0);
 
             Console.WriteLine($"x = {Math.Round(xopt, 3)}\ny = {Math.Round(yopt,3)}");
         }

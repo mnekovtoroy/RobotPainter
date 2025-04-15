@@ -1,5 +1,7 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using RobotPainter.Calculations;
+using RobotPainter.Calculations.Optimization;
 using RobotPainter.Visualization;
 
 namespace RobotPainter.ConsoleTest
@@ -65,7 +67,7 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball.jpg");
 
-            var sites = Voronoi.GenerateRandomMesh(200, image.Width, image.Height);
+            var sites = VoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height);
 
             Bitmap voronoi = new Bitmap(image.Width, image.Height);
             voronoi.SetResolution(image.HorizontalResolution, image.VerticalResolution);
@@ -75,6 +77,28 @@ namespace RobotPainter.ConsoleTest
             Color centroid_c = Color.Red;
             VoronoiVisualizer.VisualizeVoronoiInline(image, sites, edge_c, centroid_c, centroid_r);
             image.Save(path + "test_voronoi.png");
+        }
+
+        public static void OptimizatoinTest()
+        {
+            //var func = (double x, double y) => { return Math.Sqrt(x * x + y * y + 5); };
+            var func = (double x, double y) => { return Math.Pow(x * x + y - 11, 2) + Math.Pow(x + y * y - 7, 2); };
+
+            double x0 = 2.0;
+            double y0 = 3.0;
+
+            int kmax = 1000;
+            double max_step = double.MaxValue;
+            double tol = 1e-10;
+            double a = 3e-2;
+            double l = 1.2;
+            double h = 1e-4;
+
+
+            double xopt, yopt;
+            (xopt, yopt) = Optimizer.GradDescent(func, x0, y0, kmax, max_step, tol, a, l, h);
+
+            Console.WriteLine($"x = {Math.Round(xopt, 3)}\ny = {Math.Round(yopt,3)}");
         }
     }
 }

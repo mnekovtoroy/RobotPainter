@@ -138,9 +138,9 @@ namespace RobotPainter.Calculations
 
             double[,] avg = new double[w, h];
 
-            for(int i = 0; i < w; i++)
+            for (int i = 0; i < w; i++)
             {
-                for(int j = 0; j < h; j++)
+                for (int j = 0; j < h; j++)
                 {
                     int x_start = Math.Max(0, i - n);
                     int x_end = Math.Min(w - 1, i + n);
@@ -152,13 +152,13 @@ namespace RobotPainter.Calculations
                     int count = 0;
                     for (int u = x_start; u <= x_end; u++)
                     {
-                        for(int v = y_start; v <= y_end; v++)
+                        for (int v = y_start; v <= y_end; v++)
                         {
                             sum += x[u, v];
                             count++;
                         }
                     }
-                    avg[i,j] = sum / count;
+                    avg[i, j] = sum / count;
                 }
             }
             return avg;

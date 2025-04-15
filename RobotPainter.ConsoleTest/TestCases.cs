@@ -62,20 +62,25 @@ namespace RobotPainter.ConsoleTest
             image.Save(path + "norm_visualised.png");
         }
 
-        public static void VoroniVisualizerTest()
+        public static void VoronoiVisualizerTest()
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball.jpg");
 
-            var sites = VoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height);
+            List<(double, double)> points;
+            var sites = VoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height, out points);
 
-            Bitmap voronoi = new Bitmap(image.Width, image.Height);
+            Bitmap voronoi = new Bitmap(image.Width, image.Height);            
             voronoi.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            int centroid_r = 1;
+            int centroid_r = 2;
             Color edge_c = Color.Blue;
-            Color centroid_c = Color.Red;
+            Color centroid_c = Color.Blue;
+            int point_r = 2;
+            Color point_c = Color.Red;
             VoronoiVisualizer.VisualizeVoronoiInline(image, sites, edge_c, centroid_c, centroid_r);
+            VoronoiVisualizer.VisualisePointsInline(image, points, point_c, point_r);
+
             image.Save(path + "test_voronoi.png");
         }
 

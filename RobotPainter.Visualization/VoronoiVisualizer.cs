@@ -1,4 +1,5 @@
 ﻿using SharpVoronoiLib;
+using System.ComponentModel;
 using System.Drawing;
 
 namespace RobotPainter.Visualization
@@ -7,7 +8,7 @@ namespace RobotPainter.Visualization
     {
         public static void VisualizeVoronoiInline(Bitmap image, List<VoronoiSite> sites, Color edge_c, Color centroid_c, int centroid_r = 1)
         {
-            using(var g = Graphics.FromImage(image))
+            using (var g = Graphics.FromImage(image))
             {
                 Pen p = new Pen(edge_c);
                 Brush b = new SolidBrush(centroid_c);
@@ -29,6 +30,22 @@ namespace RobotPainter.Visualization
                     g.FillEllipse(b, px - centroid_r, py - centroid_r, centroid_r * 2, centroid_r * 2);
                 }
             }
+        }
+
+        public static void VisualisePointsInline(Bitmap image, List<(double, double)> points, Color point_c, int point_r = 1)
+        {
+            using (var g = Graphics.FromImage(image))
+            {
+                Brush b = new SolidBrush(point_c);
+                foreach(var p in points)
+                {
+                    int px, py;
+                    px = Convert.ToInt32(p.Item1);
+                    py = Convert.ToInt32(p.Item2);
+                    g.FillEllipse(b, px - point_r, py - point_r, point_r * 2, point_r * 2);
+                }
+            }
+            
         }
     }
 }

@@ -1,3 +1,3 @@
 ﻿using RobotPainter.ConsoleTest;
 
-TestCases.OptimizatoinTest();
+TestCases.VoronoiVisualizerTest();

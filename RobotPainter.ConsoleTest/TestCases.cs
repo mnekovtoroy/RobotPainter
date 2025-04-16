@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Optimization;
 using RobotPainter.Visualization;
+using SharpVoronoiLib;
 
 namespace RobotPainter.ConsoleTest
 {
@@ -163,6 +165,43 @@ namespace RobotPainter.ConsoleTest
             {
                 Console.WriteLine("All good");
             }
+        }
+
+        public static void LdiffPullTest()
+        {
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball.jpg");
+            int sites_n = 2000;
+
+            LabBitmap lbmp = new LabBitmap(image);
+
+            double[,] u, v;
+            (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
+
+            var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
+
+            int[] check_intervals = new int[] { 1, 2, 5};
+
+            var pre = lbmp.ToBitmap();
+            VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
+            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 2);
+            pre.Save(path + $"test_Lpull_{sites_n}_0.png");
+            pre.Dispose();
+            for (int i = 0; i < check_intervals.Max(); i++)
+            {
+                voronoi.PerformLPull();
+                if(check_intervals.Contains(i+1))
+                {
+                    Console.WriteLine($"{i+1} done.");
+                    var res = lbmp.ToBitmap();
+                    VoronoiVisualizer.VisualizeVoronoiInline(res, voronoi.sites, Color.Blue, Color.Blue, 0);
+                    VoronoiVisualizer.VisualisePointsInline(res, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
+                    res.Save(path + $"test_Lpull_{sites_n}_{i+1}.png");
+                    res.Dispose();
+                }
+
+            }
+            
         }
     }
 }

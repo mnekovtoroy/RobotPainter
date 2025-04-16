@@ -67,8 +67,7 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball.jpg");
 
-            List<(double, double)> points;
-            var sites = VoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height, out points);
+            var sites = VoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height);
 
             Bitmap voronoi = new Bitmap(image.Width, image.Height);            
             voronoi.SetResolution(image.HorizontalResolution, image.VerticalResolution);
@@ -79,7 +78,7 @@ namespace RobotPainter.ConsoleTest
             int point_r = 2;
             Color point_c = Color.Red;
             VoronoiVisualizer.VisualizeVoronoiInline(image, sites, edge_c, centroid_c, centroid_r);
-            VoronoiVisualizer.VisualisePointsInline(image, points, point_c, point_r);
+            VoronoiVisualizer.VisualisePointsInline(image, sites.Select(s => (s.X, s.Y)).ToList(), point_c, point_r);
 
             image.Save(path + "test_voronoi.png");
         }
@@ -115,6 +114,55 @@ namespace RobotPainter.ConsoleTest
             (xopt, yopt) = optimizer.Optimize(func, x0, y0);
 
             Console.WriteLine($"x = {Math.Round(xopt, 3)}\ny = {Math.Round(yopt,3)}");
+        }
+        
+        public static void VoronoiFillTest()
+        {
+            List<Color> colors = new List<Color>() {
+                Color.Gray,
+                Color.LightGray,
+                Color.DarkGray
+            };
+
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball.jpg");
+
+            LabBitmap lbmp = new LabBitmap(image);
+
+            double[,] u, v;
+            (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
+
+            var voronoi = new VoronoiStrokeGenerator(200, lbmp, u, v, new GradDescent());
+            DateTime start = DateTime.Now;
+            int[,] mask = voronoi.MaskPointsToNearestSites();
+            DateTime end = DateTime.Now;
+            Console.WriteLine($"Total time to mask {Math.Round((end-start).TotalMilliseconds, 3)} ms.");
+
+            Bitmap fill = new Bitmap(image.Width, image.Height);
+            fill.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            VoronoiVisualizer.VoronoiFillInline(fill, mask, colors);
+            VoronoiVisualizer.VisualizeVoronoiInline(fill, voronoi.sites, Color.Black, Color.Black, 0);
+            //VoronoiVisualizer.VisualisePointsInline(fill, voronoi.sites.Select(x => (x.X, x.Y)).ToList(), Color.Black, 2);
+            fill.Save(path + "test_fill.png");
+
+            bool flag = false;
+            foreach(var i in mask)
+            {
+                if(i == -1)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag)
+            {
+                Console.WriteLine("Cringe");
+            }
+            else
+            {
+                Console.WriteLine("All good");
+            }
         }
     }
 }

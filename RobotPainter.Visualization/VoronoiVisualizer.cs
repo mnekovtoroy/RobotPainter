@@ -45,7 +45,17 @@ namespace RobotPainter.Visualization
                     g.FillEllipse(b, px - point_r, py - point_r, point_r * 2, point_r * 2);
                 }
             }
-            
+        }
+
+        public static void VoronoiFillInline(Bitmap bmp, int[,] mask, List<Color> colors)
+        {
+            for(int i = 0; i < mask.GetLength(0); i++)
+            {
+                for(int j = 0; j < mask.GetLength(1); j++)
+                {
+                    bmp.SetPixel(i, j, mask[i, j] == -1 ? Color.Red : colors[mask[i, j] % colors.Count]);
+                }
+            }
         }
     }
 }

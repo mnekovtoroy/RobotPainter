@@ -21,8 +21,6 @@ namespace RobotPainter.Calculations
 
         //private double[,] L_diff;
         private int[,] mask;
-        private double[] sites_Lavg;
-        private int[] sites_pixel_count;
 
         private int width;
         private int height;
@@ -131,14 +129,14 @@ namespace RobotPainter.Calculations
             return area;
         }
 
-        private void CalculateSitesLAvg()
+        private double[] CalculateSitesLAvg(out int[] sites_pixel_count)
         {
             if(mask == null)
             {
                 throw new Exception("mask must be pre-computed");
             }
 
-            sites_Lavg = new double[sites.Count];
+            double [] sites_Lavg = new double[sites.Count];
             sites_pixel_count = new int[sites.Count];
             for(int i = 0; i < width; i++)
             {
@@ -152,31 +150,61 @@ namespace RobotPainter.Calculations
             {
                 sites_Lavg[i] = sites_Lavg[i] / sites_pixel_count[i];
             }
+            return sites_Lavg;
         }
 
-        private List<(double, double)> CalculateSitesLPull()
+        private List<(double, double)> CalculateSitesLPull(double[] sites_Lavg, int[] sites_pixel_count)
         {
-            if (mask == null || sites_Lavg == null || sites_pixel_count == null)
+            if (mask == null)
             {
-                throw new Exception("mask, Lavg and sites_pixel_count must be pre-computed");
+                throw new Exception("mask must be pre-computed");
             }
 
-            var pull = new List<(double, double)>(sites.Count);
+            //var pull = new List<(double, double)>(sites.Count);
+            List<(double, double)> Lpull = sites.Select(s => (0.0, 0.0)).ToList();
             for(int i = 0; i < width; i++)
             {
                 for(int j = 0; j < height; j++)
                 {
                     double L_diff = Math.Abs(lbmp.GetPixel(i, j).L - sites_Lavg[mask[i, j]]);
-                    double pull_x = i * (L_diff / sites_pixel_count[mask[i, j]]);
-                    double pull_y = i * (L_diff / sites_pixel_count[mask[i, j]]);
-                    pull[i] = (pull[i].Item1 + pull_x, pull[i].Item2 + pull_y);
+                    double pull_x = -(i - sites[mask[i, j]].X) * (L_diff / sites_pixel_count[mask[i, j]]);
+                    double pull_y = -(j - sites[mask[i, j]].Y) * (L_diff / sites_pixel_count[mask[i, j]]);
+                    Lpull[mask[i, j]] = (Lpull[mask[i,j]].Item1 + pull_x, Lpull[mask[i, j]].Item2 + pull_y);
                 }
             }
-            return pull;
+            return Lpull;
+        }
+
+        private void PullSites(List<(double, double)> sites_pull, double str_Lpull, double str_centroid)
+        {
+            var new_sites = new List<VoronoiSite>();
+            for(int i = 0;i < sites.Count; i++)
+            {
+                //pull to centroid + away from color diff
+                double pull_x = str_Lpull * sites_pull[i].Item1 + str_centroid * (sites[i].Centroid.X - sites[i].X);
+                double pull_y = str_Lpull * sites_pull[i].Item2 + str_centroid * (sites[i].Centroid.X - sites[i].X);
+                new_sites.Add(new VoronoiSite(sites[i].X + pull_x, sites[i].Y + pull_y));
+            }
+            sites = new_sites;
+            VoronoiPlane.TessellateOnce(sites, 0, 0, width - 1, height - 1);
+            mask = null;
+        }
+
+        public void PerformLPull(double str_Lpull = 0.2, double str_centroid = 0.5)
+        {
+            int[] sites_pixel_count;
+            MaskPointsToNearestSites();
+            var sites_Lavg = CalculateSitesLAvg(out sites_pixel_count);
+            var Lpull = CalculateSitesLPull(sites_Lavg, sites_pixel_count);
+            PullSites(Lpull, str_Lpull, str_centroid);
         }
 
         public int[,] MaskPointsToNearestSites()
         {
+            if(mask != null)
+            {
+                return mask;
+            }
             /*Consider alternative solution:
              1. find which site contains [0,0]
              2. for every next point, only check neighboring sites*/

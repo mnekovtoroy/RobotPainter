@@ -39,29 +39,59 @@ namespace RobotPainter.Calculations
             _optimizer = optimizer;
         }
 
-        public void Optimize(int k)
+        public void Optimize(int iterations)
         {
+            for(int k = 0; k < iterations; k++)
+            {
+                var sites_pull = new List<(double, double)>();
+                //optimize every site 1 by 1
+                for(int i = 0; i < sites.Count; i++)
+                {
+                    var curr_site = sites[0];
+                    sites.RemoveAt(0);
 
+                    double new_x, new_y;
+                    (new_x, new_y) = _optimizer.Optimize(CostFunction, curr_site.X, curr_site.Y);
+                    sites_pull.Add((new_x - curr_site.X, new_y - curr_site.Y));
+
+                    sites.Add(curr_site);
+                }
+                PullSites(sites_pull);
+            }
         }
 
-        private double CostFunction(double x, double y)
+        public double CostFunction(double x, double y)
         {
-            //cost = color_err + direction_err + form_err + constraints
+            //cost = (1 + direction error + shape error) * color error
             var site = new VoronoiSite(x, y);
-            sites.Add(site);
-            VoronoiPlane.TessellateOnce(sites, 0, 0, width - 1, height - 1);
-            double w1 = 0.33, w2 = 0.33, w3 = 0.33;
-            double cost = w1 * ColorCost(site) + w2 * DirectionalCost(site) + w3 * ShapeCost(site);
-            sites.Remove(site);
+            var opt_sites = sites.Select(s => new VoronoiSite(s.X, s.Y)).ToList();
+            opt_sites.Add(site);
+            VoronoiPlane.TessellateOnce(opt_sites, 0, 0, width - 1, height - 1);
+
+            //out of bounds cost penalty
+            double penalty = 0.0;
+            if(x < 0 || x > (width - 1) || y < 0 || y > (height - 1))
+            {
+                penalty += 1000;
+            }
+
+            if(penalty > 0)
+            {
+                return penalty;
+            }
+
+            double cost = (1.0 + DirectionalCost(site) + ShapeCost(site)) * ColorCost(site);
             return cost;
         }
 
-        private double ColorCost(VoronoiSite site)
+        public double ColorCost(VoronoiSite site)
         {
-            throw new NotImplementedException();
+            int p_count;
+            var Lavg = CalculateSiteLAvg(site, out p_count);
+            return CalculateSiteLStd(site, Lavg, p_count);
         }
 
-        private double DirectionalCost(VoronoiSite site)
+        public double DirectionalCost(VoronoiSite site)
         {
             //normilized vector of the longest diameter
             VoronoiPoint p1, p2;
@@ -79,7 +109,7 @@ namespace RobotPainter.Calculations
             return cost;
         }
 
-        private double ShapeCost(VoronoiSite site)
+        public double ShapeCost(VoronoiSite site)
         {
             //area of enclosing circle
             VoronoiPoint p1, p2;
@@ -89,7 +119,7 @@ namespace RobotPainter.Calculations
             //area of the polygon
             double area_p = CalculateArea(site);
             //shape cost
-            double cost = 1.0 - area_p / area_c;
+            double cost = area_p / area_c;
             return cost;
         }
 
@@ -129,7 +159,7 @@ namespace RobotPainter.Calculations
             return area;
         }
 
-        private double[] CalculateSitesLAvg(out int[] sites_pixel_count)
+        private double[] CalculateAllSitesLAvg(out int[] sites_pixel_count)
         {
             if(mask == null)
             {
@@ -151,6 +181,59 @@ namespace RobotPainter.Calculations
                 sites_Lavg[i] = sites_Lavg[i] / sites_pixel_count[i];
             }
             return sites_Lavg;
+        }
+
+        private double CalculateSiteLAvg(VoronoiSite site, out int site_pixel_count)
+        {
+            //deteremning bounding box
+            int xmax, xmin, ymax, ymin;
+            xmax = Convert.ToInt32(site.Points.Max(p => p.X));
+            xmin = Convert.ToInt32(site.Points.Min(p => p.X));
+            ymax = Convert.ToInt32(site.Points.Max(p => p.Y));
+            ymin = Convert.ToInt32(site.Points.Min(p => p.Y));
+
+            double Lavg = 0.0;
+            site_pixel_count = 0;
+            for (int i = xmin; i <= xmax; i++)
+            {
+                for (int j = ymin; j <= ymax; j++)
+                {
+                    if(site.Contains(i,j))
+                    {
+                        Lavg += lbmp.GetPixel(i, j).L;
+                        site_pixel_count++;
+                    }
+                }
+            }
+            for (int i = 0; i < sites.Count; i++)
+            {
+                Lavg = Lavg / site_pixel_count;
+            }
+            return Lavg;
+        }
+
+        private double CalculateSiteLStd(VoronoiSite site, double Lavg, int p_count)
+        {
+            //deteremning bounding box
+            int xmax, xmin, ymax, ymin;
+            xmax = Convert.ToInt32(site.Points.Max(p => p.X));
+            xmin = Convert.ToInt32(site.Points.Min(p => p.X));
+            ymax = Convert.ToInt32(site.Points.Max(p => p.Y));
+            ymin = Convert.ToInt32(site.Points.Min(p => p.Y));
+
+            double error = 0.0;
+            for(int i = xmin; i <= xmax; i++)
+            {
+                for(int j = ymin; j <= ymax; j++)
+                {
+                    if(site.Contains(i,j))
+                    {
+                        error += Math.Pow(lbmp.GetPixel(i, j).L - Lavg, 2) / p_count;
+                    }
+                }
+            }
+            error = Math.Sqrt(error);
+            return error;
         }
 
         private List<(double, double)> CalculateSitesLPull(double[] sites_Lavg, int[] sites_pixel_count)
@@ -175,15 +258,12 @@ namespace RobotPainter.Calculations
             return Lpull;
         }
 
-        private void PullSites(List<(double, double)> sites_pull, double str_Lpull, double str_centroid)
+        private void PullSites(List<(double, double)> sites_pull)
         {
             var new_sites = new List<VoronoiSite>();
             for(int i = 0;i < sites.Count; i++)
             {
-                //pull to centroid + away from color diff
-                double pull_x = str_Lpull * sites_pull[i].Item1 + str_centroid * (sites[i].Centroid.X - sites[i].X);
-                double pull_y = str_Lpull * sites_pull[i].Item2 + str_centroid * (sites[i].Centroid.X - sites[i].X);
-                new_sites.Add(new VoronoiSite(sites[i].X + pull_x, sites[i].Y + pull_y));
+                new_sites.Add(new VoronoiSite(sites[i].X + sites_pull[i].Item1, sites[i].Y + sites_pull[i].Item2));
             }
             sites = new_sites;
             VoronoiPlane.TessellateOnce(sites, 0, 0, width - 1, height - 1);
@@ -194,9 +274,16 @@ namespace RobotPainter.Calculations
         {
             int[] sites_pixel_count;
             MaskPointsToNearestSites();
-            var sites_Lavg = CalculateSitesLAvg(out sites_pixel_count);
+            var sites_Lavg = CalculateAllSitesLAvg(out sites_pixel_count);
             var Lpull = CalculateSitesLPull(sites_Lavg, sites_pixel_count);
-            PullSites(Lpull, str_Lpull, str_centroid);
+            for (int i = 0; i < sites.Count; i++)
+            {
+                //pull to centroid + away from color diff
+                double pull_x = str_Lpull * Lpull[i].Item1 + str_centroid * (sites[i].Centroid.X - sites[i].X);
+                double pull_y = str_Lpull * Lpull[i].Item2 + str_centroid * (sites[i].Centroid.X - sites[i].X);
+                Lpull[i] = (pull_x, pull_y);
+            }
+            PullSites(Lpull);
         }
 
         public int[,] MaskPointsToNearestSites()

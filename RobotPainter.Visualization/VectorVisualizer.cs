@@ -36,6 +36,13 @@ namespace RobotPainter.Visualization
             }
         }
 
+        public static void VisualiseSingleVectorInline(Bitmap image, int x, int y, double vx, double vy, Color arrow_c, Color dot_c, int arrow_length = 20, int tip_length = 3, int tip_angle = 30, int point_radius = 1)
+        {
+            int end_x = Convert.ToInt32(x + vx * arrow_length);
+            int end_y = Convert.ToInt32(y + vy * arrow_length);
+            DrawArrowInline(image, x, y, end_x, end_y, arrow_c, dot_c, tip_length, tip_angle, point_radius);
+        }
+
         private static void DrawArrowInline(Bitmap image, int start_x, int start_y, int end_x, int end_y, Color arrow_c, Color dot_c, int tip_length, int tip_angle, int point_radius)
         {
             using (var g = Graphics.FromImage(image))

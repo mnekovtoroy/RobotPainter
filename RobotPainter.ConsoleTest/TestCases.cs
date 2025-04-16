@@ -184,7 +184,7 @@ namespace RobotPainter.ConsoleTest
 
             var pre = lbmp.ToBitmap();
             VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
-            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 2);
+            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
             pre.Save(path + $"test_Lpull_{sites_n}_0.png");
             pre.Dispose();
             for (int i = 0; i < check_intervals.Max(); i++)
@@ -199,9 +199,110 @@ namespace RobotPainter.ConsoleTest
                     res.Save(path + $"test_Lpull_{sites_n}_{i+1}.png");
                     res.Dispose();
                 }
-
             }
-            
+        }
+
+        public static void CostFuncTest()
+        {
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball.jpg");
+            int sites_n = 200;
+
+            LabBitmap lbmp = new LabBitmap(image);
+
+            double[,] u, v;
+            (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
+
+            var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
+
+            int[] check_intervals = new int[] { 1, 2, 5 };
+
+            var pre = lbmp.ToBitmap();
+            VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
+            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
+            pre.Save(path + $"test_Lpull_{sites_n}_0.png");
+            pre.Dispose();
+            for (int i = 0; i < check_intervals.Max(); i++)
+            {
+                voronoi.PerformLPull();
+                if (check_intervals.Contains(i + 1))
+                {
+                    var tracker = new List<VoronoiSite>() { voronoi.sites[0] };
+                    Console.WriteLine($"{i + 1} done.");
+
+
+                    double cc = voronoi.ColorCost(voronoi.sites[0]);
+                    double dc = voronoi.DirectionalCost(voronoi.sites[0]);
+                    double sc = voronoi.ShapeCost(voronoi.sites[0]);
+                    double tc = (1.0 + dc + sc) * cc;
+                    Console.WriteLine($"\tColor cost:\t{cc}");
+                    Console.WriteLine($"\tDirectioanl cost:\t{dc}");
+                    Console.WriteLine($"\tShape cost:\t{sc}");
+                    Console.WriteLine($"\t\tTotal cost: {tc}");
+
+                    var res = lbmp.ToBitmap();
+                    VoronoiVisualizer.VisualizeVoronoiInline(res, tracker, Color.Blue, Color.Blue, 0);
+                    VoronoiVisualizer.VisualisePointsInline(res, tracker.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
+
+                    int c_x = Convert.ToInt32(tracker[0].Centroid.X);
+                    int c_y = Convert.ToInt32(tracker[0].Centroid.Y);
+                    VectorVisualizer.VisualiseSingleVectorInline(
+                        res,
+                        c_x,
+                        c_y,
+                        u[c_x, c_y],
+                        v[c_x, c_y],
+                        Color.Blue,
+                        Color.Blue,
+                        point_radius: 1);
+                    res.Save(path + $"test_Lpull_{sites_n}_{i + 1}.png");
+                    res.Dispose();
+                }
+            }
+        }
+
+        public static void OptimizationTest()
+        {
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball.jpg");
+            int sites_n = 1000;
+
+            LabBitmap lbmp = new LabBitmap(image);
+
+            double[,] u, v;
+            (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
+
+            var optimizer = new GradDescent()
+            {
+                a = 0.3,
+                l = 1.0,
+                h = 0.1,
+                max_step = 1.0,
+                tol = 0.3,
+                kmax = 10
+            };
+            var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, optimizer);
+
+            int[] check_intervals = new int[] { 1, 2, 5, 10, 20};
+
+            var pre = lbmp.ToBitmap();
+            VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
+            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
+            pre.Save(path + $"test_optimization_{sites_n}_0.png");
+            pre.Dispose();
+            for (int i = 0; i < check_intervals.Max(); i++)
+            {
+                voronoi.Optimize(1);
+                if (check_intervals.Contains(i + 1))
+                {
+                    Console.WriteLine($"{i + 1} done.");
+                    var res = lbmp.ToBitmap();
+                    VoronoiVisualizer.VisualizeVoronoiInline(res, voronoi.sites, Color.Blue, Color.Blue, 0);
+                    VoronoiVisualizer.VisualisePointsInline(res, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
+                    res.Save(path + $"test_optimization_{sites_n}_{i + 1}.png");
+                    res.Dispose();
+                }
+            }
         }
     }
 }

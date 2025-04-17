@@ -39,12 +39,12 @@ namespace RobotPainter.Calculations
             _optimizer = optimizer;
         }
 
-        public void Optimize(int iterations)
+        public void Optimize1(int iterations)
         {
             for(int k = 0; k < iterations; k++)
             {
                 var sites_pull = new List<(double, double)>();
-                //optimize every site 1 by 1
+                //optimize every site 1 by 1, pull them all at once
                 for(int i = 0; i < sites.Count; i++)
                 {
                     var curr_site = sites[0];
@@ -58,6 +58,70 @@ namespace RobotPainter.Calculations
                 }
                 PullSites(sites_pull);
             }
+        }
+
+        public void Optimize2(int iterations)
+        {
+            for (int k = 0; k < iterations; k++)
+            {
+                var sites_pull = new List<(double, double)>();
+                //optimizing countering with pulling
+                for (int i = 0; i < sites.Count; i++)
+                {
+                    var curr_site = sites[0];
+                    sites.RemoveAt(0);
+
+                    double new_x, new_y;
+                    (new_x, new_y) = _optimizer.Optimize(CostFunction, curr_site.X, curr_site.Y);
+                    sites_pull.Add((new_x - curr_site.X, new_y - curr_site.Y));
+
+                    sites.Add(curr_site);
+                }
+                PullSites(sites_pull);
+                PerformLPull(str_Lpull: 0.0, str_centroid: 0.7);
+            }
+        }
+
+        public void Optimize3(int iterations)
+        {
+            for (int k = 0; k < iterations; k++)
+            {
+                var sites_pull = new List<(double, double)>();
+                //optimizing countering with pulling
+                for (int i = 0; i < sites.Count; i++)
+                {
+                    var curr_site = sites[0];
+                    sites.RemoveAt(0);
+
+                    double new_x, new_y;
+                    (new_x, new_y) = _optimizer.Optimize(CostFunction, curr_site.X, curr_site.Y);
+                    sites_pull.Add(((new_x - curr_site.X), (new_y - curr_site.Y)));
+
+                    sites.Add(curr_site);
+                }
+                PullSites(sites_pull);
+                PerformLPull(str_Lpull: 0.3, str_centroid: 0.3);
+            }
+        }
+
+        public void Optimize5(int iterations)
+        {
+            for (int k = 0; k < iterations; k++)
+            {
+                //optimizing countering with pulling
+                for (int i = 0; i < sites.Count; i++)
+                {
+                    var curr_site = sites[0];
+                    sites.RemoveAt(0);
+
+                    double new_x, new_y;
+                    (new_x, new_y) = _optimizer.Optimize(CostFunction, curr_site.X, curr_site.Y);
+
+                    sites.Add(new VoronoiSite(new_x, new_y));
+                }
+            }
+            VoronoiPlane.TessellateOnce(sites, 0, 0, width - 1, height - 1);
+            mask = null;
         }
 
         public double CostFunction(double x, double y)
@@ -80,7 +144,9 @@ namespace RobotPainter.Calculations
                 return penalty;
             }
 
-            double cost = (1.0 + DirectionalCost(site) + ShapeCost(site)) * ColorCost(site);
+            double cost = (0.5 + 1.5 * DirectionalCost(site) + 3.0 * ShapeCost(site)) * ColorCost(site); // 1,2
+            //double cost = 100.0 * DirectionalCost(site) + 100.0 * ShapeCost(site); // 3
+            //double cost = ColorCost(site) + 50.0 * DirectionalCost(site) + 50 * ShapeCost(site); //4
             return cost;
         }
 

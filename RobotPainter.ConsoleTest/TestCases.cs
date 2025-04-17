@@ -264,7 +264,7 @@ namespace RobotPainter.ConsoleTest
         public static void OptimizationTest()
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
-            Bitmap image = new Bitmap(path + "test_ball.jpg");
+            Bitmap image = new Bitmap(path + "test3.jpg");
             int sites_n = 1000;
 
             LabBitmap lbmp = new LabBitmap(image);
@@ -274,32 +274,32 @@ namespace RobotPainter.ConsoleTest
 
             var optimizer = new GradDescent()
             {
-                a = 0.3,
-                l = 1.0,
+                a = 0.4,
+                l = 1.1,
                 h = 0.1,
-                max_step = 1.0,
+                max_step = 3.0,
                 tol = 0.3,
-                kmax = 10
+                kmax = 3
             };
             var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, optimizer);
 
-            int[] check_intervals = new int[] { 1, 2, 5, 10, 20};
+            int[] check_intervals = new int[] { 1, 2, 3, 4, 5 };
 
             var pre = lbmp.ToBitmap();
             VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
             VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
-            pre.Save(path + $"test_optimization_{sites_n}_0.png");
+            pre.Save(path + @$"test_test_optimization_{sites_n}_0.png");
             pre.Dispose();
             for (int i = 0; i < check_intervals.Max(); i++)
             {
-                voronoi.Optimize(1);
+                voronoi.Optimize5(1);
                 if (check_intervals.Contains(i + 1))
                 {
                     Console.WriteLine($"{i + 1} done.");
                     var res = lbmp.ToBitmap();
                     VoronoiVisualizer.VisualizeVoronoiInline(res, voronoi.sites, Color.Blue, Color.Blue, 0);
                     VoronoiVisualizer.VisualisePointsInline(res, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
-                    res.Save(path + $"test_optimization_{sites_n}_{i + 1}.png");
+                    res.Save(path + @$"test_test_optimization_{sites_n}_{i + 1}.png");
                     res.Dispose();
                 }
             }

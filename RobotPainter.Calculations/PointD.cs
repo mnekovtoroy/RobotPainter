@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RobotPainter.Calculations
+﻿namespace RobotPainter.Calculations
 {
     public struct PointD : IEquatable<PointD>
     {
@@ -30,7 +22,7 @@ namespace RobotPainter.Calculations
 
         public static bool operator !=(PointD a, PointD b) => a.x != b.x || a.y != b.y;
 
-        public override readonly bool Equals(object? obj) => obj is PointF && Equals((PointF)obj);
+        public override readonly bool Equals(object? obj) => obj is PointD && Equals((PointD)obj);
 
         public readonly bool Equals(PointD other) => this == other;
 

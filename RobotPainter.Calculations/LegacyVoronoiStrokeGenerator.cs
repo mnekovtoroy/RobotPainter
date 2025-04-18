@@ -3,7 +3,7 @@ using SharpVoronoiLib;
 
 namespace RobotPainter.Calculations
 {
-    public class VoronoiStrokeGenerator
+    public class LegacyVoronoiStrokeGenerator
     {
         public static List<VoronoiSite> GenerateRandomMesh(int n, int width, int height)
         {
@@ -27,7 +27,7 @@ namespace RobotPainter.Calculations
 
         private readonly IOptimizer _optimizer;
 
-        public VoronoiStrokeGenerator(int n_strokes, LabBitmap bmp, double[,] u, double[,] v, IOptimizer optimizer)
+        public LegacyVoronoiStrokeGenerator(int n_strokes, LabBitmap bmp, double[,] u, double[,] v, IOptimizer optimizer)
         {
             this.lbmp = bmp;
             this.u = u;

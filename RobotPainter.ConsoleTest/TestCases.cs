@@ -314,7 +314,18 @@ namespace RobotPainter.ConsoleTest
 
             LabBitmap lbmp = new LabBitmap(image);
 
-            var generator = new StrokeGenerator(lbmp, sites_n, new GradDescent(), 11);
+            var optimizer = new GradDescent()
+            {
+                a = 0.4,
+                l = 1.1,
+                h = 0.1,
+                max_step = 3.0,
+                tol = 0.3,
+                kmax = 1
+            };
+            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, 11);
+
+            generator.Lfit(20, 2.0);
 
             generator.CalculateStorkes();
             var stroke_visualised = generator.GetColoredStrokeMap();
@@ -330,6 +341,10 @@ namespace RobotPainter.ConsoleTest
                 VoronoiVisualizer.VisualizeStrokeInline(res_bitmap, stroke.involvedSites.Select(s => (Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y))).ToList(), Color.Blue, Color.Red, 1);
             }
             res_bitmap.Save(path + @"test_strokes\stroke_lines.png");
+
+            var res_bitmap2 = stroke_visualised.ToBitmap();
+            VoronoiVisualizer.VisualizeVoronoiInline(res_bitmap2, generator.sites, Color.Blue, Color.Red, 1);
+            res_bitmap2.Save(path + @"test_strokes\voronoi_strokes.png");
         }
     }
 }

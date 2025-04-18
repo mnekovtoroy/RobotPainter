@@ -57,5 +57,20 @@ namespace RobotPainter.Visualization
                 }
             }
         }
+
+        public static void VisualizeStrokeInline(Bitmap bmp, List<(int, int)> stroke_line, Color lines_c, Color point_c, int point_r)
+        {
+            using (var g = Graphics.FromImage(bmp))
+            {
+                var p = new Pen(lines_c);
+                var b = new SolidBrush(point_c);
+                for(int i = 0; i < stroke_line.Count - 1; i++)
+                {
+                    g.DrawLine(p, stroke_line[i].Item1, stroke_line[i].Item2, stroke_line[i + 1].Item1, stroke_line[i + 1].Item2);
+                    g.FillEllipse(b, stroke_line[i].Item1 - point_r, stroke_line[i].Item2 - point_r, point_r * 2, point_r * 2);
+                }
+                g.FillEllipse(b, stroke_line[stroke_line.Count - 1].Item1 - point_r, stroke_line[stroke_line.Count - 1].Item2 - point_r, point_r * 2, point_r * 2);
+            }
+        }
     }
 }

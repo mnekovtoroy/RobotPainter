@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Optimization;
+using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
 using SharpVoronoiLib;
 
@@ -45,9 +46,9 @@ namespace RobotPainter.ConsoleTest
         public static void VectorTest()
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
-            Bitmap image = new Bitmap(path + "test_ball.jpg");
+            Bitmap image = new Bitmap(path + "test_ball2.jpg");
 
-            int n_avg = 3;
+            int n_avg = 7;
             int n_arrows = 20;
 
             int l_s = image.Width < image.Height ? image.Width : image.Height;
@@ -69,7 +70,7 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball.jpg");
 
-            var sites = VoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height);
+            var sites = LegacyVoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height);
 
             Bitmap voronoi = new Bitmap(image.Width, image.Height);            
             voronoi.SetResolution(image.HorizontalResolution, image.VerticalResolution);
@@ -134,7 +135,7 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new VoronoiStrokeGenerator(200, lbmp, u, v, new GradDescent());
+            var voronoi = new LegacyVoronoiStrokeGenerator(200, lbmp, u, v, new GradDescent());
             DateTime start = DateTime.Now;
             int[,] mask = voronoi.MaskPointsToNearestSites();
             DateTime end = DateTime.Now;
@@ -178,7 +179,7 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
+            var voronoi = new LegacyVoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
 
             int[] check_intervals = new int[] { 1, 2, 5};
 
@@ -213,7 +214,7 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
+            var voronoi = new LegacyVoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
 
             int[] check_intervals = new int[] { 1, 2, 5 };
 
@@ -281,7 +282,7 @@ namespace RobotPainter.ConsoleTest
                 tol = 0.3,
                 kmax = 3
             };
-            var voronoi = new VoronoiStrokeGenerator(sites_n, lbmp, u, v, optimizer);
+            var voronoi = new LegacyVoronoiStrokeGenerator(sites_n, lbmp, u, v, optimizer);
 
             int[] check_intervals = new int[] { 1, 2, 3, 4, 5 };
 
@@ -303,6 +304,32 @@ namespace RobotPainter.ConsoleTest
                     res.Dispose();
                 }
             }
+        }
+
+        public static void BrushstrokeGenerationTest()
+        {
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball2.jpg");
+            int sites_n = 10000;
+
+            LabBitmap lbmp = new LabBitmap(image);
+
+            var generator = new StrokeGenerator(lbmp, sites_n, new GradDescent(), 11);
+
+            generator.CalculateStorkes();
+            var stroke_visualised = generator.GetColoredStrokeMap();
+
+            VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
+            image.Save(path + @"test_strokes\voronoi.png");
+            
+            var res_bitmap = stroke_visualised.ToBitmap();
+            res_bitmap.Save(path + @"test_strokes\strokes.png");
+
+            foreach(var stroke in generator.strokes)
+            {
+                VoronoiVisualizer.VisualizeStrokeInline(res_bitmap, stroke.involvedSites.Select(s => (Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y))).ToList(), Color.Blue, Color.Red, 1);
+            }
+            res_bitmap.Save(path + @"test_strokes\stroke_lines.png");
         }
     }
 }

@@ -10,7 +10,7 @@ namespace RobotPainter.Calculations
 {
     public struct PointD : IEquatable<PointD>
     {
-        double x, y;
+        public double x, y;
 
         public PointD(double x, double y)
         {

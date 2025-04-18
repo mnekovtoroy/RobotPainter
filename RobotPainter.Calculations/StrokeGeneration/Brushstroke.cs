@@ -14,12 +14,16 @@ namespace RobotPainter.Calculations.StrokeGeneration
         public List<VoronoiSite> involvedSites;
 
         public VoronoiSite startingPoint;
+        public VoronoiPoint startingCentroid;
+
+        public ColorLab MainColor { get { return _strokeGenerator.image.GetPixel(Convert.ToInt32(startingCentroid.X), Convert.ToInt32(startingCentroid.Y)); } }
 
 
         public Brushstroke(StrokeGenerator parent, VoronoiSite starting_point)
         {
             _strokeGenerator = parent;
             startingPoint = starting_point;
+            startingCentroid = startingPoint.Centroid;
         }
 
         public void GenerateStroke(double max_length, double max_width, double L_tol)
@@ -82,16 +86,13 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private bool IsValidExpand(VoronoiPoint last_centroid, VoronoiPoint next_centroid, double curr_length, double max_length, double L_tol)
         {
-            int lc_ix = Convert.ToInt32(last_centroid.X);
-            int lc_iy = Convert.ToInt32(last_centroid.Y);
-
             int nc_ix = Convert.ToInt32(next_centroid.X);
             int nc_iy = Convert.ToInt32(next_centroid.Y);
 
-            double last_c_L = _strokeGenerator.image.GetPixel(lc_ix, lc_iy).L;
+            double main_L = MainColor.L;
             double next_c_L = _strokeGenerator.image.GetPixel(nc_ix, nc_iy).L;
 
-            if (Math.Abs(next_c_L - last_c_L) > L_tol)
+            if (Math.Abs(next_c_L - main_L) > L_tol)
             {
                 return false;
             }

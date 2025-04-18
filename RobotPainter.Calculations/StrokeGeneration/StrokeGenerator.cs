@@ -16,7 +16,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<VoronoiSite> sites;
 
-        public Dictionary<VoronoiSite, int> strokeMask; 
+        private Dictionary<VoronoiSite, Brushstroke> siteToStroke;
 
         public LabBitmap image;
         public double[,] u;
@@ -24,6 +24,14 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private int width;
         private int height;
+
+        public double real_height_mm;
+        public double real_width_mm;
+
+        public double real_stroke_max_length_mm;
+        public double StrokeMaxLength { get { return real_stroke_max_length_mm * width / real_width_mm; } }
+
+        public double Ltol = 0.5;
 
         private readonly IOptimizer _optimizer;
 
@@ -38,11 +46,41 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _optimizer = optimizer;
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
+            siteToStroke = new Dictionary<VoronoiSite, Brushstroke>();
         }
 
-        public List<Brushstroke> CalculateStorkes()
+        public void CalculateStorkes()
         {
-            throw new NotImplementedException();
+            ClearSitesList();
+            siteToStroke.Clear();
+            var unprocessed_sites = sites.Select(x => x).ToList();
+            while(unprocessed_sites.Count > 0)
+            {
+                var curr_site = unprocessed_sites[0];
+                var stroke = GenerateBrushstroke(curr_site);
+                //reserving the sites
+                foreach (var site in stroke.involvedSites) {
+                    unprocessed_sites.Remove(site);
+                    siteToStroke.Add(site, stroke);
+                }
+            }
+        }
+
+        private Brushstroke GenerateBrushstroke(VoronoiSite startin_point)
+        {
+            var stroke = new Brushstroke(this, startin_point);
+            stroke.GenerateStroke(StrokeMaxLength, 1.0, Ltol);
+            return stroke;
+        }
+
+        public bool IsSiteReserved(VoronoiSite site)
+        {
+            return siteToStroke.ContainsKey(site);
+        }
+
+        private void ClearSitesList()
+        {
+            sites.RemoveAll(x => x.Cell == null);
         }
 
         private List<(double, double)> CalculateSitesLPull()
@@ -94,14 +132,39 @@ namespace RobotPainter.Calculations.StrokeGeneration
             PullSites(Lpull);
         }
 
-        public Brushstroke GenerateBrushstroke()
+        public LabBitmap GetColoredStrokeMap()
         {
-            throw new NotImplementedException();
-        }
-
-        public bool IsSiteReserved(VoronoiSite site)
-        {
-            return strokeMask.ContainsKey(site);
+            var result = new LabBitmap(width, height);
+            for(int x = 0; x < width; x++)
+            {
+                for(int y = 0; y < height; y++)
+                {
+                    bool value_found = false;
+                    for (int i = 0; i < sites.Count; i++)
+                    {
+                        if (sites[i].Contains(x, y))
+                        {
+                            result.SetPixel(x, y, siteToStroke[sites[i]].MainColor);
+                            value_found = true;
+                            break;
+                        }
+                    }
+                    if (!value_found)
+                    {
+                        double min_d = double.MaxValue;
+                        for (int i = 0; i < sites.Count; i++)
+                        {
+                            double d = Math.Sqrt(Math.Pow(sites[i].X - x, 2) + Math.Pow(sites[i].Y - y, 2));
+                            if (d < min_d)
+                            {
+                                result.SetPixel(x, y, siteToStroke[sites[i]].MainColor);
+                                min_d = d;
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
         }
     }
 }

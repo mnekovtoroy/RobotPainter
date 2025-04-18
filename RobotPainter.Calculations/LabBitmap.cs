@@ -27,6 +27,13 @@ namespace RobotPainter.Calculations
             }
         }
 
+        public LabBitmap(int width, int height)
+        {
+            w = width;
+            h = height;
+            _image = new ColorLab[w, h];
+        }
+
         public Bitmap ToBitmap()
         {
             var bm = new Bitmap(w, h);

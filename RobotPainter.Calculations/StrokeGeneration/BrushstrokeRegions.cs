@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RobotPainter.Calculations.StrokeGeneration
 {
-    public class Brushstroke
+    public class BrushstrokeRegions
     {
         public readonly StrokeGenerator _strokeGenerator;
 
@@ -19,7 +19,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
         public ColorLab MainColor { get { return _strokeGenerator.image.GetPixel(Convert.ToInt32(startingCentroid.X), Convert.ToInt32(startingCentroid.Y)); } }
 
 
-        public Brushstroke(StrokeGenerator parent, VoronoiSite starting_point)
+        public BrushstrokeRegions(StrokeGenerator parent, VoronoiSite starting_point)
         {
             _strokeGenerator = parent;
             startingPoint = starting_point;

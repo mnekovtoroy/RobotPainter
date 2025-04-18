@@ -17,7 +17,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<VoronoiSite> sites;
 
-        private Dictionary<VoronoiSite, Brushstroke> siteToStroke;
+        private Dictionary<VoronoiSite, BrushstrokeRegions> siteToStroke;
 
         public LabBitmap image;
         public double[,] u;
@@ -37,7 +37,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private readonly IOptimizer _optimizer;
 
-        public List<Brushstroke> strokes = new List<Brushstroke>();
+        public List<BrushstrokeRegions> strokes = new List<BrushstrokeRegions>();
 
         public StrokeGenerator(LabBitmap target_image, int n_voronoi, IOptimizer optimizer, int n_rolling_avg = 7)
         {
@@ -48,7 +48,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _optimizer = optimizer;
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
-            siteToStroke = new Dictionary<VoronoiSite, Brushstroke>();
+            siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
         }
 
         public void Lfit(int iterations, double max_step_per_i)
@@ -104,9 +104,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
         }
 
-        private Brushstroke GenerateBrushstroke(VoronoiSite startin_point)
+        private BrushstrokeRegions GenerateBrushstroke(VoronoiSite startin_point)
         {
-            var stroke = new Brushstroke(this, startin_point);
+            var stroke = new BrushstrokeRegions(this, startin_point);
             stroke.GenerateStroke(StrokeMaxLength, 1.0, Ltol);
             return stroke;
         }

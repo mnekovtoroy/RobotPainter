@@ -117,7 +117,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             var edges = site.Cell;
             foreach (var edge in edges)
             {
-                if (Geometry.CheckIntersectionRaySegment(
+                if (Geometry.CheckRaySegmentIntersection(
                     centroid.X, centroid.Y, dx, dy,
                     edge.Start.X, edge.Start.Y, edge.End.X, edge.End.Y))
                 {

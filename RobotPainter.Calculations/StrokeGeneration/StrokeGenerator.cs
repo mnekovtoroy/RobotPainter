@@ -1,5 +1,6 @@
 ﻿using RobotPainter.Calculations.Optimization;
 using SharpVoronoiLib;
+using System.Threading.Tasks;
 
 namespace RobotPainter.Calculations.StrokeGeneration
 {
@@ -32,7 +33,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
         //public double StrokeMaxLength { get { return real_stroke_max_length_mm * width / real_width_mm; } }
         public double StrokeMaxLength = 80;
 
-        public double Ltol = 5;
+        public double Ltol = 3.5;
 
         private readonly IOptimizer _optimizer;
 
@@ -48,6 +49,40 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
             siteToStroke = new Dictionary<VoronoiSite, Brushstroke>();
+        }
+
+        public void Lfit(int iterations, double max_step_per_i)
+        {
+            for (int k = 0; k < iterations; k++)
+            {
+                //optimizing countering with pulling
+                for (int i = 0; i < sites.Count; i++)
+                {
+                    var curr_site = sites[0];
+                    sites.RemoveAt(0);
+
+                    double x_pull, y_pull;
+                    (x_pull, y_pull) = CalculateSiteLPull(curr_site);
+
+                    double pull_length = Math.Sqrt(x_pull * x_pull + y_pull * y_pull);
+                    if (pull_length > max_step_per_i)
+                    {
+                        x_pull = x_pull * max_step_per_i / pull_length;
+                        y_pull = y_pull * max_step_per_i / pull_length;
+                    }
+                    if (curr_site.X + x_pull <= 0 || curr_site.X + x_pull >= width - 1)
+                        x_pull = 0;
+                    if (curr_site.Y + y_pull <= 0 || curr_site.Y + y_pull >= width - 1)
+                        y_pull = 0;
+
+                    sites.Add(new VoronoiSite(curr_site.X + x_pull, curr_site.Y + y_pull));
+                }
+                VoronoiPlane plane = new VoronoiPlane(0, 0, width - 1, height - 1);
+                plane.SetSites(sites);
+                plane.Tessellate();
+                plane.Relax(strength: 0.5f);
+                
+            }
         }
 
         public void CalculateStorkes()
@@ -86,31 +121,26 @@ namespace RobotPainter.Calculations.StrokeGeneration
             sites.RemoveAll(x => x.Cell == null);
         }
 
-        private List<(double, double)> CalculateSitesLPull()
-        {
-            List<(double, double)> Lpull = new List<(double, double)>();
-            foreach(var site in sites)
+        private (double, double) CalculateSiteLPull(VoronoiSite site)
+        {            
+            double x_pull = 0.0, y_pull = 0.0;
+            //possible optimization: use site.Cell instead of points
+            var points = site.Points;
+            var centroid = site.Centroid;
+            int cx = Convert.ToInt32(centroid.X);
+            int cy = Convert.ToInt32(centroid.Y);
+            foreach(var point in site.Points)
             {
-                double x_pull = 0.0, y_pull = 0.0;
-                //possible optimization: use site.Cell instead of points
-                var points = site.Points;
-                var centroid = site.Centroid;
-                int cx = Convert.ToInt32(centroid.X);
-                int cy = Convert.ToInt32(centroid.Y);
-                foreach(var point in site.Points)
-                {
-                    int px = Convert.ToInt32(point.X);
-                    int py = Convert.ToInt32(point.Y);
-                    double L_diff = Math.Abs(image.GetPixel(px, py).L - image.GetPixel(cx, cy).L);
-                    x_pull += -(point.X - centroid.X) * L_diff / points.Count();
-                    y_pull += -(point.Y - centroid.Y) * L_diff / points.Count();
-                }
-                Lpull.Add((x_pull, y_pull));
+                int px = Convert.ToInt32(point.X);
+                int py = Convert.ToInt32(point.Y);
+                double L_diff = Math.Abs(image.GetPixel(px, py).L - image.GetPixel(cx, cy).L);
+                x_pull += -(point.X - centroid.X) * L_diff / points.Count();
+                y_pull += -(point.Y - centroid.Y) * L_diff / points.Count();
             }
-            return Lpull;
+            return (x_pull, y_pull);
         }
 
-        private void PullSites(List<(double, double)> sites_pull, double strength = 1.0)
+        /*private void PullSites(List<(double, double)> sites_pull, double strength = 1.0)
         {
             var new_sites = new List<VoronoiSite>();
             for (int i = 0; i < sites.Count; i++)
@@ -119,11 +149,11 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
             sites = new_sites;
             VoronoiPlane.TessellateOnce(sites, 0, 0, width - 1, height - 1);
-        }
+        }*/
 
-        public void PerformLPull(double str_Lpull = 0.2, double str_centroid = 0.5)
+        /*public void PerformLPull(double str_Lpull = 0.2, double str_centroid = 0.5)
         {
-            var Lpull = CalculateSitesLPull();
+            var Lpull = CalculateSiteLPull();
             for (int i = 0; i < sites.Count; i++)
             {
                 //pull to centroid + away from color diff
@@ -133,7 +163,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 Lpull[i] = (pull_x, pull_y);
             }
             PullSites(Lpull);
-        }
+        }*/
 
         public LabBitmap GetColoredStrokeMap()
         {
@@ -149,15 +179,20 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return result;
         }
 
-        public int[,] GetVoronoiMask()
+        public int[,] GetVoronoiMask(List<VoronoiSite> from_sites = null)
         {
+            if(from_sites == null)
+            {
+                from_sites = sites;
+            }
+
             var result = new int[width, height];
             //find first pixel
             double min_d = double.MaxValue;
             int last_site_i = -1;
-            for (int i = 0; i < sites.Count; i++)
+            for (int i = 0; i < from_sites.Count; i++)
             {
-                double d = Math.Sqrt(Math.Pow(sites[i].X, 2) + Math.Pow(sites[i].Y, 2));
+                double d = Math.Sqrt(Math.Pow(from_sites[i].X, 2) + Math.Pow(from_sites[i].Y, 2));
                 if (d < min_d)
                 {
                     result[0, 0] = i;
@@ -171,15 +206,15 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 //first go ->
                 for(int y = 0; y < height; y++)
                 {
-                    min_d = Math.Sqrt(Math.Pow(sites[last_site_i].X - x, 2) + Math.Pow(sites[last_site_i].Y - y, 2));
-                    var sites_to_check = sites[last_site_i].Neighbours;
+                    min_d = Math.Sqrt(Math.Pow(from_sites[last_site_i].X - x, 2) + Math.Pow(from_sites[last_site_i].Y - y, 2));
+                    var sites_to_check = from_sites[last_site_i].Neighbours;
                     result[x, y] = last_site_i;
                     foreach (var site in sites_to_check)
                     {
                         double d = Math.Sqrt(Math.Pow(site.X - x, 2) + Math.Pow(site.Y - y, 2));                         
                         if (d < min_d)
                         {
-                            int i = sites.IndexOf(site);
+                            int i = from_sites.IndexOf(site);
                             result[x, y] = i;
                             last_site_i = i;
                             min_d = d;
@@ -194,15 +229,15 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 }
                 for (int y = height - 1; y >= 0; y--)
                 {
-                    min_d = Math.Sqrt(Math.Pow(sites[last_site_i].X - x, 2) + Math.Pow(sites[last_site_i].Y - y, 2));
-                    var sites_to_check = sites[last_site_i].Neighbours;
+                    min_d = Math.Sqrt(Math.Pow(from_sites[last_site_i].X - x, 2) + Math.Pow(from_sites[last_site_i].Y - y, 2));
+                    var sites_to_check = from_sites[last_site_i].Neighbours;
                     result[x, y] = last_site_i;
                     foreach (var site in sites_to_check)
                     {
                         double d = Math.Sqrt(Math.Pow(site.X - x, 2) + Math.Pow(site.Y - y, 2));
                         if (d < min_d)
                         {
-                            int i = sites.IndexOf(site);
+                            int i = from_sites.IndexOf(site);
                             result[x, y] = i;
                             last_site_i = i;
                             min_d = d;

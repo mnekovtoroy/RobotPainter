@@ -1,15 +1,13 @@
 ﻿using RobotPainter.Calculations.Optimization;
 using System.Data;
-using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Intrinsics;
+using MathNet.Numerics.Integration;
+using MathNet.Numerics;
 
 namespace RobotPainter.Calculations.Brushes
 {
     public class BasicBrushModel : IBrushModel
     {
         public readonly static string model_name = "Malevich 6";
-
-        private readonly IOptimizer _optimizer;
 
         public readonly static PointD[] footprint = [
             new PointD(27.447855, 0.536619),
@@ -185,7 +183,7 @@ namespace RobotPainter.Calculations.Brushes
                             Func<double, PointD> fq = t => (q0 + t * (q1 - q0));
                             Func<double, double> fopt = t => Geometry.Norm(fq(t) - p0) - fr(t);
 
-                            double t = Optimization.Optimization.Fzero(fopt, td, 1);
+                            double t = FindRoots.OfFunction(fopt, td, 1);
 
                             if (t > 1)
                                 t = 1;
@@ -262,11 +260,9 @@ namespace RobotPainter.Calculations.Brushes
         private double Fal(double al0, double ds, double zcurr, double zprev)
         {
             Func<double, double> zfun = s => -zprev + (-zcurr + zprev) * s / ds; //with inverse z
-
-            throw new NotImplementedException();
-            double int0 = 0;
-            //double int0 = integral(x => 1.0 / rfun(zfun(x)), 0, ds, 'AbsTol', 1e-13);
-            return 2 * Math.Atan(Math.Tan(al0 / 2.0) * Math.Exp(-int0));
+            
+            double int0 = NewtonCotesTrapeziumRule.IntegrateAdaptive(x => 1.0 / rfun(zfun(x)), 0, ds, 1e-13);
+			return 2 * Math.Atan(Math.Tan(al0 / 2.0) * Math.Exp(-int0));
         }
     }
 }

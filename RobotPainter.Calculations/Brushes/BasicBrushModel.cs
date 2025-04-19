@@ -1,13 +1,20 @@
-﻿using RobotPainter.Calculations.Optimization;
-using System.Data;
+﻿using System.Data;
 using MathNet.Numerics.Integration;
 using MathNet.Numerics;
+using System.Drawing;
 
 namespace RobotPainter.Calculations.Brushes
 {
     public class BasicBrushModel : IBrushModel
     {
-        public readonly static string model_name = "Malevich 6";
+		private class StrokeSkeleton
+		{
+			public List<Point3D> points = new List<Point3D>();
+			public List<double> thetas = new List<double>();
+			public List<double> ds = new List<double>();
+		}
+
+		public readonly static string model_name = "Malevich 6";
 
         public readonly static PointD[] footprint = [
             new PointD(27.447855, 0.536619),
@@ -92,6 +99,108 @@ namespace RobotPainter.Calculations.Brushes
                 result.Add(new Point3D(next_point.x, next_point.y, desired_path[i].z));
             }
             return result;
+        }
+
+        public void DrawStroke(Graphics g, Brush br, List<Point3D> root_path, double x_scale_coeff, double y_scale_coeff, double mult_coeff = 100)
+        {
+            var stroke_skeleton = CalculateStrokeSkeleton(root_path, mult_coeff);
+
+            int N = stroke_skeleton.points.Count;
+            int M = footprint.Length;
+
+            //M++; //since we add nan to exclue line connecting footpints?
+
+            for(int i = 0; i < stroke_skeleton.points.Count; i++)
+            {
+                double x = stroke_skeleton.points[i].x;
+                double y = stroke_skeleton.points[i].y;
+                double z = -stroke_skeleton.points[i].z; //inverted z
+
+                double r = rfun(z);
+                double b = bfun(z);
+                double w = wfun(z);
+
+                double bscale = stroke_skeleton.ds[i] / r; //ratio of distance to root and r
+                b *= bscale;
+
+                double theta = stroke_skeleton.thetas[i];
+
+                List<Point> footprint_polygon = GetFootprintPolygon(b, w, x, y, theta, x_scale_coeff, y_scale_coeff);
+                g.FillPolygon(br, footprint_polygon.ToArray());
+            }
+        }
+
+        private List<Point> GetFootprintPolygon(double b, double w, double x, double y, double theta, double x_scale_coeff, double y_scale_coeff)
+        {
+            double cost = Math.Cos(theta);
+            double sint = Math.Sin(theta);
+
+            double[,] Mrot = { { cost, -sint }, { sint, cost} };
+            Mrot[0, 0] = cost;
+            Mrot[0, 1] = -sint;
+            Mrot[1, 0] = sint;
+            Mrot[1, 1] = cost; //counter clockwise rotation
+
+			//offsets are theta + pi / 2
+			double xb = (x + sint * b) * x_scale_coeff;
+            double yb = (y - cost * b) * y_scale_coeff;
+            PointD offset = new PointD(xb, yb);
+
+            var footprint_scaled = footprint.Select(p => Geometry.Scale(Geometry.Rotate(w * p, Mrot), x_scale_coeff, y_scale_coeff) + offset).ToList();
+            var result = footprint_scaled.Select(p => new Point(Convert.ToInt32(p.x), Convert.ToInt32(p.y))).ToList();
+            return result;
+        }
+
+        private StrokeSkeleton CalculateStrokeSkeleton(List<Point3D> root_path, double mult_coeff = 100)
+        {
+            var stroke_skeleton = new StrokeSkeleton();
+
+            PointD p0 = new PointD(root_path[0].x, root_path[0].y);
+
+            for(int i = 1; i < root_path.Count; i++)
+            {
+                PointD q0 = new PointD(root_path[i - 1].x, root_path[i - 1].y); //previous point
+                PointD q1 = new PointD(root_path[i].x, root_path[i].y); //current point
+                double zprev = root_path[i - 1].z;
+                double zcurr = root_path[i].z;
+
+                if(zcurr > 0 && zprev < 0)
+                {
+                    double t = -zprev / (zcurr - zprev);
+                    q1 = q1 * (1 - t) + t * q1; //last point
+                    zcurr = 0;
+                }
+                if(zcurr >= 0 && zprev >= 0)
+                {
+                    p0 = q1;
+                }
+                if(zcurr < 0 && zprev > 0) //maybe change to >=
+				{
+					double t = -zprev / (zcurr - zprev);
+                    q0 = q0 * (1 - t) + t * q1;
+                    p0 = q0;
+                    zprev = 0;
+				}
+
+                PointD pinit = p0;
+                for(double t = 1.0 / mult_coeff; t < 1.0; t += mult_coeff)
+                {
+                    PointD q1s = q0 * (1 - t) + t * q1; // last point
+                    double z1s = zprev * (1 - t) + t * zcurr; // last height
+
+                    PointD pnew = Getpa(q0, q1s, pinit, z1s, zprev, pinit);
+                    PointD v = q1s - pnew;
+                    double theta = Math.Atan2(v.y, v.x) - Math.PI / 2;
+
+                    stroke_skeleton.points.Add(new Point3D(pnew.x, pnew.y, z1s));
+                    stroke_skeleton.thetas.Add(theta);
+                    stroke_skeleton.ds.Add(Geometry.Norm(v));
+
+                    p0 = pnew;
+                }
+			}
+
+            return stroke_skeleton;
         }
 
         private PointD Findq(double zcurr, double zprev, PointD q0, PointD p0, PointD p1, PointD q1start)

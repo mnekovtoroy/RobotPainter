@@ -88,5 +88,15 @@ namespace RobotPainter.Calculations
         {
             return Math.Sqrt(p.x * p.x + p.y * p.y);
         }
+
+        public static PointD Rotate(PointD p, double[,] M)
+        {
+            return new PointD(p.x * M[0, 0] + p.y * M[0, 1], p.x * M[1, 0] + p.y * M[1, 1]);
+        }
+
+        public static PointD Scale(PointD p, double x_scale_coeff, double y_scale_coeff)
+        {
+            return new PointD(p.x * x_scale_coeff, p.y * y_scale_coeff);
+        }
     }
 }

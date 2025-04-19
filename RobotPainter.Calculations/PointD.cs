@@ -16,17 +16,21 @@
 
         public static PointD Multiply(double a, PointD b) => new PointD(a* b.x, a* b.y);
 
+        public static PointD Divide(PointD a, double b) => new PointD(a.x / b, a.y / b);
+
         public static PointD operator +(PointD a, PointD b) => Add(a, b);
 
         public static PointD operator -(PointD a, PointD b) => Substract(a, b);
 
-        public static bool operator ==(PointD a, PointD b) => a.x == b.x && a.y == b.y;
-
-        public static bool operator !=(PointD a, PointD b) => a.x != b.x || a.y != b.y;
-
         public static PointD operator *(double a, PointD b) => Multiply(a, b);
 
         public static PointD operator *(PointD a, double b) => Multiply(b, a);
+
+        public static PointD operator /(PointD a, double b) => Divide(a, b);
+
+        public static bool operator ==(PointD a, PointD b) => a.x == b.x && a.y == b.y;
+
+        public static bool operator !=(PointD a, PointD b) => a.x != b.x || a.y != b.y;
 
         public override readonly bool Equals(object? obj) => obj is PointD && Equals((PointD)obj);
 

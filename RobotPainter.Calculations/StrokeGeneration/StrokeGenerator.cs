@@ -48,6 +48,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _optimizer = optimizer;
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
+            sites = sites.OrderBy(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
             siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
         }
 
@@ -85,23 +86,31 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
         }
 
+        List<VoronoiSite> unassigned_sites = new List<VoronoiSite>();
         public void CalculateStorkes()
         {
             ClearSitesList();
             siteToStroke.Clear();
             strokes.Clear();
-            var unprocessed_sites = sites.Select(x => x).ToList();
-            while(unprocessed_sites.Count > 0)
+            unassigned_sites = sites.Select(x => x).ToList();
+            while(unassigned_sites.Count > 0)
             {
-                var curr_site = unprocessed_sites[0];
-                var stroke = GenerateBrushstroke(curr_site);
-                //reserving the sites
-                foreach (var site in stroke.involvedSites) {
-                    unprocessed_sites.Remove(site);
-                    siteToStroke.Add(site, stroke);
-                }
-                strokes.Add(stroke);
+                GetNextBrushstroke();
             }
+        }
+
+        public BrushstrokeRegions GetNextBrushstroke()
+        {
+            var curr_site = unassigned_sites[0];
+            var stroke = GenerateBrushstroke(curr_site);
+            //reserving the sites
+            foreach (var site in stroke.involvedSites)
+            {
+                unassigned_sites.Remove(site);
+                siteToStroke.Add(site, stroke);
+            }
+            strokes.Add(stroke);
+            return stroke;
         }
 
         private BrushstrokeRegions GenerateBrushstroke(VoronoiSite startin_point)

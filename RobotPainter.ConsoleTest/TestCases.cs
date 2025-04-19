@@ -310,7 +310,7 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 10000;
+            int sites_n = 1000;
 
             LabBitmap lbmp = new LabBitmap(image);
 

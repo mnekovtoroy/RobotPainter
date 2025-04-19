@@ -49,6 +49,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
             sites = sites.OrderBy(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
+            unassigned_sites = sites.Select(x => x).ToList();
             siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
         }
 
@@ -84,15 +85,15 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 plane.Relax(strength: 0.5f);
                 
             }
+            unassigned_sites = sites.Select(x => x).ToList();
         }
 
-        List<VoronoiSite> unassigned_sites = new List<VoronoiSite>();
+        List<VoronoiSite> unassigned_sites;
         public void CalculateStorkes()
         {
             ClearSitesList();
             siteToStroke.Clear();
             strokes.Clear();
-            unassigned_sites = sites.Select(x => x).ToList();
             while(unassigned_sites.Count > 0)
             {
                 GetNextBrushstroke();

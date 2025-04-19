@@ -1,7 +1,5 @@
 ﻿using RobotPainter.Calculations.Optimization;
 using SharpVoronoiLib;
-using System.Drawing;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace RobotPainter.Calculations.StrokeGeneration
@@ -18,8 +16,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
         }
 
         public List<VoronoiSite> sites;
-
-        private List<VoronoiSite> unassigned_sites;
 
         private Dictionary<VoronoiSite, BrushstrokeRegions> siteToStroke;
 
@@ -52,7 +48,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _optimizer = optimizer;
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
-            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
+            sites = sites.OrderBy(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
             unassigned_sites = sites.Select(x => x).ToList();
             siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
         }
@@ -89,19 +85,16 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 plane.Relax(strength: 0.5f);
                 
             }
+            unassigned_sites = sites.Select(x => x).ToList();
         }
 
-        public void CalculateStorkesFromZero(bool i_am_absolutely_sure_i_want_to_use_this_method = false)
+        List<VoronoiSite> unassigned_sites;
+        public void CalculateStorkes()
         {
-            if(!i_am_absolutely_sure_i_want_to_use_this_method)
-            {
-                throw new Exception("Do not use this method");
-            }
-
             ClearSitesList();
             siteToStroke.Clear();
             strokes.Clear();
-            while(!AreAllStrokesDone())
+            while(!AreAllSitesAssigned())
             {
                 GetNextBrushstroke();
             }
@@ -109,29 +102,23 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public BrushstrokeRegions GetNextBrushstroke()
         {
-            if(siteToStroke.Count == strokes.Count)
+            if(AreAllSitesAssigned())
             {
-                //all strokes already done
                 return null;
             }
-
-            BrushstrokeRegions stroke = GenerateBrushstroke(unassigned_sites[0]);
+            var curr_site = unassigned_sites[0];
+            var stroke = GenerateBrushstroke(curr_site);
             //reserving the sites
             foreach (var site in stroke.involvedSites)
             {
-                siteToStroke.Add(site, stroke);
                 unassigned_sites.Remove(site);
+                siteToStroke.Add(site, stroke);
             }
             strokes.Add(stroke);
             return stroke;
         }
 
-        public bool AreAllStrokesDone() => siteToStroke.Count == strokes.Count;
-
-        public void ApplyFeedback(LabBitmap feedback)
-        {
-            throw new NotImplementedException();
-        }
+        public bool AreAllSitesAssigned() => unassigned_sites.Count == 0;
 
         private BrushstrokeRegions GenerateBrushstroke(VoronoiSite startin_point)
         {
@@ -142,7 +129,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool IsSiteReserved(VoronoiSite site)
         {
-            return siteToStroke.ContainsKey(site);
+            return !unassigned_sites.Contains(site);
         }
 
         private void ClearSitesList()

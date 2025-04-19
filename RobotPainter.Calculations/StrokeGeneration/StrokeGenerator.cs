@@ -94,7 +94,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             ClearSitesList();
             siteToStroke.Clear();
             strokes.Clear();
-            while(unassigned_sites.Count > 0)
+            while(!AreAllSitesAssigned())
             {
                 GetNextBrushstroke();
             }
@@ -102,6 +102,10 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public BrushstrokeRegions GetNextBrushstroke()
         {
+            if(AreAllSitesAssigned())
+            {
+                return null;
+            }
             var curr_site = unassigned_sites[0];
             var stroke = GenerateBrushstroke(curr_site);
             //reserving the sites
@@ -114,6 +118,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return stroke;
         }
 
+        public bool AreAllSitesAssigned() => unassigned_sites.Count == 0;
+
         private BrushstrokeRegions GenerateBrushstroke(VoronoiSite startin_point)
         {
             var stroke = new BrushstrokeRegions(this, startin_point);
@@ -123,7 +129,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool IsSiteReserved(VoronoiSite site)
         {
-            return siteToStroke.ContainsKey(site);
+            return !unassigned_sites.Contains(site);
         }
 
         private void ClearSitesList()

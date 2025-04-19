@@ -3,25 +3,32 @@ using SharpVoronoiLib;
 using SharpVoronoiLib.Exceptions;
 using System.ComponentModel;
 using System.Drawing;
+using System.Security.Cryptography;
 
 namespace RobotPainter.Calculations.StrokeGeneration
 {
-    public class BrushstrokeDrawer
+    public class BrushstrokeCalculator
     {
-        private readonly BasicBrushModel brushModel;
+        private readonly IBrushModel _brushModel;
 
-        public BrushstrokeDrawer()
+        public readonly double xResizeCoeff;
+        public readonly double yResizeCoeff;
+
+        public BrushstrokeCalculator(double x_resize_coeff, double y_resize_coeff, IBrushModel brushModel)
         {
-
+            xResizeCoeff = x_resize_coeff;
+            yResizeCoeff = y_resize_coeff;
+            _brushModel = brushModel;
         }
 
-        public LabBitmap DrawBrushstroke(BrushstrokeRegions stroke_reg, int width, int height, double real_width, double real_height)
+        public List<Point3D> GetBrushPath(BrushstrokeRegions stroke_reg)
         {
-            return null;
+            var desired_path = CalculateDesiredPath(stroke_reg);
+            var brush_path = _brushModel.CalculateBrushRootPath(desired_path);
+            return brush_path;
         }
 
-        //to do: 1-region strokes
-        public List<Point3D> CalculateDesiredPath(BrushstrokeRegions stroke_reg)
+        private List<Point3D> CalculateDesiredPath(BrushstrokeRegions stroke_reg)
         {
             if(stroke_reg.involvedSites.Count == 1)
             {
@@ -61,32 +68,76 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
                 double r = FindDesiredR(previous_point, current_point, next_point, sites[i]);
                 //calculating z
-                double z = brushModel.z(r);
+                double z = _brushModel.CalculateZCoordinate(r);
                 result.Add(new Point3D(current_point.x, current_point.y, z));
             }
             //adding 2 last points
             var prelast_c = sites[sites.Count - 2].Centroid;
             var last_c = sites[sites.Count - 1].Centroid;
             double last_r = FindDesiredR(new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), ending_point, sites.Last());
-            result.Add(new Point3D(last_c.X, last_c.Y, brushModel.z(last_r)));
+            result.Add(new Point3D(last_c.X, last_c.Y, _brushModel.CalculateZCoordinate(last_r)));
             result.Add(new Point3D(ending_point.x, ending_point.y, 0.0));
 
+            result = ResizeXYcoords(result);
             return AddRunaways(result);
         }
 
         private List<Point3D> CalculateSingleSiteDesiredPath(VoronoiSite site)
         {
             var result = new List<Point3D>();
-            var min_angle_p = FindMinAnglePoint(site);
-            result.Add(new Point3D(min_angle_p.x, min_angle_p.y, 0.0));
+            var p0 = FindMinAnglePoint(site);
 
-            throw new NotImplementedException();
+            var centroid = site.Centroid;
+            PointD p1 = new PointD(centroid.X, centroid.Y);
 
+            VoronoiEdge edge = GetIntersectingEdge(site, p0, p1);
+            if (edge == null) throw new ArgumentException("couldnt find edge intersecting ray");
+            PointD p2 = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);
+
+            double p1_r = FindDesiredR(p0, p1, p2, site);
+
+            result.Add(new Point3D(p0.x, p0.y, 0.0));
+            result.Add(new Point3D(p1.x, p1.y, _brushModel.CalculateZCoordinate(p1_r)));
+            result.Add(new Point3D(p2.x, p2.y, 0.0));
             return AddRunaways(result);
         }
 
-        private List<Point3D> AddRunaways(List<Point3D> list)
+        private List<Point3D> ResizeXYcoords(List<Point3D> points)
         {
+            return points.Select(p => new Point3D(p.x * xResizeCoeff, p.y * yResizeCoeff, p.z)).ToList();
+        }
+
+        private VoronoiEdge GetIntersectingEdge(VoronoiSite site, PointD p0, PointD p1)
+        {
+            var edges = site.Cell;
+            foreach(var edge in edges)
+            {
+                if(Geometry.CheckRaySegmentIntersection(
+                    p0.x, p0.y, p1.x - p0.x, p1.y - p0.y,
+                    edge.Start.X, edge.Start.Y, edge.End.X, edge.End.Y))
+                    { return edge; }
+            }
+            return null;
+        }
+
+        private List<Point3D> AddRunaways(List<Point3D> list, double start_angle = 30.0, double end_angle = 90.0, double safe_height = 2.0)
+        {
+            double start_length, end_length;
+            start_length = (start_angle == 90.0 || start_angle == 0.0) ? 0.0 : safe_height / Math.Tan(start_angle * Math.PI / 180.0);
+            end_length = (end_angle == 90.0 || end_angle == 0.0) ? 0.0 : safe_height / Math.Tan(end_angle * Math.PI / 180.0);
+
+            double d = Math.Sqrt(Math.Pow(list[0].x - list[1].x, 2) + Math.Pow(list[0].y - list[1].y, 2));
+            PointD start_v = new PointD((list[0].x - list[1].x) / d, (list[0].y - list[0].y) / d);
+
+            d = Math.Sqrt(Math.Pow(list[list.Count - 1].x - list[list.Count - 2].x, 2) + Math.Pow(list[list.Count - 1].y - list[list.Count - 2].y, 2));
+            PointD end_v = new PointD((list[list.Count - 1].x - list[list.Count - 2].x) / d, (list[list.Count - 1].y - list[list.Count - 2].y) / d);
+
+            PointD start_runaway = (new PointD(list[0].x, list[0].y)) + start_length * start_v;
+            PointD end_runaway = (new PointD(list[list.Count - 1].x, list[list.Count - 1].y)) + end_length * end_v;
+
+            list.Insert(0, new Point3D(start_runaway.x, start_runaway.y, safe_height));
+            list.Add(new Point3D(end_runaway.x, end_runaway.y, safe_height));
+
             return list;
         }
 
@@ -109,7 +160,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
                 if (intersection1.HasValue)
                 {
-                    double r = Math.Sqrt(Math.Pow(intersection1.Value.x - p1.x, 2) + Math.Pow(intersection1.Value.y - p1.y, 2));
+                    double r = Math.Sqrt(Math.Pow((intersection1.Value.x - p1.x) * xResizeCoeff, 2) + Math.Pow((intersection1.Value.y - p1.y) * yResizeCoeff, 2));
                     if (r < desired_r)
                     {
                         desired_r = r;
@@ -117,7 +168,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 }
                 if (intersection2.HasValue)
                 {
-                    double r = Math.Sqrt(Math.Pow(intersection2.Value.x - p1.x, 2) + Math.Pow(intersection2.Value.y - p1.y, 2));
+                    double r = Math.Sqrt(Math.Pow((intersection2.Value.x - p1.x) * xResizeCoeff, 2) + Math.Pow((intersection2.Value.y - p1.y) * yResizeCoeff, 2));
                     if (r < desired_r)
                     {
                         desired_r = r;

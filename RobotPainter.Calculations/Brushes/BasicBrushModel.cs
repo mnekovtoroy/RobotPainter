@@ -20,9 +20,9 @@ namespace RobotPainter.Calculations.Brushes
             new PointD(28.679915, 9.508738),
             new PointD(27.944634, 9.888365),
             new PointD(27.447857, 9.961784)
-        ]; 	
+        ];
 
-        public BasicBrushModel()
+		public BasicBrushModel()
         {
             
         }
@@ -49,9 +49,20 @@ namespace RobotPainter.Calculations.Brushes
             return kb * z;
         }
 
-        public double z(double r)
+        public double CalculateZCoordinate(double w)
         {
-            return 0;
+			if (w < 0)
+			{
+				return 5;
+			}
+			return -(Math.Abs((w - 1.07) / 0.6));
+		}
+
+        public List<Point3D> CalculateBrushRootPath(List<Point3D> desired_path)
+        {
+            throw new NotImplementedException();
+
+
         }
     }
 }

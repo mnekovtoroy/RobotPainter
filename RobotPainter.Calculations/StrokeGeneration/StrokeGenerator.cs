@@ -1,5 +1,7 @@
 ﻿using RobotPainter.Calculations.Optimization;
 using SharpVoronoiLib;
+using System.Drawing;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace RobotPainter.Calculations.StrokeGeneration
@@ -16,6 +18,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
         }
 
         public List<VoronoiSite> sites;
+
+        private List<VoronoiSite> unassigned_sites;
 
         private Dictionary<VoronoiSite, BrushstrokeRegions> siteToStroke;
 
@@ -48,6 +52,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _optimizer = optimizer;
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
+            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
+            unassigned_sites = sites.Select(x => x).ToList();
             siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
         }
 
@@ -85,23 +91,46 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
         }
 
-        public void CalculateStorkes()
+        public void CalculateStorkesFromZero(bool i_am_absolutely_sure_i_want_to_use_this_method = false)
         {
+            if(!i_am_absolutely_sure_i_want_to_use_this_method)
+            {
+                throw new Exception("Do not use this method");
+            }
+
             ClearSitesList();
             siteToStroke.Clear();
             strokes.Clear();
-            var unprocessed_sites = sites.Select(x => x).ToList();
-            while(unprocessed_sites.Count > 0)
+            while(!AreAllStrokesDone())
             {
-                var curr_site = unprocessed_sites[0];
-                var stroke = GenerateBrushstroke(curr_site);
-                //reserving the sites
-                foreach (var site in stroke.involvedSites) {
-                    unprocessed_sites.Remove(site);
-                    siteToStroke.Add(site, stroke);
-                }
-                strokes.Add(stroke);
+                GetNextBrushstroke();
             }
+        }
+
+        public BrushstrokeRegions GetNextBrushstroke()
+        {
+            if(siteToStroke.Count == strokes.Count)
+            {
+                //all strokes already done
+                return null;
+            }
+
+            BrushstrokeRegions stroke = GenerateBrushstroke(unassigned_sites[0]);
+            //reserving the sites
+            foreach (var site in stroke.involvedSites)
+            {
+                siteToStroke.Add(site, stroke);
+                unassigned_sites.Remove(site);
+            }
+            strokes.Add(stroke);
+            return stroke;
+        }
+
+        public bool AreAllStrokesDone() => siteToStroke.Count == strokes.Count;
+
+        public void ApplyFeedback(LabBitmap feedback)
+        {
+            throw new NotImplementedException();
         }
 
         private BrushstrokeRegions GenerateBrushstroke(VoronoiSite startin_point)

@@ -327,7 +327,7 @@ namespace RobotPainter.ConsoleTest
 
             generator.Lfit(20, 2.0);
 
-            generator.CalculateStorkes();
+            generator.CalculateStorkesFromZero();
             var stroke_visualised = generator.GetColoredStrokeMap();
 
             VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);

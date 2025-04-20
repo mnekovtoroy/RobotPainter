@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
+using RobotPainter.Calculations.Clustering;
 using RobotPainter.Calculations.Optimization;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
@@ -481,6 +482,36 @@ namespace RobotPainter.ConsoleTest
             }
             res_bitmap.Save(path + @"fullbrushmodel_test\strokes_lines.png");
             result_image.Save(path + @"fullbrushmodel_test\actual_strokes_lines.png");
+        }
+
+        public static void ClusteringTest()
+        {
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball2.jpg");
+            int sites_n = 5000;
+            int n_clusters = 8;
+            var optimizer = new GradDescent()
+            {
+                a = 0.4,
+                l = 1.1,
+                h = 0.1,
+                max_step = 3.0,
+                tol = 0.3,
+                kmax = 1
+            };
+
+
+            var lbmp = new LabBitmap(image);
+            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, n_rolling_avg: 11);
+
+            List<ColorLab> all_colors = generator.sites.Select(s => s.Centroid).Select(c => new ColorLab(generator.image.GetPixel(Convert.ToInt32(c.X), Convert.ToInt32(c.Y)).L, 0, 0)).ToList();
+;
+            List<ColorLab> clusters = ClusteringEngine.KmeansClustering(all_colors, n_clusters);
+
+            var palette = new Palette();
+            palette.Colors = clusters;
+            var result = palette.Apply(new LabBitmap(image)).ToBitmap();
+            result.Save(path + "paletted.png");
         }
     }
 }

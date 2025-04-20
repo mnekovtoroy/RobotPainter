@@ -24,9 +24,17 @@ namespace RobotPainter.Calculations.StrokeGeneration
         public List<Point3D> GetBrushPath(BrushstrokeRegions stroke_reg)
         {
             var desired_path = CalculateDesiredPath(stroke_reg);
+            desired_path = ResizeXYcoords(desired_path);
+            desired_path = AddRunaways(desired_path);
             var brush_path = _brushModel.CalculateBrushRootPath(desired_path);
+            return brush_path;
+        }
+
+        public List<Point3D> GetDesiredPath(BrushstrokeRegions stroke_reg)
+        {
+            var desired_path = CalculateDesiredPath(stroke_reg);
+            desired_path = ResizeXYcoords(desired_path);
             return desired_path;
-            //return brush_path;
         }
 
         private List<Point3D> CalculateDesiredPath(BrushstrokeRegions stroke_reg)
@@ -85,8 +93,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             result.Add(new Point3D(last_c.X, last_c.Y, _brushModel.CalculateZCoordinate(last_r)));
             result.Add(new Point3D(last_p.x, last_p.y, 0.0));
 
-            //result = ResizeXYcoords(result);
-            return AddRunaways(result);
+            return result;
         }
 
         private List<Point3D> CalculateSingleSiteDesiredPath(VoronoiSite site)
@@ -106,8 +113,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             result.Add(new Point3D(p0.x, p0.y, 0.0));
             result.Add(new Point3D(p1.x, p1.y, _brushModel.CalculateZCoordinate(p1_r)));
             result.Add(new Point3D(p2.x, p2.y, 0.0));
-            //result = ResizeXYcoords(result);
-            return AddRunaways(result);
+            return result;
         }
 
         public List<Point3D> ResizeXYcoords(List<Point3D> points)
@@ -128,7 +134,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return null;
         }
 
-        private List<Point3D> AddRunaways(List<Point3D> list, double start_angle = 30.0, double end_angle = 85.0, double safe_height = 2.0)
+        private List<Point3D> AddRunaways(List<Point3D> list, double start_angle = 30.0, double end_angle = 60.0, double safe_height = 2.0)
         {
             double start_length, end_length;
             start_length = (start_angle == 90.0 || start_angle == 0.0) ? 0.0 : safe_height / Math.Tan(start_angle * Math.PI / 180.0);

@@ -7,7 +7,7 @@ namespace RobotPainter.Calculations.Brushes
 {
     public class BasicBrushModel : IBrushModel
     {
-		private class StrokeSkeleton
+		public class StrokeSkeleton
 		{
 			public List<Point3D> points = new List<Point3D>();
 			public List<double> thetas = new List<double>();
@@ -17,19 +17,32 @@ namespace RobotPainter.Calculations.Brushes
 		public readonly static string model_name = "Malevich 6";
 
         public readonly static PointD[] footprint = [
-            new PointD(27.447855, 0.536619),
-            new PointD(28.201554, 0.775132),
-            new PointD(28.869389, 1.233075),
-            new PointD(29.317792, 1.782544),
-            new PointD(29.651710, 2.454259),
-            new PointD(29.880682, 3.179337),
-            new PointD(30.201969, 4.677195),
-            new PointD(30.310004, 5.980738),
-            new PointD(30.087150, 7.662308),
-            new PointD(29.427442, 8.717410),
-            new PointD(28.679915, 9.508738),
-            new PointD(27.944634, 9.888365),
-            new PointD(27.447857, 9.961784)
+            new PointD(0, 0),
+            new PointD(0.131666625322442, 0.0416667685714476),
+            new PointD(0.248333332751021, 0.121666621828563),
+            new PointD(0.326666606106111, 0.217655509898332),
+            new PointD(0.385000047167356, 0.335000029697965),
+            new PointD(0.425000061142869, 0.461666740620422),
+            new PointD(0.481126943426076, 0.723333411363280),
+            new PointD(0.500000000000000, 0.951054434971765),
+            new PointD(0.461068763366268, 1.24481447332057),
+            new PointD(0.345821793344791, 1.42913436721848),
+            new PointD(0.215233378835274, 1.56737454968277),
+            new PointD(0.0867842659484185, 1.63369307467920),
+            new PointD(3.49387819869476e-07, 1.64651892686230),
+            new PointD(-3.49387819869476e-07, 1.64651892686230),
+            new PointD(-0.0867842659484185, 1.63369307467920),
+            new PointD(-0.215233378835274, 1.56737454968277),
+            new PointD(-0.345821793344791, 1.42913436721848),
+            new PointD(-0.461068763366268, 1.24481447332057),
+            new PointD(-0.500000000000000, 0.951054434971765),
+            new PointD(-0.481126943426076, 0.723333411363280),
+            new PointD(-0.425000061142869, 0.461666740620422),
+            new PointD(-0.385000047167356, 0.335000029697965),
+            new PointD(-0.326666606106111, 0.217655509898332),
+            new PointD(-0.248333332751021, 0.121666621828563),
+            new PointD(-0.131666625322442, 0.0416667685714476),
+            new PointD(0, 0)
         ];
 
 		public BasicBrushModel()
@@ -118,7 +131,7 @@ namespace RobotPainter.Calculations.Brushes
 
                 double r = rfun(z);
                 double b = bfun(z);
-                double w = wfun(z);
+                double w = z > 0 ? wfun(z) : 0.0; //changed to not draw unnecessary tails
 
                 double bscale = stroke_skeleton.ds[i] / r; //ratio of distance to root and r
                 b *= bscale;
@@ -126,10 +139,6 @@ namespace RobotPainter.Calculations.Brushes
                 double theta = stroke_skeleton.thetas[i];
 
                 List<Point> footprint_polygon = GetFootprintPolygon(b, w, x, y, theta, x_scale_coeff, y_scale_coeff);
-                if(footprint_polygon.Max(p => p.X) - footprint_polygon.Min(p => p.X) > 100)
-                {
-                    Console.WriteLine("sus");
-                }
                 g.FillPolygon(br, footprint_polygon.ToArray());
             }
         }
@@ -139,7 +148,7 @@ namespace RobotPainter.Calculations.Brushes
             double cost = Math.Cos(theta);
             double sint = Math.Sin(theta);
 
-            double[,] Mrot = { { cost, -sint }, { sint, cost} };
+            double[,] Mrot = new double[2, 2];
             Mrot[0, 0] = cost;
             Mrot[0, 1] = -sint;
             Mrot[1, 0] = sint;
@@ -156,7 +165,7 @@ namespace RobotPainter.Calculations.Brushes
             return result;
         }
 
-        private StrokeSkeleton CalculateStrokeSkeleton(List<Point3D> root_path, double mult_coeff = 100)
+        public StrokeSkeleton CalculateStrokeSkeleton(List<Point3D> root_path, double mult_coeff = 100)
         {
             var stroke_skeleton = new StrokeSkeleton();
 
@@ -188,7 +197,7 @@ namespace RobotPainter.Calculations.Brushes
 				}
 
                 PointD pinit = p0;
-                double h = 1.0 / mult_coeff;
+                double h = 1.0 / (mult_coeff + 1); //mult_coeff + 1 to actually get required mult_coeff
                 for (double t = h; t < 1.0; t += h)
                 {
                     PointD q1s = q0 * (1 - t) + t * q1; // last point
@@ -200,10 +209,7 @@ namespace RobotPainter.Calculations.Brushes
 
                     stroke_skeleton.points.Add(new Point3D(pnew.x, pnew.y, z1s));
                     stroke_skeleton.thetas.Add(theta);
-                    if (double.IsNaN(Geometry.Norm(v)))
-                    {
-                        //throw new Exception("something gone wrong");
-                    }
+
                     stroke_skeleton.ds.Add(Geometry.Norm(v));
 
                     p0 = pnew;
@@ -270,10 +276,6 @@ namespace RobotPainter.Calculations.Brushes
             {
                 //al0 = Math.Acos((v.x * vq0.x + v.y * vq0.y) / (Math.Sqrt(v.x * v.x + v.y * v.y) * Math.Sqrt(vq0.x * vq0.x + vq0.y * vq0.y)));
                 al0 = Geometry.CalculateAngleDeg(v, vq0) * Math.PI / 180.0; //in radians
-                if (double.IsNaN(al0))
-                {
-                    throw new Exception("something gone wrong");
-                }
             } else
             {
                 al0 = 0.0;
@@ -320,10 +322,7 @@ namespace RobotPainter.Calculations.Brushes
 
 
                             al0 = Math.Acos(cosg1); //alpha
-                            if(double.IsNaN(al0))
-                            {
-                                throw new Exception("something gone wrong");
-                            }
+
                             zprev = zprev + t * (zcurr - zprev);
 
                             v = q1 - fq(t);
@@ -338,10 +337,6 @@ namespace RobotPainter.Calculations.Brushes
 					} else
                     {
                         //al1 = alp1
-                        if (double.IsNaN(p0.x))
-                        {
-                            throw new Exception("something gone wrong");
-                        }
                         return p0;
                     }
                 } else
@@ -350,10 +345,6 @@ namespace RobotPainter.Calculations.Brushes
                     //al1 = alp1;
                     if(rfun(-zcurr) < Geometry.Norm(vp))
                     {
-                        if (double.IsNaN((q1 - vp * rfun(-zcurr) / Geometry.Norm(vp)).x))
-                        {
-                            throw new Exception("something gone wrong");
-                        }
                         return q1 - vp * rfun(-zcurr) / Geometry.Norm(vp);
                     } else
                     {
@@ -369,20 +360,12 @@ namespace RobotPainter.Calculations.Brushes
             double rcurr = rfun(-zcurr);
             if(rd < rcurr)
             {
-                if (double.IsNaN(p0.x))
-                {
-                    throw new Exception("something gone wrong");
-                }
                 return p0;
 				/*cosgnew = v'*vq/norm(v)/norm(vq); %cos between vectors
 	            al1 = acos(cosgnew); % alpha
 	            if cosgnew >= 1
 		            al1 = 0;*/
 			}
-            if (double.IsNaN(al0))
-            {
-                throw new Exception("something gone wrong");
-            }
             double alp = Fal(al0, s, zcurr, zprev);
             double lat = -(rfun(-zcurr)) * Math.Cos(alp);
 
@@ -397,10 +380,6 @@ namespace RobotPainter.Calculations.Brushes
             double dypix = -lat * sing + orth * cosg;
 
             //al1 = alp
-            if (double.IsNaN(q1.x + dxpix))
-            {
-                throw new Exception("something gone wrong");
-            }
             return new PointD(q1.x + dxpix, q1.y + dypix);
         }
 

@@ -48,7 +48,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _optimizer = optimizer;
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
-            sites = sites.OrderBy(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
+            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
             unassigned_sites = sites.Select(x => x).ToList();
             siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
         }

@@ -99,6 +99,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             result.Add(new Point3D(p0.x, p0.y, 0.0));
             result.Add(new Point3D(p1.x, p1.y, _brushModel.CalculateZCoordinate(p1_r)));
             result.Add(new Point3D(p2.x, p2.y, 0.0));
+            result = ResizeXYcoords(result);
             return AddRunaways(result);
         }
 
@@ -120,7 +121,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return null;
         }
 
-        private List<Point3D> AddRunaways(List<Point3D> list, double start_angle = 30.0, double end_angle = 90.0, double safe_height = 2.0)
+        private List<Point3D> AddRunaways(List<Point3D> list, double start_angle = 30.0, double end_angle = 85.0, double safe_height = 2.0)
         {
             double start_length, end_length;
             start_length = (start_angle == 90.0 || start_angle == 0.0) ? 0.0 : safe_height / Math.Tan(start_angle * Math.PI / 180.0);

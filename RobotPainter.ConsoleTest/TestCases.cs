@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using RobotPainter.Calculations;
+using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.Optimization;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
@@ -327,7 +328,7 @@ namespace RobotPainter.ConsoleTest
 
             generator.Lfit(20, 2.0);
 
-            generator.CalculateStorkesFromZero();
+            generator.CalculateStorkes();
             var stroke_visualised = generator.GetColoredStrokeMap();
 
             VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
@@ -346,5 +347,54 @@ namespace RobotPainter.ConsoleTest
             VoronoiVisualizer.VisualizeVoronoiInline(res_bitmap2, generator.sites, Color.Blue, Color.Red, 1);
             res_bitmap2.Save(path + @"test_strokes\voronoi_strokes.png");
         }
+
+        public static void BrushModelTest()
+        {
+            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
+            Bitmap image = new Bitmap(path + "test_ball2.jpg");
+            int sites_n = 1000;
+            double real_width = 300;
+            double real_height = 300;
+
+            LabBitmap lbmp = new LabBitmap(image);
+
+            var optimizer = new GradDescent()
+            {
+                a = 0.4,
+                l = 1.1,
+                h = 0.1,
+                max_step = 3.0,
+                tol = 0.3,
+                kmax = 1
+            };
+            var brushModel = new BasicBrushModel();
+            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, 11);
+
+            generator.Lfit(20, 2.0);
+
+            generator.CalculateStorkes();
+            var stroke_visualised = generator.GetColoredStrokeMap();
+
+            VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
+            image.Save(path + @"brushmodel_test\voronoi.png");
+
+            var res_bitmap = stroke_visualised.ToBitmap();
+            res_bitmap.Save(path + @"brushmodel_test\strokes.png");
+
+            Bitmap result_image = new Bitmap(image.Width, image.Height);
+            result_image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
+            using(var g =  Graphics.FromImage(result_image))
+            {
+                for(int i = 0; i < 1; i++)
+                {
+                    var stroke_reg = generator.strokes[i];
+                    var brush_root_path = b_calc.GetBrushPath(stroke_reg);
+                    Brush br = new SolidBrush(stroke_reg.MainColor.ToRgb());
+                    brushModel.DrawStroke(g, br, brush_root_path, image.Width / real_width, image.Height / real_height);
+                }
+            }
+            result_image.Save(path + @"brushmodel_test\actual_strokes.png");        }
     }
 }

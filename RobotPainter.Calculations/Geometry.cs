@@ -69,7 +69,10 @@ namespace RobotPainter.Calculations
             double l1 = Math.Sqrt(v1.x * v1.x + v1.y * v1.y);
             double l2 = Math.Sqrt(v2.x * v2.x + v2.y * v2.y);
             if (l1 == 0 || l2 == 0) return 0;
-            return Math.Acos((v1.x * v2.x + v1.y * v2.y) / (l1 * l2)) * 180.0 / Math.PI;
+            double cos = (v1.x * v2.x + v1.y * v2.y) / (l1 * l2);
+            if (cos > 1.0) cos = 1.0; //in case of a numerical error
+            if (cos < -1.0) cos = -1.0;
+            return Math.Acos(cos) * 180.0 / Math.PI;
         }
 
         public static PointD GetBisectorVector(PointD p0, PointD p1, PointD p2)

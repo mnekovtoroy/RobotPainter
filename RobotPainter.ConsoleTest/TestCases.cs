@@ -385,16 +385,32 @@ namespace RobotPainter.ConsoleTest
             result_image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
-            using(var g =  Graphics.FromImage(result_image))
+            int n_brushstrokes_to_draw = 1;
+
+            for(int i = 0; i < n_brushstrokes_to_draw; i++)
             {
-                for(int i = 0; i < 1; i++)
+                var stroke = generator.strokes[i];
+                var brush_desired_path = b_calc.GetDesiredPath(stroke);
+                var brush_root_path = b_calc.GetBrushPath(stroke);
+
+                using(var g = Graphics.FromImage(result_image))
                 {
-                    var stroke_reg = generator.strokes[i];
-                    var brush_root_path = b_calc.GetBrushPath(stroke_reg);
-                    Brush br = new SolidBrush(stroke_reg.MainColor.ToRgb());
-                    brushModel.DrawStroke(g, br, brush_root_path, image.Width / real_width, image.Height / real_height);
+                    var br = new SolidBrush(stroke.MainColor.ToRgb());
+                    brushModel.DrawStroke(g, br, brush_root_path, image.Width / real_width, image.Height / real_height, mult_coeff: 100);
                 }
+
+                var stroke_skeleton = brushModel.CalculateStrokeSkeleton(brush_root_path);
+
+                double x_scale = image.Width / real_width;
+                double y_scale = image.Height / real_height;
+
+                var test = stroke_skeleton.points.Select(p => p.z).ToList();
+                VoronoiVisualizer.VisualizeVoronoiInline(result_image, stroke.involvedSites, Color.Blue, Color.Red, 1);
+                VoronoiVisualizer.VisualizeStrokeInline(result_image, brush_desired_path.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Green, Color.Orange, 1);
+                VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);
+                VoronoiVisualizer.VisualisePointsInline(result_image, [(brush_desired_path[0].x * x_scale, brush_desired_path[0].y * y_scale)], Color.Pink, 1);
             }
-            result_image.Save(path + @"brushmodel_test\actual_strokes.png");        }
+            result_image.Save(path + @"brushmodel_test\actual_strokes.png");
+        }
     }
 }

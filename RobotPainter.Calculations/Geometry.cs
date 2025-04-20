@@ -76,17 +76,18 @@ namespace RobotPainter.Calculations
 
         public static PointD GetBisectorVector(PointD p0, PointD p1, PointD p2)
         {
-            /*double l1 = Math.Sqrt(Math.Pow(p0.x - p1.x, 2) + Math.Pow(p0.y - p1.y, 2));
-            double l2 = Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
-            PointD v1 = new PointD((p0.x - p1.x) / l1, (p0.y - p1.y) / l1);
-            PointD v2 = new PointD((p2.x - p1.x) / l2, (p2.y - p1.y) / l2);
-
-            PointD v_bisector = v1 + v2;*/
-
             PointD v1 = (p0 - p1) / Norm(p0 - p1);
             PointD v2 = (p2 - p1) / Norm(p2 - p1);
+            if(Norm(v1 + v2) < 1e-3)
+            {
+                //if vectors are at 180 degree angle, return a pe to one of them
+                double[,] M = new double[2, 2];
+                M[0, 0] = 0; M[0, 1] = -1;
+                M[1, 0] = 1; M[1, 1] = 0;
+                return Rotate(v2, M);
+            }
 
-            return v1 + v2;
+            return (v1 + v2) / Norm(v1 + v2);
         }
 
         public static double Norm(PointD p)

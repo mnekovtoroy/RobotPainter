@@ -197,7 +197,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             {
                 throw new Exception("Cant find desired radius");
             }
-            double max_r = 4.0;
+            double max_r = 3.5;
             desired_r = desired_r < max_r ? desired_r : max_r;
             return desired_r;
         }

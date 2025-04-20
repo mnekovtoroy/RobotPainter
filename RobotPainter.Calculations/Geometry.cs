@@ -40,11 +40,10 @@ namespace RobotPainter.Calculations
             double y_i = -(a_v * c_s - a_s * c_v) / den;
 
             //checking if intersection point is on the segment & the ray
-            bool isOnS =
-                x_i >= Math.Min(s_x0, s_x1) &&
-                x_i <= Math.Max(s_x0, s_x1) &&
-                y_i >= Math.Min(s_y0, s_y1) &&
-                y_i <= Math.Max(s_y0, s_y1);
+            bool isBetweenXS = x_i >= Math.Min(s_x0, s_x1) && x_i <= Math.Max(s_x0, s_x1);
+            bool isBetweenYS = y_i >= Math.Min(s_y0, s_y1) && y_i <= Math.Max(s_y0, s_y1);
+            bool isOnS = (s_dx <= 1e-5 || isBetweenXS) && (s_dy <= 1e-5 || isBetweenYS); //in case segment line is parallel to either of the axes, to exclude numerical error
+
             bool isOnV = (v_dx * (x_i - v_x0) + v_dy * (y_i - v_y0)) > 0;
 
             if (isOnS && isOnV)
@@ -77,14 +76,17 @@ namespace RobotPainter.Calculations
 
         public static PointD GetBisectorVector(PointD p0, PointD p1, PointD p2)
         {
-            double l1 = Math.Sqrt(Math.Pow(p0.x - p1.x, 2) + Math.Pow(p0.y - p1.y, 2));
+            /*double l1 = Math.Sqrt(Math.Pow(p0.x - p1.x, 2) + Math.Pow(p0.y - p1.y, 2));
             double l2 = Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
             PointD v1 = new PointD((p0.x - p1.x) / l1, (p0.y - p1.y) / l1);
             PointD v2 = new PointD((p2.x - p1.x) / l2, (p2.y - p1.y) / l2);
 
-            PointD v_bisector = v1 + v2;
+            PointD v_bisector = v1 + v2;*/
 
-            return v_bisector;
+            PointD v1 = (p0 - p1) / Norm(p0 - p1);
+            PointD v2 = (p2 - p1) / Norm(p2 - p1);
+
+            return v1 + v2;
         }
 
         public static double Norm(PointD p)

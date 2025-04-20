@@ -205,5 +205,9 @@ namespace RobotPainter.Calculations
             if (var_a > 0 && var_b < 0) var_bias = 360;
             return Math.Atan(var_b / var_a) * 180.0 / Math.PI + var_bias;
         }
+
+        public static ColorLab Substract(ColorLab a, ColorLab b) => new ColorLab(a.L - b.L, a.a - b.a, a.b - b.b);
+
+        public static ColorLab operator -(ColorLab a, ColorLab b) => Substract(a, b);
     }
 }

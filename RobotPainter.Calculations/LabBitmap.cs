@@ -58,5 +58,22 @@ namespace RobotPainter.Calculations
         {
             _image[x, y] = color;
         }
+
+        internal static ColorLab[,] CalculateDifference(LabBitmap bmp1, LabBitmap bmp2)
+        {
+            if(bmp1.h != bmp2.h || bmp1.w != bmp2.w)
+            {
+                throw new ArgumentException("bitmaps must have save dimensions");
+            }
+            ColorLab[,] difference = new ColorLab[bmp1.h, bmp2.h];
+            for (int i = 0; i < bmp1.w; i++)
+            {
+                for (int j = 0; j < bmp1.h; j++)
+                {
+                    difference[i, j] = bmp1.GetPixel(i, j) - bmp2.GetPixel(i, j);
+                }
+            }
+            return difference;
+        }
     }
 }

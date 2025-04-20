@@ -95,6 +95,11 @@ namespace RobotPainter.Calculations
             return Math.Sqrt(p.x * p.x + p.y * p.y);
         }
 
+        public static double Norm(Point3D p)
+        {
+            return Math.Sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
+        }
+
         public static PointD Rotate(PointD p, double[,] M)
         {
             return new PointD(p.x * M[0, 0] + p.y * M[0, 1], p.x * M[1, 0] + p.y * M[1, 1]);

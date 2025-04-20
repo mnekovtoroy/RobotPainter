@@ -127,6 +127,82 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return stroke;
         }
 
+        private LabBitmap prev_feedback;
+        public void ApplyFeedback(LabBitmap feedback)
+        {
+            if(prev_feedback == null)
+            {
+                prev_feedback = feedback;
+                return;
+            }
+            //find the difference mask
+            var difference = LabBitmap.CalculateDifference(feedback, prev_feedback);
+            bool[,] difference_mask = GetDifferenceMask(difference);
+
+            //find the sites to optimize
+            var affected_sites = GetSitesByMask(difference_mask);
+            var sites_to_optimize = GetUnassignedSitesAndNeighbors(affected_sites);
+
+            //optimize the sites
+            OptimizeSitesToMaskPreservingAssigned(sites_to_optimize, difference_mask);
+        }
+
+        public bool[,] GetDifferenceMask(ColorLab[,] difference)
+        {
+            bool[,] difference_mask = new bool[width, height];
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    double diff = Geometry.Norm(new Point3D(difference[i, j].L, difference[i, j].a, difference[i, j].b));
+                    difference_mask[i, j] = diff > 1e-5; //if diff is more than some small error
+                }
+            }
+            return difference_mask;
+        }
+
+        private List<VoronoiSite> GetSitesByMask(bool[,] difference_mask)
+        {
+            var sites_mask = GetVoronoiMask();
+            HashSet<VoronoiSite> masked_sites = new HashSet<VoronoiSite>();
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    if (difference_mask[i, j] && !masked_sites.Contains(sites[sites_mask[i,j]]))
+                    {
+                        masked_sites.Add(sites[sites_mask[i, j]]);
+                    }
+                }
+            }
+            return masked_sites.ToList();
+        }
+
+        private List<VoronoiSite> GetUnassignedSitesAndNeighbors(List<VoronoiSite> sites_list)
+        {
+            HashSet<VoronoiSite> result = new HashSet<VoronoiSite>();
+            foreach(var site in sites_list)
+            {
+                if(!IsSiteReserved(site) && !result.Contains(site))
+                {
+                    result.Add(site);
+                }
+                foreach(var neighbor in site.Neighbours)
+                {
+                    if (!IsSiteReserved(neighbor) && !result.Contains(neighbor))
+                    {
+                        result.Add(neighbor);
+                    }
+                }
+            }
+            return result.ToList();
+        }
+
+        private void OptimizeSitesToMaskPreservingAssigned(List<VoronoiSite> sites_to_optimize, bool[,] difference_mask)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsSiteReserved(VoronoiSite site)
         {
             return !unassigned_sites.Contains(site);
@@ -155,31 +231,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
             return (x_pull, y_pull);
         }
-
-        /*private void PullSites(List<(double, double)> sites_pull, double strength = 1.0)
-        {
-            var new_sites = new List<VoronoiSite>();
-            for (int i = 0; i < sites.Count; i++)
-            {
-                new_sites.Add(new VoronoiSite(sites[i].X + strength * sites_pull[i].Item1, sites[i].Y + strength * sites_pull[i].Item2));
-            }
-            sites = new_sites;
-            VoronoiPlane.TessellateOnce(sites, 0, 0, width - 1, height - 1);
-        }*/
-
-        /*public void PerformLPull(double str_Lpull = 0.2, double str_centroid = 0.5)
-        {
-            var Lpull = CalculateSiteLPull();
-            for (int i = 0; i < sites.Count; i++)
-            {
-                //pull to centroid + away from color diff
-                var centroid = sites[i].Centroid;
-                double pull_x = str_Lpull * Lpull[i].Item1 + str_centroid * (centroid.X - sites[i].X);
-                double pull_y = str_Lpull * Lpull[i].Item2 + str_centroid * (centroid.X - sites[i].X);
-                Lpull[i] = (pull_x, pull_y);
-            }
-            PullSites(Lpull);
-        }*/
 
         public LabBitmap GetColoredStrokeMap()
         {

@@ -23,7 +23,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<Point3D> GetBrushPath(BrushstrokeRegions stroke_reg)
         {
-            var desired_path = CalculateDesiredPath(stroke_reg);
+            var desired_path = SimpleCalculateDesiredPath(stroke_reg);
             desired_path = ResizeXYcoords(desired_path);
             desired_path = AddRunaways(desired_path);
             var brush_path = _brushModel.CalculateBrushRootPath(desired_path);
@@ -32,7 +32,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<Point3D> GetDesiredPath(BrushstrokeRegions stroke_reg)
         {
-            var desired_path = CalculateDesiredPath(stroke_reg);
+            var desired_path = SimpleCalculateDesiredPath(stroke_reg);
             desired_path = ResizeXYcoords(desired_path);
             return desired_path;
         }
@@ -75,7 +75,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 PointD current_point = new PointD(curr_c.X, curr_c.Y);
                 PointD next_point = new PointD(next_c.X, next_c.Y);
 
-                double r = FindDesiredR(previous_point, current_point, next_point, sites[i]);
+                double r = FindDesiredR(/*previous_point, current_point, next_point,*/ sites[i]);
                 //calculating z
                 double z = _brushModel.CalculateZCoordinate(r);
                 result.Add(new Point3D(current_point.x, current_point.y, z));
@@ -89,9 +89,48 @@ namespace RobotPainter.Calculations.StrokeGeneration
             if (edge == null) throw new ArgumentException("couldnt find edge intersecting ray");
             PointD last_p = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);*/
 
-            double last_r = FindDesiredR(new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), ending_point, sites.Last());
+            double last_r = FindDesiredR(/*new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), ending_point,*/ sites.Last());
             result.Add(new Point3D(last_c.X, last_c.Y, _brushModel.CalculateZCoordinate(last_r)));
             result.Add(new Point3D(ending_point.x, ending_point.y, 0.0));
+
+            return result;
+        }
+
+        private List<Point3D> SimpleCalculateDesiredPath(BrushstrokeRegions stroke_reg)
+        {
+            if (stroke_reg.involvedSites.Count == 1) 
+                return SimpleCalculateSingleSiteDesiredPath(stroke_reg);
+
+            var result = new List<Point3D>();
+
+            for (int i = 0; i < stroke_reg.involvedSites.Count; i++)
+            {
+                var site_c = stroke_reg.involvedSites[i].Centroid;
+                double r = FindDesiredR(stroke_reg.involvedSites[i]);
+                double z = _brushModel.CalculateZCoordinate(r);
+                result.Add(new Point3D(site_c.X, site_c.Y, z));
+            }
+
+            //adding start and end points
+            //start
+            PointD p0 = new PointD(result[0].x, result[0].y);
+            PointD p1 = new PointD(result[1].x, result[1].y);
+            PointD v = p0 - p1;
+            v = v / Geometry.Norm(v);
+            double s = FindDesiredR(stroke_reg.involvedSites[0]);
+            double start_coeff = 1.2;
+            PointD ps = p0 + v * s * start_coeff;
+            result.Insert(0, new Point3D(ps.x, ps.y, 0.0));
+
+            //end
+            PointD pn = new PointD(result[result.Count - 1].x, result[result.Count - 1].y);
+            PointD pn_ = new PointD(result[result.Count - 2].x, result[result.Count - 2].y);
+            v = pn - pn_;
+            v = v / Geometry.Norm(v);
+            s = FindDesiredR(stroke_reg.involvedSites[0]);
+            double end_coeff = 1.2;
+            PointD pe = pn + v * s * end_coeff;
+            result.Add(new Point3D(pe.x, pe.y, 0.0));
 
             return result;
         }
@@ -111,11 +150,49 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
             PointD p2 = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);
 
-            double p1_r = FindDesiredR(p0, p1, p2, site);
+            double p1_r = FindDesiredR(/*p0, p1, p2,*/ site);
 
             result.Add(new Point3D(p0.x, p0.y, 0.0));
             result.Add(new Point3D(p1.x, p1.y, _brushModel.CalculateZCoordinate(p1_r)));
             result.Add(new Point3D(p2.x, p2.y, 0.0));
+            return result;
+        }
+
+        private List<Point3D> SimpleCalculateSingleSiteDesiredPath(BrushstrokeRegions stroke_reg)
+        {
+            var result = new List<Point3D>();
+
+            var v = stroke_reg.StartingNorm;
+
+            if(Geometry.Norm(v) == 0)
+            {
+                v.x = xResizeCoeff >= yResizeCoeff ? 1.0 : 0.0;
+                v.y = xResizeCoeff < yResizeCoeff ? 1.0 : 0.0;
+            } else
+            {
+                v = v / Geometry.Norm(v);
+            }
+
+
+            var site = stroke_reg.startingSite;
+            var centroid = stroke_reg.startingCentroid;
+            double r = FindDesiredR(site);
+
+            var pm = new PointD(centroid.X, centroid.Y);
+            //start
+            double start_coeff = 1.2;
+            PointD ps = pm - v * r * start_coeff;
+            result.Add(new Point3D(ps.x, ps.y, 0.0));
+
+            //middle
+            double z = _brushModel.CalculateZCoordinate(r);
+            result.Add(new Point3D(pm.x, pm.y, z));
+
+            //end
+            double end_coeff = 1.2;
+            PointD pe = pm + v * r * end_coeff;
+            result.Add(new Point3D(pe.x, pe.y, 0.0));
+
             return result;
         }
 
@@ -158,9 +235,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return list;
         }
 
-        private double FindDesiredR(PointD p0, PointD p1, PointD p2, VoronoiSite site)
+        private double FindDesiredR(/*PointD p0, PointD p1, PointD p2,*/ VoronoiSite site)
         {
-            PointD bisector_v = Geometry.GetBisectorVector(p0, p1, p2);
+            //PointD bisector_v = Geometry.GetBisectorVector(p0, p1, p2);
 
             //double desired_r = double.MaxValue;
             double desired_r = -1.0;

@@ -1,4 +1,5 @@
-﻿using SharpVoronoiLib;
+﻿using MathNet.Numerics.Optimization;
+using SharpVoronoiLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,29 +14,39 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<VoronoiSite> involvedSites;
 
-        public VoronoiSite startingPoint;
+        public VoronoiSite startingSite;
         public VoronoiPoint startingCentroid;
 
         public ColorLab MainColor { get { return _strokeGenerator.image.GetPixel(Convert.ToInt32(startingCentroid.X), Convert.ToInt32(startingCentroid.Y)); } }
 
+        public PointD StartingNorm { 
+            get { 
+                return new PointD(
+                    _strokeGenerator.u[Convert.ToInt32(startingCentroid.X), Convert.ToInt32(startingCentroid.Y)], 
+                    _strokeGenerator.v[Convert.ToInt32(startingCentroid.X), Convert.ToInt32(startingCentroid.Y)]); 
+            } 
+        }
 
         public BrushstrokeRegions(StrokeGenerator parent, VoronoiSite starting_point)
         {
             _strokeGenerator = parent;
-            startingPoint = starting_point;
-            startingCentroid = startingPoint.Centroid;
+            startingSite = starting_point;
+            startingCentroid = startingSite.Centroid;
         }
 
         public void GenerateStroke(double max_length, double max_width, double L_tol)
         {
             involvedSites = new List<VoronoiSite>();
-            involvedSites.Add(startingPoint);
+            involvedSites.Add(startingSite);
 
             double curr_length = 0.0;
 
             //forward expansion
-            VoronoiSite last_site = startingPoint;
+            VoronoiSite last_site = startingSite;
             var last_centroid = last_site.Centroid;
+
+            PointD prev_v = new PointD(0.0, 0.0);
+
             while (curr_length < max_length)
             {
                 int lc_ix = Convert.ToInt32(last_centroid.X);
@@ -44,7 +55,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 double vx = _strokeGenerator.u[lc_ix, lc_iy];
                 double vy = _strokeGenerator.v[lc_ix, lc_iy];
 
-                VoronoiSite next_site = GetAdjasentSite(last_site, vx, vy);
+                PointD norm_v = new PointD(vx, vy);
+
+                VoronoiSite next_site = GetAdjasentSite(last_site, norm_v, prev_v);
 
                 if (!IsValidSite(next_site)) 
                     break;
@@ -54,34 +67,54 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
                 curr_length += Math.Sqrt(Math.Pow(next_centroid.X - last_centroid.X, 2) + Math.Pow(next_centroid.Y - last_centroid.Y, 2));
                 involvedSites.Add(next_site);
+
+                prev_v.x = next_centroid.X - last_centroid.X;
+                prev_v.y = next_centroid.Y - last_centroid.Y;
+
                 last_site = next_site;
                 last_centroid = next_centroid;
             }
 
             //backwards expansion
-            last_site = startingPoint;
+            last_site = startingSite;
             last_centroid = last_site.Centroid;
-            while (curr_length < max_length)
+            if(involvedSites.Count > 1)
             {
-                int lc_ix = Convert.ToInt32(last_centroid.X);
-                int lc_iy = Convert.ToInt32(last_centroid.Y);
+                prev_v.x = involvedSites[0].X - involvedSites[1].X;
+                prev_v.y = involvedSites[0].Y - involvedSites[1].Y;
 
-                double vx = -_strokeGenerator.u[lc_ix, lc_iy];
-                double vy = -_strokeGenerator.v[lc_ix, lc_iy];
-
-                VoronoiSite next_site = GetAdjasentSite(last_site, vx, vy);
-
-                if (!IsValidSite(next_site))
-                    break;
-                var next_centroid = next_site.Centroid;
-                if (!IsValidExpand(last_centroid, next_centroid, curr_length, max_length, L_tol))
-                    break;
-
-                curr_length += Math.Sqrt(Math.Pow(next_centroid.X - last_centroid.X, 2) + Math.Pow(next_centroid.Y - last_centroid.Y, 2));
-                involvedSites.Insert(0, next_site);
-                last_site = next_site;
-                last_centroid = next_centroid;
+            } else
+            {
+                prev_v.x = 0;
+                prev_v.y = 0;
             }
+                while (curr_length < max_length)
+                {
+                    int lc_ix = Convert.ToInt32(last_centroid.X);
+                    int lc_iy = Convert.ToInt32(last_centroid.Y);
+
+                    double vx = -_strokeGenerator.u[lc_ix, lc_iy];
+                    double vy = -_strokeGenerator.v[lc_ix, lc_iy];
+
+                    PointD norm_v = new PointD(vx, vy);
+
+                    VoronoiSite next_site = GetAdjasentSite(last_site, norm_v, prev_v);
+
+                    if (!IsValidSite(next_site))
+                        break;
+                    var next_centroid = next_site.Centroid;
+                    if (!IsValidExpand(last_centroid, next_centroid, curr_length, max_length, L_tol))
+                        break;
+
+                    curr_length += Math.Sqrt(Math.Pow(next_centroid.X - last_centroid.X, 2) + Math.Pow(next_centroid.Y - last_centroid.Y, 2));
+                    involvedSites.Insert(0, next_site);
+
+                    prev_v.x = next_centroid.X - last_centroid.X;
+                    prev_v.y = next_centroid.Y - last_centroid.Y;
+
+                    last_site = next_site;
+                    last_centroid = next_centroid;
+                }
         }
 
         private bool IsValidExpand(VoronoiPoint last_centroid, VoronoiPoint next_centroid, double curr_length, double max_length, double L_tol)
@@ -111,9 +144,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return site != null && !involvedSites.Contains(site) && !_strokeGenerator.IsSiteReserved(site);
         }
 
-        private VoronoiSite GetAdjasentSite(VoronoiSite site, double dx, double dy)
+        private VoronoiSite GetAdjasentSite(VoronoiSite site, PointD norm, PointD prev_v, double max_norm_angle = 30.0, double max_brush_angle = 30.0)
         {
-            var centroid = site.Centroid;
+            /*var centroid = site.Centroid;
             var edges = site.Cell;
             foreach (var edge in edges)
             {
@@ -136,7 +169,29 @@ namespace RobotPainter.Calculations.StrokeGeneration
                     }
                 }
             }
-            return null;
+            return null;*/
+
+            var candidates = new Dictionary<VoronoiSite, double>();
+            var neighbors = site.Neighbours;
+            var centroid = site.Centroid;
+            foreach (var neighbor in neighbors)
+            {
+                var neighbor_c = neighbor.Centroid;
+                var v_n = new PointD(neighbor_c.X - centroid.X, neighbor_c.Y - centroid.Y);
+
+                double brush_angle = Geometry.Norm(prev_v) != 0 ? Geometry.CalculateAngleDeg(v_n, prev_v) : 0.0;
+                double norm_angle = Geometry.CalculateAngleDeg(v_n, norm);
+                if(brush_angle <= max_brush_angle && norm_angle <= max_norm_angle)
+                {
+                    candidates.Add(neighbor, brush_angle);
+                }
+            }
+            if(candidates.Count == 0)
+            {
+                return null;
+            }
+            var result = candidates.OrderBy(c => c.Value).First();
+            return result.Key;
         }
     }
 }

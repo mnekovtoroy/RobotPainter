@@ -25,7 +25,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
         {
             var desired_path = CalculateDesiredPath(stroke_reg);
             var brush_path = _brushModel.CalculateBrushRootPath(desired_path);
-            return brush_path;
+            return desired_path;
+            //return brush_path;
         }
 
         private List<Point3D> CalculateDesiredPath(BrushstrokeRegions stroke_reg)
@@ -39,18 +40,18 @@ namespace RobotPainter.Calculations.StrokeGeneration
             //finding starting point
             PointD p1, p2;
             double angle1 = FindNonAdjMinAngle(stroke_reg.involvedSites[0], stroke_reg.involvedSites[1], out p1);
-            double angle2 = FindNonAdjMinAngle(stroke_reg.involvedSites[stroke_reg.involvedSites.Count - 2], stroke_reg.involvedSites[stroke_reg.involvedSites.Count - 1], out p2);
+            double angle2 = FindNonAdjMinAngle(stroke_reg.involvedSites[stroke_reg.involvedSites.Count - 1], stroke_reg.involvedSites[stroke_reg.involvedSites.Count - 2], out p2);
 
-            PointD starting_point, ending_point;
+            PointD starting_point;//, ending_point;
             if(angle1 <= angle2)
             {
                 starting_point = p1;
-                ending_point = p2;
+                //ending_point = p2;
             } else
             {
                 stroke_reg.involvedSites.Reverse();
                 starting_point = p2;
-                ending_point = p1;
+                //ending_point = p1;
             }
             result.Add(new Point3D(starting_point.x, starting_point.y, 0.0));
 
@@ -74,11 +75,17 @@ namespace RobotPainter.Calculations.StrokeGeneration
             //adding 2 last points
             var prelast_c = sites[sites.Count - 2].Centroid;
             var last_c = sites[sites.Count - 1].Centroid;
-            double last_r = FindDesiredR(new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), ending_point, sites.Last());
-            result.Add(new Point3D(last_c.X, last_c.Y, _brushModel.CalculateZCoordinate(last_r)));
-            result.Add(new Point3D(ending_point.x, ending_point.y, 0.0));
 
-            result = ResizeXYcoords(result);
+            //last point in the middle of the edge
+            VoronoiEdge edge = GetIntersectingEdge(sites[sites.Count - 1], new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y));
+            if (edge == null) throw new ArgumentException("couldnt find edge intersecting ray");
+            PointD last_p = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);
+
+            double last_r = FindDesiredR(new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), last_p, sites.Last());
+            result.Add(new Point3D(last_c.X, last_c.Y, _brushModel.CalculateZCoordinate(last_r)));
+            result.Add(new Point3D(last_p.x, last_p.y, 0.0));
+
+            //result = ResizeXYcoords(result);
             return AddRunaways(result);
         }
 
@@ -99,11 +106,11 @@ namespace RobotPainter.Calculations.StrokeGeneration
             result.Add(new Point3D(p0.x, p0.y, 0.0));
             result.Add(new Point3D(p1.x, p1.y, _brushModel.CalculateZCoordinate(p1_r)));
             result.Add(new Point3D(p2.x, p2.y, 0.0));
-            result = ResizeXYcoords(result);
+            //result = ResizeXYcoords(result);
             return AddRunaways(result);
         }
 
-        private List<Point3D> ResizeXYcoords(List<Point3D> points)
+        public List<Point3D> ResizeXYcoords(List<Point3D> points)
         {
             return points.Select(p => new Point3D(p.x * xResizeCoeff, p.y * yResizeCoeff, p.z)).ToList();
         }
@@ -114,7 +121,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             foreach(var edge in edges)
             {
                 if(Geometry.CheckRaySegmentIntersection(
-                    p0.x, p0.y, p1.x - p0.x, p1.y - p0.y,
+                    p1.x, p1.y, p1.x - p0.x, p1.y - p0.y,
                     edge.Start.X, edge.Start.Y, edge.End.X, edge.End.Y))
                     { return edge; }
             }

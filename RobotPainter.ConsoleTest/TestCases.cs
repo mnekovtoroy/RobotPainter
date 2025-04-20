@@ -311,7 +311,7 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 1000;
+            int sites_n = 10000;
 
             LabBitmap lbmp = new LabBitmap(image);
 
@@ -417,7 +417,7 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 10000;
+            int sites_n = 50000;
             double real_width = 300;
             double real_height = 300;
 
@@ -435,7 +435,7 @@ namespace RobotPainter.ConsoleTest
             var brushModel = new BasicBrushModel();
             var generator = new StrokeGenerator(lbmp, sites_n, optimizer, 11);
 
-            generator.Lfit(20, 2.0);
+            generator.Lfit(2, 2.0);
 
             generator.CalculateStorkes();
             var stroke_visualised = generator.GetColoredStrokeMap();
@@ -451,11 +451,14 @@ namespace RobotPainter.ConsoleTest
 
             var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
 
+            Console.WriteLine($"Total strokes: {generator.strokes.Count}");
+
             using (var g = Graphics.FromImage(result_image))
             {
                 g.FillRectangle(new SolidBrush(Color.White), new Rectangle(0,0,image.Width, image.Height));
-                foreach (var stroke in generator.strokes)
+                for(int i =  0; i < generator.strokes.Count; i++)
                 {
+                    var stroke = generator.strokes[i];
                     var brush_root_path = b_calc.GetBrushPath(stroke);
 
                     var br = new SolidBrush(stroke.MainColor.ToRgb());
@@ -466,13 +469,18 @@ namespace RobotPainter.ConsoleTest
                     double x_scale = image.Width / real_width;
                     double y_scale = image.Height / real_height;
 
-                    VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);*/
-                    //break;
+                    VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Where(p => p.z < 0).Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);*/
                 }
-
-            }
-            
+            }            
             result_image.Save(path + @"fullbrushmodel_test\actual_strokes.png");
+
+            foreach (var stroke in generator.strokes)
+            {
+                VoronoiVisualizer.VisualizeStrokeInline(res_bitmap, stroke.involvedSites.Select(s => (Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y))).ToList(), Color.Blue, Color.Red, 1);
+                VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke.involvedSites.Select(s => (Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y))).ToList(), Color.Blue, Color.Red, 1);
+            }
+            res_bitmap.Save(path + @"fullbrushmodel_test\strokes_lines.png");
+            result_image.Save(path + @"fullbrushmodel_test\actual_strokes_lines.png");
         }
     }
 }

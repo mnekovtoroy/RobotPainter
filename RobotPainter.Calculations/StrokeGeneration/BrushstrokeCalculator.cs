@@ -50,16 +50,16 @@ namespace RobotPainter.Calculations.StrokeGeneration
             double angle1 = FindNonAdjMinAngle(stroke_reg.involvedSites[0], stroke_reg.involvedSites[1], out p1);
             double angle2 = FindNonAdjMinAngle(stroke_reg.involvedSites[stroke_reg.involvedSites.Count - 1], stroke_reg.involvedSites[stroke_reg.involvedSites.Count - 2], out p2);
 
-            PointD starting_point;//, ending_point;
+            PointD starting_point, ending_point;
             if(angle1 <= angle2)
             {
                 starting_point = p1;
-                //ending_point = p2;
+                ending_point = p2;
             } else
             {
                 stroke_reg.involvedSites.Reverse();
                 starting_point = p2;
-                //ending_point = p1;
+                ending_point = p1;
             }
             result.Add(new Point3D(starting_point.x, starting_point.y, 0.0));
 
@@ -85,13 +85,13 @@ namespace RobotPainter.Calculations.StrokeGeneration
             var last_c = sites[sites.Count - 1].Centroid;
 
             //last point in the middle of the edge
-            VoronoiEdge edge = GetIntersectingEdge(sites[sites.Count - 1], new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y));
+            /*VoronoiEdge edge = GetIntersectingEdge(sites[sites.Count - 1], new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y));
             if (edge == null) throw new ArgumentException("couldnt find edge intersecting ray");
-            PointD last_p = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);
+            PointD last_p = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);*/
 
-            double last_r = FindDesiredR(new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), last_p, sites.Last());
+            double last_r = FindDesiredR(new PointD(prelast_c.X, prelast_c.Y), new PointD(last_c.X, last_c.Y), ending_point, sites.Last());
             result.Add(new Point3D(last_c.X, last_c.Y, _brushModel.CalculateZCoordinate(last_r)));
-            result.Add(new Point3D(last_p.x, last_p.y, 0.0));
+            result.Add(new Point3D(ending_point.x, ending_point.y, 0.0));
 
             return result;
         }
@@ -105,7 +105,10 @@ namespace RobotPainter.Calculations.StrokeGeneration
             PointD p1 = new PointD(centroid.X, centroid.Y);
 
             VoronoiEdge edge = GetIntersectingEdge(site, p0, p1);
-            if (edge == null) throw new ArgumentException("couldnt find edge intersecting ray");
+            if (edge == null)
+            {
+                throw new ArgumentException("couldnt find edge intersecting ray");
+            }
             PointD p2 = new PointD((edge.Start.X + edge.End.X) / 2.0, (edge.Start.Y + edge.End.Y) / 2.0);
 
             double p1_r = FindDesiredR(p0, p1, p2, site);
@@ -159,7 +162,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
         {
             PointD bisector_v = Geometry.GetBisectorVector(p0, p1, p2);
 
-            double desired_r = double.MaxValue;
+            //double desired_r = double.MaxValue;
+            double desired_r = -1.0;
             var edges = site.Cell;
 
             foreach (var edge in edges)
@@ -175,7 +179,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 if (intersection1.HasValue)
                 {
                     double r = Math.Sqrt(Math.Pow((intersection1.Value.x - p1.x) * xResizeCoeff, 2) + Math.Pow((intersection1.Value.y - p1.y) * yResizeCoeff, 2));
-                    if (r < desired_r)
+                    if (r > desired_r)
                     {
                         desired_r = r;
                     }
@@ -183,16 +187,18 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 if (intersection2.HasValue)
                 {
                     double r = Math.Sqrt(Math.Pow((intersection2.Value.x - p1.x) * xResizeCoeff, 2) + Math.Pow((intersection2.Value.y - p1.y) * yResizeCoeff, 2));
-                    if (r < desired_r)
+                    if (r > desired_r)
                     {
                         desired_r = r;
                     }
                 }
             }
-            if(desired_r == double.MaxValue)
+            if (desired_r == -1)
             {
                 throw new Exception("Cant find desired radius");
             }
+            double max_r = 4.0;
+            desired_r = desired_r < max_r ? desired_r : max_r;
             return desired_r;
         }
 

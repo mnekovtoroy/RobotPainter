@@ -164,7 +164,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             //double desired_r = double.MaxValue;
             double desired_r = -1.0;
-            var edges = site.Cell;
+            /*var edges = site.Cell;
 
             foreach (var edge in edges)
             {
@@ -197,6 +197,26 @@ namespace RobotPainter.Calculations.StrokeGeneration
             {
                 throw new Exception("Cant find desired radius");
             }
+            double max_r = 3.5;
+            desired_r = desired_r < max_r ? desired_r : max_r;*/
+            var points = site.Points;
+            var centroid = site.Centroid;
+            PointD p_centroid = new PointD(centroid.X, centroid.Y);
+            foreach(var p in points)
+            {
+                PointD curr_p = new PointD(p.X, p.Y);
+                double r = Geometry.Norm(curr_p - p_centroid);
+                if(r > desired_r)
+                {
+                    desired_r = r;
+                }
+            }
+            if (desired_r == -1)
+            {
+                throw new Exception("Cant find desired radius");
+            }
+            double overlap = 0.2;
+            desired_r += overlap;
             double max_r = 3.5;
             desired_r = desired_r < max_r ? desired_r : max_r;
             return desired_r;

@@ -207,6 +207,11 @@ namespace RobotPainter.Calculations.Brushes
                     PointD v = q1s - pnew;
                     double theta = Math.Atan2(v.y, v.x) - Math.PI / 2;
 
+                    if(double.IsNaN(theta) || double.IsNaN(Geometry.Norm(v)) || double.IsNaN(pnew.x) || double.IsNaN(pnew.y) || double.IsNaN(z1s))
+                    {
+
+                    }
+
                     stroke_skeleton.points.Add(new Point3D(pnew.x, pnew.y, z1s));
                     stroke_skeleton.thetas.Add(theta);
 
@@ -290,33 +295,42 @@ namespace RobotPainter.Calculations.Brushes
                 double cosg1 = Math.Cos(Geometry.CalculateAngleDeg(v, vp) * Math.PI / 180.0); //cos between vectors
                 double alp1 = Math.Acos(cosg1); //alpha
 
-                if(alp1 < Math.PI / 2.0) //if there is a possibility to draw
+                if (alp1 < Math.PI / 2.0) //if there is a possibility to draw
                 {
-                    if(-rfun(-zcurr) <= Math.Sqrt(vp.x*vp.x + vp.y*vp.y)) //if in final point r <= ||vp||
+                    if (-rfun(-zcurr) <= Math.Sqrt(vp.x * vp.x + vp.y * vp.y)) //if in final point r <= ||vp||
                     {
                         Func<double, double> fr = t => rfun(-zprev - t * (zcurr - zprev));
                         PointD prjp0 = (vp.x * v.x + vp.y * v.y) * v / Math.Pow(s, 2);
-						PointD vdel = vp - prjp0; //distance in the point closest to v
+                        PointD vdel = vp - prjp0; //distance in the point closest to v
                         double vdn = Geometry.Norm(vdel);
                         double td = Geometry.Norm(p0 + vdel - q0) / s;
 
                         al0 = Math.PI / 2.0;
-                        
-                        if(vdn < fr(td)) // if in this point the distance is <= r
+
+                        if (vdn < fr(td)) // if in this point the distance is <= r
                         {
                             //find a point where distane is equal to r
                             Func<double, PointD> fq = t => (q0 + t * (q1 - q0));
                             Func<double, double> fopt = t => Geometry.Norm(fq(t) - p0) - fr(t);
 
-                            double t = FindRoots.OfFunction(fopt, td, 1);
-
-                            if (t > 1)
+                            double t0 = td-0.2, t1 = 1.2;
+                            double t;
+                            try
+                            {
+                                t = FindRoots.OfFunction(fopt, t0, t1);
+                            } catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.ToString());
                                 t = 1;
+                            }
+
+                            if (t >= 1)
+                                t = 0.99;
                             if (t <= 0)
                                 t = 0;
 
                             vp = fq(t) - p0;
-							cosg1 = Math.Cos(Geometry.CalculateAngleDeg(v, vp) * Math.PI / 180.0); //cos between vectors
+                            cosg1 = Math.Cos(Geometry.CalculateAngleDeg(v, vp) * Math.PI / 180.0); //cos between vectors
                             if (cosg1 > 1.0)
                                 cosg1 = 1.0; //if a numerical error occurs
 
@@ -327,14 +341,14 @@ namespace RobotPainter.Calculations.Brushes
 
                             v = q1 - fq(t);
                             s = Geometry.Norm(v);
-						} else
+                        } else
                         {
-							//change v to the projection of (q1 - p0) onto v
-							prjp0 = (vp.x * v.x + vp.y * v.y) * v / Math.Pow(s, 2);
+                            //change v to the projection of (q1 - p0) onto v
+                            prjp0 = (vp.x * v.x + vp.y * v.y) * v / Math.Pow(s, 2);
                             v = prjp0;
                             s = Geometry.Norm(prjp0);
-						}
-					} else
+                        }
+                    } else
                     {
                         //al1 = alp1
                         return p0;
@@ -343,7 +357,7 @@ namespace RobotPainter.Calculations.Brushes
                 {
                     //check the case if r(zcurr) < ||vp||
                     //al1 = alp1;
-                    if(rfun(-zcurr) < Geometry.Norm(vp))
+                    if (rfun(-zcurr) < Geometry.Norm(vp))
                     {
                         return q1 - vp * rfun(-zcurr) / Geometry.Norm(vp);
                     } else
@@ -358,14 +372,19 @@ namespace RobotPainter.Calculations.Brushes
             PointD vq = q1 - p0;
             double rd = Geometry.Norm(vq);
             double rcurr = rfun(-zcurr);
-            if(rd < rcurr)
+            if (rd < rcurr)
             {
                 return p0;
-				/*cosgnew = v'*vq/norm(v)/norm(vq); %cos between vectors
+                /*cosgnew = v'*vq/norm(v)/norm(vq); %cos between vectors
 	            al1 = acos(cosgnew); % alpha
 	            if cosgnew >= 1
 		            al1 = 0;*/
-			}
+            }
+            if (double.IsNaN(al0))
+            {
+
+            }
+
             double alp = Fal(al0, s, zcurr, zprev);
             double lat = -(rfun(-zcurr)) * Math.Cos(alp);
 
@@ -378,6 +397,11 @@ namespace RobotPainter.Calculations.Brushes
 
             double dxpix = lat * cosg + orth * sing;
             double dypix = -lat * sing + orth * cosg;
+
+            if (double.IsNaN(q1.x + dxpix) || double.IsNaN(q1.y + dypix))
+            {
+
+            }
 
             //al1 = alp
             return new PointD(q1.x + dxpix, q1.y + dypix);

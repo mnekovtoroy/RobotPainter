@@ -506,7 +506,7 @@ namespace RobotPainter.ConsoleTest
 
             List<ColorLab> all_colors = generator.sites.Select(s => s.Centroid).Select(c => new ColorLab(generator.image.GetPixel(Convert.ToInt32(c.X), Convert.ToInt32(c.Y)).L, 0, 0)).ToList();
 ;
-            List<ColorLab> clusters = ClusteringEngine.KmeansClustering(all_colors, n_clusters);
+            List<ColorLab> clusters = KMeansClustering.FindClusters(all_colors, n_clusters);
 
             var palette = new Palette();
             palette.Colors = clusters;

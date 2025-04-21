@@ -1,12 +1,35 @@
 ﻿using RobotPainter.Calculations.Core;
 using RobotPainter.Calculations.Optimization;
 using SharpVoronoiLib;
-using System.Threading.Tasks;
 
 namespace RobotPainter.Calculations.StrokeGeneration
 {
     public class StrokeGenerator
     {
+        public class Options
+        {
+            public double CanvasWidth;
+            public double CanvasHeight;
+
+            public int RelaxationIterations = 5;
+            public int LpullIterations = 2;
+            public double LpullMaxStep = 2.0;
+
+            public int RollingAverageN = 9;
+
+            //for StrokeSitesBuilder.Options
+            public double CanvasMaxStrokeLength = 80.0;
+            public double L_tol = 3.5;
+            public double MaxNormAngle = 30.0;
+            public double MaxBrushAngle = 30.0;
+
+            public Options(double canvas_width, double canvas_height)
+            {
+                CanvasWidth = canvas_width;
+                CanvasHeight = canvas_height;
+            }
+        }
+
         public static List<VoronoiSite> GenerateRandomRelaxedMesh(int n, int width, int height, int relax_iterations = 3)
         {
             VoronoiPlane plane = new VoronoiPlane(0, 0, width - 1, height - 1);
@@ -27,28 +50,21 @@ namespace RobotPainter.Calculations.StrokeGeneration
         private int width;
         private int height;
 
-        public double real_height_mm;
-        public double real_width_mm;
-
-        public double real_stroke_max_length_mm;
-        //public double StrokeMaxLength { get { return real_stroke_max_length_mm * width / real_width_mm; } }
-        public double StrokeMaxLength = 80;
-
-        public double Ltol = 3.5;
-
-        private readonly IOptimizer _optimizer;
+        Options options;
 
         public List<StrokeSites> strokes = new List<StrokeSites>();
 
-        public StrokeGenerator(LabBitmap target_image, int n_voronoi, IOptimizer optimizer, int n_rolling_avg = 7)
+        public StrokeGenerator(LabBitmap target_image, int n_voronoi, Options options)
         {
             image = target_image;
-            (u,v) = ImageProcessor.LNormWithRollAvg(image, n_rolling_avg);
+            (u,v) = ImageProcessor.LNormWithRollAvg(image, options.RollingAverageN);
             width = image.Width;
             height = image.Height;
-            _optimizer = optimizer;
 
-            sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
+            this.options = options;
+
+            sites = GenerateRandomRelaxedMesh(n_voronoi, width, height, options.RelaxationIterations);
+            Lfit(options.LpullIterations, options.LpullMaxStep);
             sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
             unassigned_sites = sites.Select(x => x).ToList();
             siteToStroke = new Dictionary<VoronoiSite, StrokeSites>();
@@ -121,87 +137,17 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool AreAllSitesAssigned() => unassigned_sites.Count == 0;
 
-        private StrokeSites GenerateBrushstroke(VoronoiSite startin_point)
+        private StrokeSites GenerateBrushstroke(VoronoiSite starting_site)
         {
-            var stroke = new StrokeSites(this, startin_point);
-            stroke.GenerateStroke(StrokeMaxLength, 1.0, Ltol);
+            var strokeSitesBuilderOptions = new StrokeSitesBuilder.Options(width / options.CanvasWidth, height / options.CanvasHeight)
+            {
+                L_tol = options.L_tol,
+                CanvasMaxStrokeLength = options.CanvasMaxStrokeLength,
+                MaxNormAngle = options.MaxNormAngle,
+                MaxBrushAngle = options.MaxBrushAngle
+            };
+            var stroke = StrokeSitesBuilder.GenerateStrokeSites(this, starting_site, strokeSitesBuilderOptions);
             return stroke;
-        }
-
-        private LabBitmap prev_feedback;
-        public void ApplyFeedback(LabBitmap feedback)
-        {
-            if(prev_feedback == null)
-            {
-                prev_feedback = feedback;
-                return;
-            }
-            //find the difference mask
-            var difference = LabBitmap.CalculateDifference(feedback, prev_feedback);
-            bool[,] difference_mask = GetDifferenceMask(difference);
-
-            //find the sites to optimize
-            var affected_sites = GetSitesByMask(difference_mask);
-            var sites_to_optimize = GetUnassignedSitesAndNeighbors(affected_sites);
-
-            //optimize the sites
-            OptimizeSitesToMaskPreservingAssigned(sites_to_optimize, difference_mask);
-        }
-
-        public bool[,] GetDifferenceMask(ColorLab[,] difference)
-        {
-            bool[,] difference_mask = new bool[width, height];
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    double diff = Geometry.Norm(new Point3D(difference[i, j].L, difference[i, j].a, difference[i, j].b));
-                    difference_mask[i, j] = diff > 1e-5; //if diff is more than some small error
-                }
-            }
-            return difference_mask;
-        }
-
-        private List<VoronoiSite> GetSitesByMask(bool[,] difference_mask)
-        {
-            var sites_mask = GetVoronoiMask();
-            HashSet<VoronoiSite> masked_sites = new HashSet<VoronoiSite>();
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    if (difference_mask[i, j] && !masked_sites.Contains(sites[sites_mask[i,j]]))
-                    {
-                        masked_sites.Add(sites[sites_mask[i, j]]);
-                    }
-                }
-            }
-            return masked_sites.ToList();
-        }
-
-        private List<VoronoiSite> GetUnassignedSitesAndNeighbors(List<VoronoiSite> sites_list)
-        {
-            HashSet<VoronoiSite> result = new HashSet<VoronoiSite>();
-            foreach(var site in sites_list)
-            {
-                if(!IsSiteReserved(site) && !result.Contains(site))
-                {
-                    result.Add(site);
-                }
-                foreach(var neighbor in site.Neighbours)
-                {
-                    if (!IsSiteReserved(neighbor) && !result.Contains(neighbor))
-                    {
-                        result.Add(neighbor);
-                    }
-                }
-            }
-            return result.ToList();
-        }
-
-        private void OptimizeSitesToMaskPreservingAssigned(List<VoronoiSite> sites_to_optimize, bool[,] difference_mask)
-        {
-            throw new NotImplementedException();
         }
 
         public bool IsSiteReserved(VoronoiSite site)

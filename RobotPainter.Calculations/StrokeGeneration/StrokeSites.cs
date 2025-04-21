@@ -1,7 +1,7 @@
-﻿using RobotPainter.Calculations.StrokeGeneration;
+﻿using RobotPainter.Calculations.Core;
 using SharpVoronoiLib;
 
-namespace RobotPainter.Calculations.Core
+namespace RobotPainter.Calculations.StrokeGeneration
 {
     public class StrokeSites
     {

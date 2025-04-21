@@ -7,10 +7,19 @@ namespace RobotPainter.Calculations.StrokeGeneration
     {
         public class Options
         {
-            public double MaxStrokeLength = 80.0;
-            public double L_tol = 1.0;
+            public double xResizeCoeff;
+            public double yResizeCoeff;
+
+            public double CanvasMaxStrokeLength = 80.0;
+            public double L_tol = 3.5;
             public double MaxNormAngle = 30.0;
             public double MaxBrushAngle = 30.0;
+
+            public Options(double x_resize_coeff, double y_resize_coeff)
+            {
+                xResizeCoeff = x_resize_coeff;
+                yResizeCoeff = y_resize_coeff;
+            }
         }
 
         public static StrokeSites GenerateStrokeSites(StrokeGenerator parent, VoronoiSite starting_site, Options options)
@@ -31,7 +40,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             PointD prev_v = new PointD(0.0, 0.0);
 
-            while (curr_length < options.MaxStrokeLength)
+            while (curr_length < options.CanvasMaxStrokeLength)
             {
                 int lc_ix = Convert.ToInt32(last_centroid.X);
                 int lc_iy = Convert.ToInt32(last_centroid.Y);
@@ -73,7 +82,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 prev_v.x = 0;
                 prev_v.y = 0;
             }
-            while (curr_length < options.MaxStrokeLength)
+            while (curr_length < options.CanvasMaxStrokeLength)
             {
                 int lc_ix = Convert.ToInt32(last_centroid.X);
                 int lc_iy = Convert.ToInt32(last_centroid.Y);
@@ -91,7 +100,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 if (!IsValidExpand(stroke_sites, last_centroid, next_centroid, curr_length, options))
                     break;
 
-                curr_length += Math.Sqrt(Math.Pow(next_centroid.X - last_centroid.X, 2) + Math.Pow(next_centroid.Y - last_centroid.Y, 2));
+                curr_length += Math.Sqrt(Math.Pow((next_centroid.X - last_centroid.X) * options.xResizeCoeff, 2) + Math.Pow((next_centroid.Y - last_centroid.Y) * options.yResizeCoeff, 2));
                 stroke_sites.involvedSites.Insert(0, next_site);
 
                 prev_v.x = next_centroid.X - last_centroid.X;
@@ -116,8 +125,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 return false;
             }
 
-            double add_length = Math.Sqrt(Math.Pow(next_centroid.X - last_centroid.X, 2) + Math.Pow(next_centroid.Y - last_centroid.Y, 2));
-            if (curr_length + add_length > options.MaxStrokeLength)
+            double add_length = Math.Sqrt(Math.Pow((next_centroid.X - last_centroid.X) * options.xResizeCoeff, 2) + Math.Pow((next_centroid.Y - last_centroid.Y) * options.yResizeCoeff, 2));
+            if (curr_length + add_length > options.CanvasMaxStrokeLength)
             {
                 return false;
             }

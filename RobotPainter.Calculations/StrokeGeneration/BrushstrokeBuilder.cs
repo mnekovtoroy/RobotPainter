@@ -181,8 +181,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
             foreach(var p in points)
             {
                 PointD curr_p = new PointD(p.X, p.Y);
-                throw new NotImplementedException("Add resizing!");
-                double r = Geometry.Norm(curr_p - p_centroid);
+                PointD r_v = new PointD((curr_p.x - p_centroid.x) * options.xResizeCoeff, (curr_p.y - p_centroid.y) * options.yResizeCoeff);
+                double r = Geometry.Norm(r_v);
                 if(r > desired_r)
                 {
                     desired_r = r;

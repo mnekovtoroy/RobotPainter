@@ -1,19 +1,19 @@
-﻿using SharpVoronoiLib;
+﻿using RobotPainter.Calculations.Core;
+using SharpVoronoiLib;
 
 namespace RobotPainter.Calculations.StrokeGeneration
 {
     public static class StrokeSitesBuilder
     {
-        public class StrokeBuilderOptions
+        public class Options
         {
             public double MaxStrokeLength = 80.0;
-            public double MaxStrokeWidth = 7.0;
             public double L_tol = 1.0;
             public double MaxNormAngle = 30.0;
             public double MaxBrushAngle = 30.0;
         }
 
-        public static StrokeSites GenerateStrokeSites(StrokeGenerator parent, VoronoiSite starting_site, StrokeBuilderOptions options)
+        public static StrokeSites GenerateStrokeSites(StrokeGenerator parent, VoronoiSite starting_site, Options options)
         {
             var stroke_sites = new StrokeSites()
             {
@@ -103,7 +103,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return stroke_sites;
         }
 
-        private static bool IsValidExpand(StrokeSites stroke_sties, VoronoiPoint last_centroid, VoronoiPoint next_centroid, double curr_length, StrokeBuilderOptions options)
+        private static bool IsValidExpand(StrokeSites stroke_sties, VoronoiPoint last_centroid, VoronoiPoint next_centroid, double curr_length, Options options)
         {
             int nc_ix = Convert.ToInt32(next_centroid.X);
             int nc_iy = Convert.ToInt32(next_centroid.Y);
@@ -130,7 +130,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return site != null && !stroke_sites.involvedSites.Contains(site) && !stroke_sites.strokeGenerator.IsSiteReserved(site);
         }
 
-        private static VoronoiSite GetAdjasentSite(StrokeSites stroke_sites, VoronoiSite site, PointD norm, PointD prev_v, StrokeBuilderOptions options)
+        private static VoronoiSite GetAdjasentSite(StrokeSites stroke_sites, VoronoiSite site, PointD norm, PointD prev_v, Options options)
         {
             var candidates = new Dictionary<VoronoiSite, double>();
             var neighbors = site.Neighbours;

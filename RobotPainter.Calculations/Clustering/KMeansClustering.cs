@@ -1,6 +1,7 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
+using RobotPainter.Calculations.Core;
 
 namespace RobotPainter.Calculations.Clustering
 {

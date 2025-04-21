@@ -386,7 +386,7 @@ namespace RobotPainter.ConsoleTest
             Bitmap result_image = new Bitmap(image.Width, image.Height);
             result_image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
+            var b_calc = new BrushstrokeBuilder(real_width / image.Width, real_height / image.Height, brushModel);
             int n_brushstrokes_to_draw = 1;
 
             for(int i = 0; i < n_brushstrokes_to_draw; i++)
@@ -451,7 +451,7 @@ namespace RobotPainter.ConsoleTest
             Bitmap result_image = new Bitmap(image.Width, image.Height);
             result_image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
+            var b_calc = new BrushstrokeBuilder(real_width / image.Width, real_height / image.Height, brushModel);
 
             Console.WriteLine($"Total strokes: {generator.strokes.Count}");
 

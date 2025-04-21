@@ -21,7 +21,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             _brushModel = brushModel;
         }
 
-        public List<Point3D> GetBrushPath(BrushstrokeRegions stroke_reg)
+        public List<Point3D> GetBrushPath(StrokeSites stroke_reg)
         {
             var desired_path = SimpleCalculateDesiredPath(stroke_reg);
             desired_path = ResizeXYcoords(desired_path);
@@ -30,14 +30,14 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return brush_path;
         }
 
-        public List<Point3D> GetDesiredPath(BrushstrokeRegions stroke_reg)
+        public List<Point3D> GetDesiredPath(StrokeSites stroke_reg)
         {
             var desired_path = SimpleCalculateDesiredPath(stroke_reg);
             desired_path = ResizeXYcoords(desired_path);
             return desired_path;
         }
 
-        private List<Point3D> CalculateDesiredPath(BrushstrokeRegions stroke_reg)
+        private List<Point3D> CalculateDesiredPath(StrokeSites stroke_reg)
         {
             if(stroke_reg.involvedSites.Count == 1)
             {
@@ -96,7 +96,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return result;
         }
 
-        private List<Point3D> SimpleCalculateDesiredPath(BrushstrokeRegions stroke_reg)
+        private List<Point3D> SimpleCalculateDesiredPath(StrokeSites stroke_reg)
         {
             if (stroke_reg.involvedSites.Count == 1) 
                 return SimpleCalculateSingleSiteDesiredPath(stroke_reg);
@@ -158,7 +158,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return result;
         }
 
-        private List<Point3D> SimpleCalculateSingleSiteDesiredPath(BrushstrokeRegions stroke_reg)
+        private List<Point3D> SimpleCalculateSingleSiteDesiredPath(StrokeSites stroke_reg)
         {
             var result = new List<Point3D>();
 

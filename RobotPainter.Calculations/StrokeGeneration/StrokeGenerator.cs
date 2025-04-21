@@ -17,7 +17,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<VoronoiSite> sites;
 
-        private Dictionary<VoronoiSite, BrushstrokeRegions> siteToStroke;
+        private Dictionary<VoronoiSite, StrokeSites> siteToStroke;
 
         public LabBitmap image;
         public double[,] u;
@@ -37,7 +37,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private readonly IOptimizer _optimizer;
 
-        public List<BrushstrokeRegions> strokes = new List<BrushstrokeRegions>();
+        public List<StrokeSites> strokes = new List<StrokeSites>();
 
         public StrokeGenerator(LabBitmap target_image, int n_voronoi, IOptimizer optimizer, int n_rolling_avg = 7)
         {
@@ -50,7 +50,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height);
             sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
             unassigned_sites = sites.Select(x => x).ToList();
-            siteToStroke = new Dictionary<VoronoiSite, BrushstrokeRegions>();
+            siteToStroke = new Dictionary<VoronoiSite, StrokeSites>();
         }
 
         public void Lfit(int iterations, double max_step_per_i)
@@ -100,7 +100,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
         }
 
-        public BrushstrokeRegions GetNextBrushstroke()
+        public StrokeSites GetNextBrushstroke()
         {
             if(AreAllSitesAssigned())
             {
@@ -120,9 +120,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool AreAllSitesAssigned() => unassigned_sites.Count == 0;
 
-        private BrushstrokeRegions GenerateBrushstroke(VoronoiSite startin_point)
+        private StrokeSites GenerateBrushstroke(VoronoiSite startin_point)
         {
-            var stroke = new BrushstrokeRegions(this, startin_point);
+            var stroke = new StrokeSites(this, startin_point);
             stroke.GenerateStroke(StrokeMaxLength, 1.0, Ltol);
             return stroke;
         }

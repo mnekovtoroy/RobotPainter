@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using RobotPainter.Calculations.Core;
+using System.Drawing;
 
 namespace RobotPainter.Calculations
 {

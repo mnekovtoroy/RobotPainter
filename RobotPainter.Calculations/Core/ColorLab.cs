@@ -1,8 +1,6 @@
 ﻿using System.Drawing;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 
-namespace RobotPainter.Calculations
+namespace RobotPainter.Calculations.Core
 {
     public struct ColorLab
     {
@@ -40,9 +38,9 @@ namespace RobotPainter.Calculations
             y = pivotXyz(y / ref_Y);
             z = pivotXyz(z / ref_Z);
 
-            double L = (116 * y - 16);
-            double a = (500 * (x - y));
-            double b = (200 * (y - z));
+            double L = 116 * y - 16;
+            double a = 500 * (x - y);
+            double b = 200 * (y - z);
 
             return new ColorLab(L, a, b);
         }
@@ -91,7 +89,7 @@ namespace RobotPainter.Calculations
 
         private static double reverse_pivotRgb(double n)
         {
-            return n > 0.0031308 ? (1.055 * Math.Pow(n, 1.0 / 2.4) - 0.055) : 12.92 * n;
+            return n > 0.0031308 ? 1.055 * Math.Pow(n, 1.0 / 2.4) - 0.055 : 12.92 * n;
         }
 
         private static double reverse_pivotXyz(double n)
@@ -102,9 +100,9 @@ namespace RobotPainter.Calculations
         public double DeltaE76(ColorLab c)
         {
             double dist = Math.Sqrt(
-                Math.Pow(c.L - this.L, 2) +
-                Math.Pow(c.a - this.a, 2) +
-                Math.Pow(c.b - this.b, 2));
+                Math.Pow(c.L - L, 2) +
+                Math.Pow(c.a - a, 2) +
+                Math.Pow(c.b - b, 2));
             return dist;
         }
 
@@ -114,9 +112,9 @@ namespace RobotPainter.Calculations
             double wC = 0.045;
             double wH = 0.015;
 
-            double L1 = this.L; double L2 = c.L;
-            double a1 = this.a; double a2 = c.a;
-            double b1 = this.b; double b2 = c.b;
+            double L1 = L; double L2 = c.L;
+            double a1 = a; double a2 = c.a;
+            double b1 = b; double b2 = c.b;
 
             double xC1 = Math.Sqrt(a1 * a1 + b1 * b1);
             double xC2 = Math.Sqrt(a2 * a2 + b2 * b2);
@@ -149,11 +147,11 @@ namespace RobotPainter.Calculations
                 }
             }
 
-            xDH = 2 * Math.Sqrt(xC1 * xC2) * Math.Sin((xDH / 2) * Math.PI / 180.0);
+            xDH = 2 * Math.Sqrt(xC1 * xC2) * Math.Sin(xDH / 2 * Math.PI / 180.0);
             double xLX = (L1 + L2) / 2;
             double xCY = (xC1 + xC2) / 2;
             double xHX;
-            if ((xC1 * xC2) == 0)
+            if (xC1 * xC2 == 0)
             {
                 xHX = xH1 + xH2;
             }
@@ -162,7 +160,7 @@ namespace RobotPainter.Calculations
                 xNN = Math.Abs(Math.Round(xH1 - xH2, 12));
                 if (xNN > 180)
                 {
-                    if ((xH2 + xH1) < 360) 
+                    if (xH2 + xH1 < 360) 
                         xHX = xH1 + xH2 + 360;
                     else 
                         xHX = xH1 + xH2 - 360;
@@ -174,17 +172,17 @@ namespace RobotPainter.Calculations
                 xHX /= 2;
             }
             double xTX = 1 - 0.17 * Math.Cos((xHX - 30) * Math.PI / 180.0)
-                           + 0.24 * Math.Cos((2 * xHX) * Math.PI / 180.0)
+                           + 0.24 * Math.Cos(2 * xHX * Math.PI / 180.0)
                            + 0.32 * Math.Cos((3 * xHX + 6) * Math.PI / 180.0)
                            - 0.20 * Math.Cos((4 * xHX - 63) * Math.PI / 180.0);
             double xPH = 30 * Math.Exp(-((xHX - 275) / 25) * ((xHX - 275) / 25));
             double xRC = 2 * Math.Sqrt(Math.Pow(xCY, 7) / (Math.Pow(xCY, 7) + Math.Pow(25, 7)));
-            double xSL = 1 + ((0.015 * ((xLX - 50) * (xLX - 50)))
-                     / Math.Sqrt(20 + ((xLX - 50) * (xLX - 50))));
+            double xSL = 1 + 0.015 * ((xLX - 50) * (xLX - 50))
+                     / Math.Sqrt(20 + (xLX - 50) * (xLX - 50));
 
             double xSC = 1 + 0.045 * xCY;
             double xSH = 1 + 0.015 * xCY * xTX;
-            double xRT = -Math.Sin((2 * xPH) * Math.PI / 180.0) * xRC;
+            double xRT = -Math.Sin(2 * xPH * Math.PI / 180.0) * xRC;
             xDL = xDL / (wL * xSL);
             xDC = xDC / (wC * xSC);
             xDH = xDH / (wH * xSH);

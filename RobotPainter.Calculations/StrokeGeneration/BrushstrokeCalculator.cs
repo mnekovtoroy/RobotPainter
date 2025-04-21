@@ -1,4 +1,5 @@
 ﻿using RobotPainter.Calculations.Brushes;
+using RobotPainter.Calculations.Core;
 using SharpVoronoiLib;
 using SharpVoronoiLib.Exceptions;
 using System.ComponentModel;

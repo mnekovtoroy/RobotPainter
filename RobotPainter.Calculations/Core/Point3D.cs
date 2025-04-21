@@ -1,4 +1,4 @@
-﻿namespace RobotPainter.Calculations
+﻿namespace RobotPainter.Calculations.Core
 {
     public struct Point3D : IEquatable<Point3D>
     {
@@ -33,7 +33,7 @@
 
         public static bool operator !=(Point3D a, Point3D b) => a.x != b.x || a.y != b.y || a.z != b.z;
 
-        public override readonly bool Equals(object? obj) => obj is Point3D && Equals((Point3D)obj);
+        public override readonly bool Equals(object obj) => obj is Point3D && Equals((Point3D)obj);
 
         public readonly bool Equals(Point3D other) => this == other;
 

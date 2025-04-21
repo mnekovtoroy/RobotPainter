@@ -4,6 +4,7 @@ using System.Drawing;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.Clustering;
+using RobotPainter.Calculations.Core;
 using RobotPainter.Calculations.Optimization;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;

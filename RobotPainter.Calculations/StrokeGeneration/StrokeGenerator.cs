@@ -1,4 +1,5 @@
-﻿using RobotPainter.Calculations.Optimization;
+﻿using RobotPainter.Calculations.Core;
+using RobotPainter.Calculations.Optimization;
 using SharpVoronoiLib;
 using System.Threading.Tasks;
 

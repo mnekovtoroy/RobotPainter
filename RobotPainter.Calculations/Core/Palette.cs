@@ -1,7 +1,4 @@
-﻿using RobotPainter.Calculations.Core;
-using System.Drawing;
-
-namespace RobotPainter.Calculations
+﻿namespace RobotPainter.Calculations.Core
 {
     public class Palette
     {

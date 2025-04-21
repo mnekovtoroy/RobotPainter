@@ -14,12 +14,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public double L_tol = 3.5;
             public double MaxNormAngle = 30.0;
             public double MaxBrushAngle = 30.0;
-
-            public Options(double x_resize_coeff, double y_resize_coeff)
-            {
-                xResizeCoeff = x_resize_coeff;
-                yResizeCoeff = y_resize_coeff;
-            }
         }
 
         public static StrokeSites GenerateStrokeSites(StrokeGenerator parent, VoronoiSite starting_site, Options options)

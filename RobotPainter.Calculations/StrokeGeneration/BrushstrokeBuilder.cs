@@ -20,12 +20,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public double SafeHeight = 2.0;
             public double StartRunawayAngle = 30.0;
             public double EndRunawayAngle = 80.0;
-
-            public Options(double xResizeCoeff, double yResizeCoeff)
-            {
-                this.xResizeCoeff = xResizeCoeff;
-                this.yResizeCoeff = yResizeCoeff;
-            }
         }
 
         public static Brushstroke GenerateBrushstroke(StrokeSites stroke_sites, Options options)

@@ -1,5 +1,5 @@
 ﻿using RobotPainter.Calculations.Core;
-using RobotPainter.Calculations.Optimization;
+using RobotPainter.Calculations.ImageProcessing;
 using SharpVoronoiLib;
 
 namespace RobotPainter.Calculations.StrokeGeneration
@@ -8,26 +8,10 @@ namespace RobotPainter.Calculations.StrokeGeneration
     {
         public class Options
         {
-            public double CanvasWidth;
-            public double CanvasHeight;
-
             public int RelaxationIterations = 5;
             public int LpullIterations = 2;
             public double LpullMaxStep = 2.0;
-
             public int RollingAverageN = 9;
-
-            //for StrokeSitesBuilder.Options
-            public double CanvasMaxStrokeLength = 80.0;
-            public double L_tol = 3.5;
-            public double MaxNormAngle = 30.0;
-            public double MaxBrushAngle = 30.0;
-
-            public Options(double canvas_width, double canvas_height)
-            {
-                CanvasWidth = canvas_width;
-                CanvasHeight = canvas_height;
-            }
         }
 
         public static List<VoronoiSite> GenerateRandomRelaxedMesh(int n, int width, int height, int relax_iterations = 3)
@@ -106,25 +90,26 @@ namespace RobotPainter.Calculations.StrokeGeneration
         }
 
         List<VoronoiSite> unassigned_sites;
-        public void CalculateStorkes()
+        public List<StrokeSites> CalculateAllStorkes(StrokeSitesBuilder.Options strokeSitesBuilderOptions)
         {
             ClearSitesList();
             siteToStroke.Clear();
             strokes.Clear();
             while(!AreAllSitesAssigned())
             {
-                GetNextBrushstroke();
+                GetNextStrokeSites(strokeSitesBuilderOptions);
             }
+            return strokes;
         }
 
-        public StrokeSites GetNextBrushstroke()
+        public StrokeSites GetNextStrokeSites(StrokeSitesBuilder.Options strokeSitesBuilderOptions)
         {
             if(AreAllSitesAssigned())
             {
                 return null;
             }
             var curr_site = unassigned_sites[0];
-            var stroke = GenerateBrushstroke(curr_site);
+            var stroke = GenerateBrushstroke(curr_site, strokeSitesBuilderOptions);
             //reserving the sites
             foreach (var site in stroke.involvedSites)
             {
@@ -137,15 +122,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool AreAllSitesAssigned() => unassigned_sites.Count == 0;
 
-        private StrokeSites GenerateBrushstroke(VoronoiSite starting_site)
+        private StrokeSites GenerateBrushstroke(VoronoiSite starting_site, StrokeSitesBuilder.Options strokeSitesBuilderOptions)
         {
-            var strokeSitesBuilderOptions = new StrokeSitesBuilder.Options(width / options.CanvasWidth, height / options.CanvasHeight)
-            {
-                L_tol = options.L_tol,
-                CanvasMaxStrokeLength = options.CanvasMaxStrokeLength,
-                MaxNormAngle = options.MaxNormAngle,
-                MaxBrushAngle = options.MaxBrushAngle
-            };
             var stroke = StrokeSitesBuilder.GenerateStrokeSites(this, starting_site, strokeSitesBuilderOptions);
             return stroke;
         }
@@ -261,6 +239,11 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
 
             return result;
+        }
+
+        public static int CalculateDesiredVoronoiN(double target_stroke_width)
+        {
+            throw new NotImplementedException();
         }
     }
 }

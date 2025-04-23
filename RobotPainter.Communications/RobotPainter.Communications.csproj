@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RobotPainter.Core\RobotPainter.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PainterCore">
+      <HintPath>..\..\JakaZuPainter\PainterCore\bin\Debug\net8.0-windows\PainterCore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

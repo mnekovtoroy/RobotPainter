@@ -1,5 +1,6 @@
 ﻿using PainterCore;
 using RobotPainter.Communications.Converting;
+using System.Drawing;
 
 namespace RobotPainter.Communications
 {
@@ -21,8 +22,9 @@ namespace RobotPainter.Communications
         private PaintingController _controller;
         private IPltConverter _pltConverter;
 
-        public RobotPainter(string controllerIp = null)
+        public RobotPainter(IPltConverter pltConverter, string controllerIp = null)
         {
+            _pltConverter = pltConverter;
             if(controllerIp == null)
                 _controller = new PaintingController();
             else
@@ -36,12 +38,20 @@ namespace RobotPainter.Communications
 
             _pltConverter.SavePlt(pltCommandes, path_plt);
 
-            SendPltCommands(path_plt);
+            await SendPltCommands(path_plt);
         }
 
-        private async void SendPltCommands(string path_plt)
+        public async Task<Bitmap> TakePhoto()
+        {
+            //await _controller.TakeaPhoto();
+            //
+            throw new NotImplementedException();
+        }
+
+        private async Task SendPltCommands(string path_plt)
         {
             //await _controller.Start(path_plt);
+            throw new NotImplementedException();
         }
     }
 }

@@ -207,5 +207,9 @@ namespace RobotPainter.Core
         public static ColorLab Substract(ColorLab a, ColorLab b) => new ColorLab(a.L - b.L, a.a - b.a, a.b - b.b);
 
         public static ColorLab operator -(ColorLab a, ColorLab b) => Substract(a, b);
+
+        public static bool operator ==(ColorLab a, ColorLab b) => a.L == b.L && a.a == b.a && a.b == b.b;
+
+        public static bool operator !=(ColorLab a, ColorLab b) => a.L != b.L || a.a != b.a || a.b != b.b;
     }
 }

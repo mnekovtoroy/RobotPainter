@@ -14,9 +14,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public IBrushModel brushModel = new BasicBrushModel();
 
             public double MaxWidth = 7.0;
-            public double Overlap = 0.5;
-            public double StartOverheadCoeff = 1.2;
-            public double EndOverheadCoeff = 1.2;
+            public double Overlap = 1.3;
+            public double StartOverheadCoeff = 1.5;
+            public double EndOverheadCoeff = 1.5;
             public double SafeHeight = 2.0;
             public double StartRunawayAngle = 30.0;
             public double EndRunawayAngle = 80.0;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.Clustering;
 using RobotPainter.Calculations.Core;
@@ -313,8 +314,22 @@ namespace RobotPainter.ConsoleTest
             int sites_n = 50000;
             double canvas_width = 300;
             double canvas_height = 300;
+            var brush = new BasicBrushModel();
 
-            
+            var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height, brush);
+            robot_painter.InitializeStrokeGenerator(sites_n, new StrokeGenerator.Options());
+
+            var strokes = robot_painter.GetAllBrushstrokes();
+            Console.WriteLine($"Number of strokes: {strokes.Count}");
+            Bitmap result = new Bitmap(image.Width, image.Height);
+            using(var g =  Graphics.FromImage(result))
+            {
+                for (int i = 0; i < strokes.Count; i++)
+                {
+                    brush.DrawStroke(g, new SolidBrush(strokes[i].Color.ToRgb()), strokes[i].RootPath, image.Width / canvas_width, image.Height / canvas_height);
+                }
+            }
+            result.Save(path + @"fullbrushmodel_test\actual_strokes.png");
         }
 
         public static void ClusteringTest()

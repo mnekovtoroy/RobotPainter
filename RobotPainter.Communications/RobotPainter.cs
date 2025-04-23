@@ -6,7 +6,7 @@ namespace RobotPainter.Communications
 {
     public class RobotPainter
     {
-        private string _tempPath = "";
+        private string _tempPath;
 
         public string TempPath { 
             get 
@@ -22,8 +22,9 @@ namespace RobotPainter.Communications
         private PaintingController _controller;
         private IPltConverter _pltConverter;
 
-        public RobotPainter(IPltConverter pltConverter, string controllerIp = null)
+        public RobotPainter(IPltConverter pltConverter, string temp_path, string controllerIp = null)
         {
+            _tempPath = temp_path;
             _pltConverter = pltConverter;
             if(controllerIp == null)
                 _controller = new PaintingController();
@@ -41,17 +42,35 @@ namespace RobotPainter.Communications
             await SendPltCommands(path_plt);
         }
 
-        public async Task<Bitmap> TakePhoto()
+        public async Task<Bitmap> TakePhoto(string photo_folder_path)
         {
-            //await _controller.TakeaPhoto();
-            //
-            throw new NotImplementedException();
+            await _controller.TakeaPhoto();
+
+            //retrieve the photo
+            string[] files = Directory.GetFiles(photo_folder_path);
+
+            var file_creation_times = new Dictionary<string, DateTime>();
+
+            foreach(string file in files)
+            {
+                file_creation_times.Add(file, File.GetCreationTime(file));
+            }
+            var files_sorted = file_creation_times.OrderBy(f => f.Value).ToList();
+
+            Bitmap photo = new Bitmap(files_sorted[0].Key);
+            
+            //deleting old files
+            for(int i = 1; i < files_sorted.Count; i++)
+            {
+                File.Delete(files_sorted[i].Key);
+            }
+
+            return photo;
         }
 
         private async Task SendPltCommands(string path_plt)
         {
-            //await _controller.Start(path_plt);
-            throw new NotImplementedException();
+            await _controller.Start(path_plt);
         }
     }
 }

@@ -13,4 +13,8 @@
     <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RobotPainter.Core\RobotPainter.Core.csproj" />
+  </ItemGroup>
+
 </Project>

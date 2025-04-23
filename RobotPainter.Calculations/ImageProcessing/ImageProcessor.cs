@@ -1,4 +1,4 @@
-﻿using RobotPainter.Calculations.Core;
+﻿using RobotPainter.Core;
 
 namespace RobotPainter.Calculations.ImageProcessing
 {

@@ -1,5 +1,5 @@
 ﻿using RobotPainter.Calculations.Brushes;
-using RobotPainter.Calculations.Core;
+using RobotPainter.Core;
 using SharpVoronoiLib;
 
 namespace RobotPainter.Calculations.StrokeGeneration

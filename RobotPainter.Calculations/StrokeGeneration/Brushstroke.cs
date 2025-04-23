@@ -1,6 +1,7 @@
 ﻿using RobotPainter.Calculations.Brushes;
+using RobotPainter.Core;
 
-namespace RobotPainter.Calculations.Core
+namespace RobotPainter.Calculations.StrokeGeneration
 {
     public class Brushstroke
     {

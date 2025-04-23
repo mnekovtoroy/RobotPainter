@@ -2,7 +2,7 @@
 using MathNet.Numerics.Integration;
 using MathNet.Numerics;
 using System.Drawing;
-using RobotPainter.Calculations.Core;
+using RobotPainter.Core;
 
 namespace RobotPainter.Calculations.Brushes
 {

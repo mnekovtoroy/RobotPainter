@@ -1,4 +1,4 @@
-﻿using RobotPainter.Calculations.Core;
+﻿using RobotPainter.Core;
 using System.Drawing;
 
 namespace RobotPainter.Calculations.Brushes

@@ -1,4 +1,4 @@
-﻿namespace RobotPainter.Calculations.Core
+﻿namespace RobotPainter.Core
 {
     public struct Point3D : IEquatable<Point3D>
     {

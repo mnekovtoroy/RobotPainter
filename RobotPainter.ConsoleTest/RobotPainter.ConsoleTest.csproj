@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RobotPainter.Calculations\RobotPainter.Calculations.csproj" />
+    <ProjectReference Include="..\RobotPainter.Core\RobotPainter.Core.csproj" />
     <ProjectReference Include="..\RobotPainter.Visualization\RobotPainter.Visualization.csproj" />
   </ItemGroup>
 

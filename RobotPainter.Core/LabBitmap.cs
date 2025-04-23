@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace RobotPainter.Calculations.Core
+namespace RobotPainter.Core
 {
     public class LabBitmap
     {

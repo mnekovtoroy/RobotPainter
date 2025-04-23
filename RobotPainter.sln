@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotPainter.ConsoleTest", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotPainter.Visualization", "RobotPainter.Visualization\RobotPainter.Visualization.csproj", "{EA9630E7-59FF-4A6E-95BB-8E65E714C91F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotPainter.Communications", "RobotPainter.Communications\RobotPainter.Communications.csproj", "{9AF3F1C1-25AF-4F3B-935D-9BE9E5C29E1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotPainter.Core", "RobotPainter.Core\RobotPainter.Core.csproj", "{E80539D2-A76C-4968-950B-779B2B2FE3F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{EA9630E7-59FF-4A6E-95BB-8E65E714C91F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA9630E7-59FF-4A6E-95BB-8E65E714C91F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA9630E7-59FF-4A6E-95BB-8E65E714C91F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AF3F1C1-25AF-4F3B-935D-9BE9E5C29E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AF3F1C1-25AF-4F3B-935D-9BE9E5C29E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AF3F1C1-25AF-4F3B-935D-9BE9E5C29E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AF3F1C1-25AF-4F3B-935D-9BE9E5C29E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E80539D2-A76C-4968-950B-779B2B2FE3F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E80539D2-A76C-4968-950B-779B2B2FE3F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E80539D2-A76C-4968-950B-779B2B2FE3F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E80539D2-A76C-4968-950B-779B2B2FE3F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

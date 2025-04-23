@@ -1,6 +1,4 @@
-﻿using RobotPainter.Core;
-
-namespace RobotPainter.Calculations
+﻿namespace RobotPainter.Core
 {
     public static class Geometry
     {

@@ -5,7 +5,7 @@ namespace RobotPainter.Communications.PltCommands
 {
     public class BrushstrokeCommand : IPltCommand
     {
-        private int scf = 40; // scale to PLT
+        private static int scf = 40; // scale to PLT
 
         public List<Point3D> rootPath;
 

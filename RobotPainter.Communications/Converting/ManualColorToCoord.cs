@@ -4,9 +4,20 @@ namespace RobotPainter.Communications.Converting
 {
     public class ManualColorToCoord : IColorToCoordConverter
     {
+        private Dictionary<ColorLab, PointD> colorToCoord;
+
+        public ManualColorToCoord(List<ColorLab> colors, PointD p0, double dx, double dy, int width, int height)
+        {
+            colorToCoord = new Dictionary<ColorLab, PointD>();
+            for(int i =  0; i < colors.Count; i++)
+            {
+                colorToCoord.Add(colors[i], p0 + new PointD(dx * i % width, dy * i / height));
+            }
+        }
+
         public PointD ColorToCoord(ColorLab color)
         {
-            throw new NotImplementedException();
+            return colorToCoord[color];
         }
     }
 }

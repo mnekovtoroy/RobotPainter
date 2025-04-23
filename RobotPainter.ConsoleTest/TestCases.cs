@@ -4,6 +4,8 @@ using System.Drawing;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.Clustering;
+using RobotPainter.Calculations.Core;
+using RobotPainter.Calculations.ImageProcessing;
 using RobotPainter.Calculations.Optimization;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
@@ -72,9 +74,9 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball.jpg");
 
-            var sites = LegacyVoronoiStrokeGenerator.GenerateRandomMesh(200, image.Width, image.Height);
+            var sites = StrokeGenerator.GenerateRandomRelaxedMesh(200, image.Width, image.Height);
 
-            Bitmap voronoi = new Bitmap(image.Width, image.Height);            
+            Bitmap voronoi = new Bitmap(image.Width, image.Height);  
             voronoi.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             int centroid_r = 2;
@@ -106,7 +108,7 @@ namespace RobotPainter.ConsoleTest
 
             double xopt, yopt;
 
-            IOptimizer optimizer = new GradDescent()
+            IOptimizer optimizer = new GradDescent(new GradDescent.Options()
             {
                 kmax = kmax,
                 max_step = max_step,
@@ -114,7 +116,7 @@ namespace RobotPainter.ConsoleTest
                 a = a,
                 l = l,
                 h = h
-            };
+            });
 
             (xopt, yopt) = optimizer.Optimize(func, x0, y0);
 
@@ -137,9 +139,9 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new LegacyVoronoiStrokeGenerator(200, lbmp, u, v, new GradDescent());
+            var voronoi = new StrokeGenerator(lbmp, 200, new StrokeGenerator.Options());
             DateTime start = DateTime.Now;
-            int[,] mask = voronoi.MaskPointsToNearestSites();
+            int[,] mask = voronoi.GetVoronoiMask();
             DateTime end = DateTime.Now;
             Console.WriteLine($"Total time to mask {Math.Round((end-start).TotalMilliseconds, 3)} ms.");
 
@@ -181,7 +183,7 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new LegacyVoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
+            var voronoi = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
 
             int[] check_intervals = new int[] { 1, 2, 5};
 
@@ -192,7 +194,7 @@ namespace RobotPainter.ConsoleTest
             pre.Dispose();
             for (int i = 0; i < check_intervals.Max(); i++)
             {
-                voronoi.PerformLPull();
+                voronoi.Lfit(1, 2.0);
                 if(check_intervals.Contains(i+1))
                 {
                     Console.WriteLine($"{i+1} done.");
@@ -205,131 +207,25 @@ namespace RobotPainter.ConsoleTest
             }
         }
 
-        public static void CostFuncTest()
-        {
-            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
-            Bitmap image = new Bitmap(path + "test_ball.jpg");
-            int sites_n = 200;
-
-            LabBitmap lbmp = new LabBitmap(image);
-
-            double[,] u, v;
-            (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
-
-            var voronoi = new LegacyVoronoiStrokeGenerator(sites_n, lbmp, u, v, new GradDescent());
-
-            int[] check_intervals = new int[] { 1, 2, 5 };
-
-            var pre = lbmp.ToBitmap();
-            VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
-            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
-            pre.Save(path + $"test_Lpull_{sites_n}_0.png");
-            pre.Dispose();
-            for (int i = 0; i < check_intervals.Max(); i++)
-            {
-                voronoi.PerformLPull();
-                if (check_intervals.Contains(i + 1))
-                {
-                    var tracker = new List<VoronoiSite>() { voronoi.sites[0] };
-                    Console.WriteLine($"{i + 1} done.");
-
-
-                    double cc = voronoi.ColorCost(voronoi.sites[0]);
-                    double dc = voronoi.DirectionalCost(voronoi.sites[0]);
-                    double sc = voronoi.ShapeCost(voronoi.sites[0]);
-                    double tc = (1.0 + dc + sc) * cc;
-                    Console.WriteLine($"\tColor cost:\t{cc}");
-                    Console.WriteLine($"\tDirectioanl cost:\t{dc}");
-                    Console.WriteLine($"\tShape cost:\t{sc}");
-                    Console.WriteLine($"\t\tTotal cost: {tc}");
-
-                    var res = lbmp.ToBitmap();
-                    VoronoiVisualizer.VisualizeVoronoiInline(res, tracker, Color.Blue, Color.Blue, 0);
-                    VoronoiVisualizer.VisualisePointsInline(res, tracker.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
-
-                    int c_x = Convert.ToInt32(tracker[0].Centroid.X);
-                    int c_y = Convert.ToInt32(tracker[0].Centroid.Y);
-                    VectorVisualizer.VisualiseSingleVectorInline(
-                        res,
-                        c_x,
-                        c_y,
-                        u[c_x, c_y],
-                        v[c_x, c_y],
-                        Color.Blue,
-                        Color.Blue,
-                        point_radius: 1);
-                    res.Save(path + $"test_Lpull_{sites_n}_{i + 1}.png");
-                    res.Dispose();
-                }
-            }
-        }
-
-        public static void OptimizationTest()
-        {
-            string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
-            Bitmap image = new Bitmap(path + "test3.jpg");
-            int sites_n = 1000;
-
-            LabBitmap lbmp = new LabBitmap(image);
-
-            double[,] u, v;
-            (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
-
-            var optimizer = new GradDescent()
-            {
-                a = 0.4,
-                l = 1.1,
-                h = 0.1,
-                max_step = 3.0,
-                tol = 0.3,
-                kmax = 3
-            };
-            var voronoi = new LegacyVoronoiStrokeGenerator(sites_n, lbmp, u, v, optimizer);
-
-            int[] check_intervals = new int[] { 1, 2, 3, 4, 5 };
-
-            var pre = lbmp.ToBitmap();
-            VoronoiVisualizer.VisualizeVoronoiInline(pre, voronoi.sites, Color.Blue, Color.Blue, 0);
-            VoronoiVisualizer.VisualisePointsInline(pre, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
-            pre.Save(path + @$"test_test_optimization_{sites_n}_0.png");
-            pre.Dispose();
-            for (int i = 0; i < check_intervals.Max(); i++)
-            {
-                voronoi.Optimize5(1);
-                if (check_intervals.Contains(i + 1))
-                {
-                    Console.WriteLine($"{i + 1} done.");
-                    var res = lbmp.ToBitmap();
-                    VoronoiVisualizer.VisualizeVoronoiInline(res, voronoi.sites, Color.Blue, Color.Blue, 0);
-                    VoronoiVisualizer.VisualisePointsInline(res, voronoi.sites.Select(s => (s.X, s.Y)).ToList(), Color.Red, 1);
-                    res.Save(path + @$"test_test_optimization_{sites_n}_{i + 1}.png");
-                    res.Dispose();
-                }
-            }
-        }
-
         public static void BrushstrokeGenerationTest()
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
+            double canvas_width = 30.0;
+            double canvas_height = 30.0;
             int sites_n = 10000;
 
             LabBitmap lbmp = new LabBitmap(image);
 
-            var optimizer = new GradDescent()
-            {
-                a = 0.4,
-                l = 1.1,
-                h = 0.1,
-                max_step = 3.0,
-                tol = 0.3,
-                kmax = 1
-            };
-            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, 11);
+            var generator = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
 
             generator.Lfit(20, 2.0);
 
-            generator.CalculateStorkes();
+            generator.CalculateAllStorkes(new StrokeSitesBuilder.Options()
+            {
+                xResizeCoeff = canvas_width / image.Width,
+                yResizeCoeff = canvas_height / image.Height
+            });
             var stroke_visualised = generator.GetColoredStrokeMap();
 
             VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
@@ -354,26 +250,21 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
             int sites_n = 1000;
-            double real_width = 300;
-            double real_height = 300;
+            double canvas_width = 300;
+            double canvas_height = 300;
 
             LabBitmap lbmp = new LabBitmap(image);
 
-            var optimizer = new GradDescent()
-            {
-                a = 0.4,
-                l = 1.1,
-                h = 0.1,
-                max_step = 3.0,
-                tol = 0.3,
-                kmax = 1
-            };
             var brushModel = new BasicBrushModel();
-            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, 11);
+            var generator = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
 
             generator.Lfit(20, 2.0);
 
-            generator.CalculateStorkes();
+            generator.CalculateAllStorkes(new StrokeSitesBuilder.Options()
+            {
+                xResizeCoeff = canvas_width / image.Width,
+                yResizeCoeff = canvas_height / image.Height
+            });
             var stroke_visualised = generator.GetColoredStrokeMap();
 
             VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
@@ -385,31 +276,33 @@ namespace RobotPainter.ConsoleTest
             Bitmap result_image = new Bitmap(image.Width, image.Height);
             result_image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
             int n_brushstrokes_to_draw = 1;
 
             for(int i = 0; i < n_brushstrokes_to_draw; i++)
             {
                 var stroke = generator.strokes[i];
-                var brush_desired_path = b_calc.GetDesiredPath(stroke);
-                var brush_root_path = b_calc.GetBrushPath(stroke);
+                var brushstroke = BrushstrokeBuilder.GenerateBrushstroke(stroke, new BrushstrokeBuilder.Options()
+                {
+                    xResizeCoeff = canvas_width / image.Width,
+                    yResizeCoeff = canvas_height / image.Height
+                });
 
                 using(var g = Graphics.FromImage(result_image))
                 {
                     var br = new SolidBrush(stroke.MainColor.ToRgb());
-                    brushModel.DrawStroke(g, br, brush_root_path, image.Width / real_width, image.Height / real_height, mult_coeff: 100);
+                    brushModel.DrawStroke(g, br, brushstroke.RootPath, image.Width / canvas_width, image.Height / canvas_height, mult_coeff: 100);
                 }
 
-                var stroke_skeleton = brushModel.CalculateStrokeSkeleton(brush_root_path);
+                var stroke_skeleton = brushModel.CalculateStrokeSkeleton(brushstroke.RootPath);
 
-                double x_scale = image.Width / real_width;
-                double y_scale = image.Height / real_height;
+                double x_scale = image.Width / canvas_width;
+                double y_scale = image.Height / canvas_height;
 
                 var test = stroke_skeleton.points.Select(p => p.z).ToList();
                 VoronoiVisualizer.VisualizeVoronoiInline(result_image, stroke.involvedSites, Color.Blue, Color.Red, 1);
-                VoronoiVisualizer.VisualizeStrokeInline(result_image, brush_desired_path.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Green, Color.Orange, 1);
+                VoronoiVisualizer.VisualizeStrokeInline(result_image, brushstroke.DesiredPath.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Green, Color.Orange, 1);
                 VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);
-                VoronoiVisualizer.VisualisePointsInline(result_image, [(brush_desired_path[0].x * x_scale, brush_desired_path[0].y * y_scale)], Color.Pink, 1);
+                VoronoiVisualizer.VisualisePointsInline(result_image, [(brushstroke.DesiredPath[0].x * x_scale, brushstroke.DesiredPath[0].y * y_scale)], Color.Pink, 1);
             }
             result_image.Save(path + @"brushmodel_test\actual_strokes.png");
         }
@@ -419,69 +312,24 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
             int sites_n = 50000;
-            double real_width = 300;
-            double real_height = 300;
+            double canvas_width = 300;
+            double canvas_height = 300;
+            var brush = new BasicBrushModel();
 
-            LabBitmap lbmp = new LabBitmap(image);
+            var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height, brush);
+            robot_painter.InitializeStrokeGenerator(sites_n, new StrokeGenerator.Options());
 
-            var optimizer = new GradDescent()
+            var strokes = robot_painter.GetAllBrushstrokes();
+            Console.WriteLine($"Number of strokes: {strokes.Count}");
+            Bitmap result = new Bitmap(image.Width, image.Height);
+            using(var g =  Graphics.FromImage(result))
             {
-                a = 0.4,
-                l = 1.1,
-                h = 0.1,
-                max_step = 3.0,
-                tol = 0.3,
-                kmax = 1
-            };
-            var brushModel = new BasicBrushModel();
-            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, 11);
-
-            generator.Lfit(2, 2.0);
-
-            generator.CalculateStorkes();
-            var stroke_visualised = generator.GetColoredStrokeMap();
-
-            VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
-            image.Save(path + @"fullbrushmodel_test\voronoi.png");
-
-            var res_bitmap = stroke_visualised.ToBitmap();
-            res_bitmap.Save(path + @"fullbrushmodel_test\strokes.png");
-
-            Bitmap result_image = new Bitmap(image.Width, image.Height);
-            result_image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            var b_calc = new BrushstrokeCalculator(real_width / image.Width, real_height / image.Height, brushModel);
-
-            Console.WriteLine($"Total strokes: {generator.strokes.Count}");
-
-            using (var g = Graphics.FromImage(result_image))
-            {
-                g.FillRectangle(new SolidBrush(Color.White), new Rectangle(0,0,image.Width, image.Height));
-                for(int i =  0; i < generator.strokes.Count; i++)
+                for (int i = 0; i < strokes.Count; i++)
                 {
-                    var stroke = generator.strokes[i];
-                    var brush_root_path = b_calc.GetBrushPath(stroke);
-
-                    var br = new SolidBrush(stroke.MainColor.ToRgb());
-                    brushModel.DrawStroke(g, br, brush_root_path, image.Width / real_width, image.Height / real_height, mult_coeff: 100);
-
-                    /*var stroke_skeleton = brushModel.CalculateStrokeSkeleton(brush_root_path);
-
-                    double x_scale = image.Width / real_width;
-                    double y_scale = image.Height / real_height;
-
-                    VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Where(p => p.z < 0).Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);*/
+                    brush.DrawStroke(g, new SolidBrush(strokes[i].Color.ToRgb()), strokes[i].RootPath, image.Width / canvas_width, image.Height / canvas_height);
                 }
-            }            
-            result_image.Save(path + @"fullbrushmodel_test\actual_strokes.png");
-
-            foreach (var stroke in generator.strokes)
-            {
-                VoronoiVisualizer.VisualizeStrokeInline(res_bitmap, stroke.involvedSites.Select(s => (Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y))).ToList(), Color.Blue, Color.Red, 1);
-                VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke.involvedSites.Select(s => (Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y))).ToList(), Color.Blue, Color.Red, 1);
             }
-            res_bitmap.Save(path + @"fullbrushmodel_test\strokes_lines.png");
-            result_image.Save(path + @"fullbrushmodel_test\actual_strokes_lines.png");
+            result.Save(path + @"fullbrushmodel_test\actual_strokes.png");
         }
 
         public static void ClusteringTest()
@@ -490,23 +338,14 @@ namespace RobotPainter.ConsoleTest
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
             int sites_n = 5000;
             int n_clusters = 8;
-            var optimizer = new GradDescent()
-            {
-                a = 0.4,
-                l = 1.1,
-                h = 0.1,
-                max_step = 3.0,
-                tol = 0.3,
-                kmax = 1
-            };
-
 
             var lbmp = new LabBitmap(image);
-            var generator = new StrokeGenerator(lbmp, sites_n, optimizer, n_rolling_avg: 11);
+            var generator = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
 
             List<ColorLab> all_colors = generator.sites.Select(s => s.Centroid).Select(c => new ColorLab(generator.image.GetPixel(Convert.ToInt32(c.X), Convert.ToInt32(c.Y)).L, 0, 0)).ToList();
 ;
-            List<ColorLab> clusters = ClusteringEngine.KmeansClustering(all_colors, n_clusters);
+            var clusterer = new KMeansClustering();
+            List<ColorLab> clusters = clusterer.FindClusters(all_colors, n_clusters);
 
             var palette = new Palette();
             palette.Colors = clusters;

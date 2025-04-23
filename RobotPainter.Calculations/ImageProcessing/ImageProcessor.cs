@@ -1,6 +1,6 @@
-﻿using System.Drawing;
+﻿using RobotPainter.Calculations.Core;
 
-namespace RobotPainter.Calculations
+namespace RobotPainter.Calculations.ImageProcessing
 {
     public static class ImageProcessor
     {

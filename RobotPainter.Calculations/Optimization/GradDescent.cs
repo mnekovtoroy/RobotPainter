@@ -2,6 +2,34 @@
 {
     public class GradDescent : IOptimizer
     {
+        public class Options
+        {
+            /// <summary>
+            /// Maximum iterations.
+            /// </summary>
+            public int kmax { get; set; } = 1000;
+            /// <summary>
+            /// Maximum step distance in a single iteration.
+            /// </summary>
+            public double max_step { get; set; } = 1.0;
+            /// <summary>
+            /// Tolerance condition to stop optimizing.
+            /// </summary>
+            public double tol { get; set; } = 1e-3;
+            /// <summary>
+            /// Alpha.
+            /// </summary>
+            public double a { get; set; } = 0.05;
+            /// <summary>
+            /// Rate of decrease of alpha.
+            /// </summary>
+            public double l { get; set; } = 1.2;
+            /// <summary>
+            /// h for finite differences to find gradient.
+            /// </summary>
+            public double h { get; set; } = 0.1;
+        }
+
         private static (double, double) Grad(Func<double, double, double> function, double x, double y, double h)
         {
             double dx, dy;
@@ -10,34 +38,11 @@
             return (dx, dy);
         }
 
-        /// <summary>
-        /// Maximum iterations.
-        /// </summary>
-        public int kmax { get; set; } = 1000;
-        /// <summary>
-        /// Maximum step distance in a single iteration.
-        /// </summary>
-        public double max_step { get; set; } = 1.0;
-        /// <summary>
-        /// Tolerance condition to stop optimizing.
-        /// </summary>
-        public double tol { get; set; } = 1e-3;
-        /// <summary>
-        /// Alpha.
-        /// </summary>
-        public double a { get; set; } = 0.05;
-        /// <summary>
-        /// Rate of decrease of alpha.
-        /// </summary>
-        public double l { get; set; } = 1.2;
-        /// <summary>
-        /// h for finite differences to find gradient.
-        /// </summary>
-        public double h { get; set; } = 0.1;
+        public Options options;
 
-        public GradDescent()
+        public GradDescent(Options options = null)
         {
-
+            this.options = options == null ? new Options() : options;
         }
 
         /// <summary>
@@ -51,18 +56,18 @@
         {
             double xc = x0, yc = y0;
 
-            double ac = a;
+            double ac = options.a;
 
-            for (int i = 0; i < kmax; i++)
+            for (int i = 0; i < options.kmax; i++)
             {
                 double xgrad, ygrad;
-                (xgrad, ygrad) = Grad(function, xc, yc, h);
+                (xgrad, ygrad) = Grad(function, xc, yc, options.h);
                 
                 //checking for max step
-                if (Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)) > max_step)
+                if (Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)) > options.max_step)
                 {
-                    xgrad = xgrad * (max_step / Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)));
-                    ygrad = ygrad * (max_step / Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)));
+                    xgrad = xgrad * (options.max_step / Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)));
+                    ygrad = ygrad * (options.max_step / Math.Sqrt(Math.Pow(ac * xgrad, 2) + Math.Pow(ac * ygrad, 2)));
                 }
 
                 double xnext = xc + ac * -xgrad;
@@ -71,7 +76,7 @@
                 //decreasing step
                 if (function.Invoke(xnext, ynext) < function.Invoke(xc, yc))
                 {
-                    ac /= l;
+                    ac /= options.l;
                 }
 
                 double delta = Math.Sqrt(Math.Pow(xnext - xc, 2) + Math.Pow(ynext - yc, 2));
@@ -79,7 +84,7 @@
                 xc = xnext; yc = ynext;
 
                 //checking for exit condition
-                if (delta < tol)
+                if (delta < options.tol)
                 {
                     break;
                 }

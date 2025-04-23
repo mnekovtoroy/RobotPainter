@@ -1,10 +1,11 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
+using RobotPainter.Calculations.Core;
 
 namespace RobotPainter.Calculations.Clustering
 {
-    public static class ClusteringEngine
+    public class KMeansClustering : IClusterer<ColorLab>
     {
         public class DataPoint
         {
@@ -12,7 +13,7 @@ namespace RobotPainter.Calculations.Clustering
             public float[] Coordinates { get; set; }
         }
 
-        public static List<ColorLab> KmeansClustering(List<ColorLab> data, int n_clusters)
+        public List<ColorLab> FindClusters(List<ColorLab> data, int n_clusters)
         {
             List<DataPoint> dataPoints = data.Select(c => new DataPoint { Coordinates = [Convert.ToSingle(c.L), Convert.ToSingle(c.a), Convert.ToSingle(c.b)] }).ToList();
 

@@ -22,14 +22,21 @@ namespace RobotPainter.Communications
         private PaintingController _controller;
         private IPltConverter _pltConverter;
 
-        public RobotPainter(IPltConverter pltConverter, string temp_path, string controllerIp = null)
+        private RobotPainter(IPltConverter pltConverter, string temp_path, PaintingController controller)
         {
             _tempPath = temp_path;
             _pltConverter = pltConverter;
-            if(controllerIp == null)
-                _controller = new PaintingController();
+            _controller = controller;
+        }
+
+        public static async Task<RobotPainter> Create(IPltConverter pltConverter, string temp_path, string controllerIp = null)
+        {
+            PaintingController controller;
+            if (controllerIp == null)
+                controller = await PaintingController.CreateController();
             else
-                _controller = new PaintingController(controllerIp);
+                controller = await PaintingController.CreateController(controllerIp);
+            return new RobotPainter(pltConverter, temp_path, controller);
         }
 
         public async Task ApplyStrokes(List<BrushstrokeInfo> strokes)

@@ -411,7 +411,7 @@ namespace RobotPainter.ConsoleTest
             IColorToCoordConverter color2coord = new ManualColorToCoord(new List<ColorLab> { new ColorLab() }, new PointD(0, 0), 3, 3, 10, 2);
             IPltConverter pltConverter = new PltConverter(color2coord);
 
-            var robot = await RobotPainter.Communications.RobotPainter.Create(pltConverter, path_plt);
+            var robot = await RobotController.Create(pltConverter, path_plt);
 
             var brushstrokeInfo = new BrushstrokeInfo()
             {

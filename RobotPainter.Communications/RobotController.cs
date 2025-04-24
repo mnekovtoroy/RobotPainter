@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace RobotPainter.Communications
 {
-    public class RobotPainter
+    public class RobotController
     {
         private string _tempPath;
 
@@ -22,21 +22,21 @@ namespace RobotPainter.Communications
         private PaintingController _controller;
         private IPltConverter _pltConverter;
 
-        private RobotPainter(IPltConverter pltConverter, string temp_path, PaintingController controller)
+        private RobotController(IPltConverter pltConverter, string temp_path, PaintingController controller)
         {
             _tempPath = temp_path;
             _pltConverter = pltConverter;
             _controller = controller;
         }
 
-        public static async Task<RobotPainter> Create(IPltConverter pltConverter, string temp_path, string controllerIp = null)
+        public static async Task<RobotController> Create(IPltConverter pltConverter, string temp_path, string controllerIp = null)
         {
             PaintingController controller;
             if (controllerIp == null)
                 controller = await PaintingController.CreateController();
             else
                 controller = await PaintingController.CreateController(controllerIp);
-            return new RobotPainter(pltConverter, temp_path, controller);
+            return new RobotController(pltConverter, temp_path, controller);
         }
 
         public async Task ApplyStrokes(List<BrushstrokeInfo> strokes)

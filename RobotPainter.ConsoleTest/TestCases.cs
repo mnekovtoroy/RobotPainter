@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.Clustering;
@@ -9,7 +7,8 @@ using RobotPainter.Calculations.ImageProcessing;
 using RobotPainter.Calculations.Optimization;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
-using SharpVoronoiLib;
+using RobotPainter.Communications;
+using RobotPainter.Communications.Converting;
 
 namespace RobotPainter.ConsoleTest
 {
@@ -351,6 +350,40 @@ namespace RobotPainter.ConsoleTest
             palette.Colors = clusters;
             var result = palette.Apply(new LabBitmap(image)).ToBitmap();
             result.Save(path + "paletted.png");
+        }
+
+        public static void ToPltTest()
+        {
+            var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_plt\";
+
+            //test_calligraphy_sedov.m --"t"
+            var root_path = new List<Point3D> {
+                new Point3D(55.5483330293793, 32.8239968217536, 2.25000000000000),
+                new Point3D(51.9312381882220, 28.4611092298424, -0.155204257767549),
+                new Point3D(44.4715413462125, 19.4633305668608, -0.0264430111751386),
+                new Point3D(39.0385903206145, 14.6406734909229, -0.0162715460735159),
+                new Point3D(32.2177259241430, 10.2712769560302, -0.208608272197352),
+                new Point3D(27.7591012124281, 10.5706525800299, -0.549093190163909),
+                new Point3D(21.6248995867494, 18.7038029106224, -3.66149473090046),
+                new Point3D(31.6302034596677, 26.7376541346915, -4.07761195122949),
+                new Point3D(37.4663948369331, 32.8054355420039, -4.26132235156708),
+                new Point3D(39.8531305999195, 40.5486397480948, -4.31891438445548),
+                new Point3D(44.7707287653652, 44.2888645387676, -4.36614738202227),
+                new Point3D(43.7607136814139, 45.4291249989077, 2.25000000000000)
+            };
+
+            IColorToCoordConverter color2coord= new ManualColorToCoord(new List<ColorLab> { new ColorLab() }, new PointD(0,0), 3, 3, 10, 2);
+            IPltConverter pltConverter = new PltConverter(color2coord);
+
+            var brushstrokeInfo = new BrushstrokeInfo()
+            {
+                Color = new ColorLab(),
+                RootPath = root_path
+            };
+
+            var commands = pltConverter.ToPlt(new List<BrushstrokeInfo> { brushstrokeInfo });
+
+            pltConverter.SavePlt(commands, path + "test.plt");
         }
     }
 }

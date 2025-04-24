@@ -366,3 +366,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /RobotPainter.Calculations/plan.txt
 /RobotPainter.ConsoleTest/test_plt
+/RobotPainter.ConsoleTest/test_photo
+/RobotPainter.ConsoleTest/test_bmp

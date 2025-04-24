@@ -385,5 +385,49 @@ namespace RobotPainter.ConsoleTest
 
             pltConverter.SavePlt(commands, path + "test.plt");
         }
+
+        public static async Task CommunicationsTest()
+        {
+            var path_plt = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_plt\";
+            var path_img = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photos\";
+            var path_bmp = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+
+            //test_calligraphy_sedov.m --"t"
+            var root_path = new List<Point3D> {
+                new Point3D(55.5483330293793, 32.8239968217536, 2.25000000000000),
+                new Point3D(51.9312381882220, 28.4611092298424, -0.155204257767549),
+                new Point3D(44.4715413462125, 19.4633305668608, -0.0264430111751386),
+                new Point3D(39.0385903206145, 14.6406734909229, -0.0162715460735159),
+                new Point3D(32.2177259241430, 10.2712769560302, -0.208608272197352),
+                new Point3D(27.7591012124281, 10.5706525800299, -0.549093190163909),
+                new Point3D(21.6248995867494, 18.7038029106224, -3.66149473090046),
+                new Point3D(31.6302034596677, 26.7376541346915, -4.07761195122949),
+                new Point3D(37.4663948369331, 32.8054355420039, -4.26132235156708),
+                new Point3D(39.8531305999195, 40.5486397480948, -4.31891438445548),
+                new Point3D(44.7707287653652, 44.2888645387676, -4.36614738202227),
+                new Point3D(43.7607136814139, 45.4291249989077, 2.25000000000000)
+            };
+
+            IColorToCoordConverter color2coord = new ManualColorToCoord(new List<ColorLab> { new ColorLab() }, new PointD(0, 0), 3, 3, 10, 2);
+            IPltConverter pltConverter = new PltConverter(color2coord);
+
+            var robot = await RobotPainter.Communications.RobotPainter.Create(pltConverter, path_plt);
+
+            var brushstrokeInfo = new BrushstrokeInfo()
+            {
+                Color = new ColorLab(),
+                RootPath = root_path
+            };
+
+            await robot.ApplyStrokes(new List<BrushstrokeInfo>() { brushstrokeInfo });
+
+            for(int i = 0; i < 3; i++)
+            {
+                Console.WriteLine($"taking photo {i + 1}");
+                var bmp = await robot.TakePhoto(path_img);
+                bmp.Save(path_bmp + $"image_{i + 1}.png");
+                Thread.Sleep(1000 * 10);
+            }
+        }
     }
 }

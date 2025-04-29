@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RobotPainter.Calculations.Brushes;
+using RobotPainter.Calculations.StrokeGeneration;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +14,8 @@ namespace RobotPainter.Application
 {
     public partial class ParametersPanel : UserControl
     {
+        public EventHandler? CalculatePredictionButtonClicked;
+
         private readonly int defaultNumOfLayers = 3;
         private readonly int minNumOfLayers = 1;
         private readonly int maxNumOfLayers = 5;
@@ -26,7 +30,7 @@ namespace RobotPainter.Application
             }
             set
             {
-                if(value != _numOfLayers)
+                if (value != _numOfLayers)
                 {
                     _numOfLayers = value;
                     OnNumOfLayersChanged();
@@ -41,19 +45,61 @@ namespace RobotPainter.Application
             NumOfLayers = defaultNumOfLayers;
         }
 
+        public List<StrokeSitesBuilder.Options> GetStrokeSitesBuilderOptionsForAllLayers()
+        {
+            return tabControl_layerTabs.Invoke(() =>
+            {
+                var result = new List<StrokeSitesBuilder.Options>();
+                for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
+                {
+                    var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
+                    result.Add(layer_parameters_panel.GetStrokeSitesBuilderOptions());
+                }
+                return result;
+            });
+        }
+
+        public List<BrushstrokeBuilder.Options> GetBrushstrokeBuilderOptionsForAllLayers()
+        {
+            return tabControl_layerTabs.Invoke(() =>
+            {
+                var result = new List<BrushstrokeBuilder.Options>();
+                for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
+                {
+                    var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
+                    result.Add(layer_parameters_panel.GetBrushstrokeBuilderOptions());
+                }
+                return result;
+            });
+        }
+
+        public List<IBrushModel> GetBrushModelsForAllLayers()
+        {
+            return tabControl_layerTabs.Invoke(() =>
+            {
+                var result = new List<IBrushModel>();
+                for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
+                {
+                    var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
+                    result.Add(layer_parameters_panel.BrushModel);
+                }
+                return result;
+            });
+        }
+
         private void textBox_numOfLayers_Validating(object sender, CancelEventArgs e)
         {
             int new_numOfLayers;
             if (!int.TryParse(((TextBox)sender).Text, out new_numOfLayers))
             {
                 MessageBox.Show("Field must be an integer.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                ((TextBox)sender).Focus();
+                e.Cancel = true;
                 return;
             }
-            if(new_numOfLayers < minNumOfLayers || new_numOfLayers > maxNumOfLayers)
+            if (new_numOfLayers < minNumOfLayers || new_numOfLayers > maxNumOfLayers)
             {
                 MessageBox.Show($"Number of layers must be in range {minNumOfLayers} to {maxNumOfLayers}.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                ((TextBox)sender).Focus();
+                e.Cancel = true;
                 return;
             }
             NumOfLayers = new_numOfLayers;
@@ -64,23 +110,23 @@ namespace RobotPainter.Application
             if (!int.TryParse(((TextBox)sender).Text, out _))
             {
                 MessageBox.Show("Field must be an integer.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                ((TextBox)sender).Focus();
+                e.Cancel = true;
             }
         }
 
         private void OnNumOfLayersChanged()
         {
             //adjust tabs to according number of layer tabs
-            if(NumOfLayers < tabControl_layerTabs.TabPages.Count)
+            if (NumOfLayers < tabControl_layerTabs.TabPages.Count)
             {
-                for(int i = tabControl_layerTabs.TabPages.Count - 1; i >= NumOfLayers; i--)
+                for (int i = tabControl_layerTabs.TabPages.Count - 1; i >= NumOfLayers; i--)
                 {
                     tabControl_layerTabs.TabPages.RemoveAt(i);
                 }
             }
-            if(NumOfLayers > tabControl_layerTabs.TabPages.Count)
+            if (NumOfLayers > tabControl_layerTabs.TabPages.Count)
             {
-                for(int i = tabControl_layerTabs.TabPages.Count; i < NumOfLayers; i++)
+                for (int i = tabControl_layerTabs.TabPages.Count; i < NumOfLayers; i++)
                 {
                     var tab = new TabPage($"Layer {i + 1}");
                     tab.Controls.Add(new LayerParametersPanel());
@@ -88,6 +134,26 @@ namespace RobotPainter.Application
                     tabControl_layerTabs.TabPages.Add(tab);
                 }
             }
+        }
+
+        private void button_propagateParams_Click(object sender, EventArgs e)
+        {
+            var curr_layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[0].Controls[0];
+            var brushModel = curr_layer_parameters_panel.BrushModel;
+            var ssbOptions = curr_layer_parameters_panel.GetStrokeSitesBuilderOptions();
+            var bsbOptions = curr_layer_parameters_panel.GetBrushstrokeBuilderOptions();
+
+            for (int i = 1; i < tabControl_layerTabs.TabCount; i++)
+            {
+                curr_layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
+                curr_layer_parameters_panel.SetFieldsFromOptions(brushModel, ssbOptions, bsbOptions);
+
+            }
+        }
+
+        private void button_calculatePrediction_Click(object sender, EventArgs e)
+        {
+            CalculatePredictionButtonClicked?.Invoke(this, e);
         }
     }
 }

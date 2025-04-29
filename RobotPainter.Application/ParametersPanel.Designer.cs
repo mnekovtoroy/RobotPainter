@@ -36,7 +36,7 @@
             textBox_numOfLayers = new TextBox();
             tabControl_layerTabs = new TabControl();
             button_propagateParams = new Button();
-            button_buildPrediction = new Button();
+            button_calculatePrediction = new Button();
             SuspendLayout();
             // 
             // label_numOfLayers
@@ -116,21 +116,23 @@
             button_propagateParams.TabIndex = 7;
             button_propagateParams.Text = "Propagate Layer 1 parameters";
             button_propagateParams.UseVisualStyleBackColor = true;
+            button_propagateParams.Click += button_propagateParams_Click;
             // 
-            // button_buildPrediction
+            // button_calculatePrediction
             // 
-            button_buildPrediction.Location = new Point(180, 377);
-            button_buildPrediction.Name = "button_buildPrediction";
-            button_buildPrediction.Size = new Size(140, 23);
-            button_buildPrediction.TabIndex = 8;
-            button_buildPrediction.Text = "Build prediction";
-            button_buildPrediction.UseVisualStyleBackColor = true;
+            button_calculatePrediction.Location = new Point(180, 377);
+            button_calculatePrediction.Name = "button_calculatePrediction";
+            button_calculatePrediction.Size = new Size(140, 23);
+            button_calculatePrediction.TabIndex = 8;
+            button_calculatePrediction.Text = "Calculate prediction";
+            button_calculatePrediction.UseVisualStyleBackColor = true;
+            button_calculatePrediction.Click += button_calculatePrediction_Click;
             // 
             // ParametersPanel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(button_buildPrediction);
+            Controls.Add(button_calculatePrediction);
             Controls.Add(button_propagateParams);
             Controls.Add(tabControl_layerTabs);
             Controls.Add(textBox_numOfLayers);
@@ -155,6 +157,6 @@
         private TextBox textBox_numOfLayers;
         private TabControl tabControl_layerTabs;
         private Button button_propagateParams;
-        private Button button_buildPrediction;
+        private Button button_calculatePrediction;
     }
 }

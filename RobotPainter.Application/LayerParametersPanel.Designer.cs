@@ -54,6 +54,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             Controls.Add(comboBox_brushModel);
             Controls.Add(label_brushModel);
             MaximumSize = new Size(312, 256);

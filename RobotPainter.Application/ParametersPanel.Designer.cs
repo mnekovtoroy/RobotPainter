@@ -35,13 +35,8 @@
             textBox_canvasHeight = new TextBox();
             textBox_numOfLayers = new TextBox();
             tabControl_layerTabs = new TabControl();
-            tabPage_layer1 = new TabPage();
-            layerParametersPanel1 = new LayerParametersPanel();
-            tabPage_layer2 = new TabPage();
             button_propagateParams = new Button();
             button_buildPrediction = new Button();
-            tabControl_layerTabs.SuspendLayout();
-            tabPage_layer1.SuspendLayout();
             SuspendLayout();
             // 
             // label_numOfLayers
@@ -101,46 +96,15 @@
             textBox_numOfLayers.Size = new Size(50, 23);
             textBox_numOfLayers.TabIndex = 5;
             textBox_numOfLayers.TextAlign = HorizontalAlignment.Center;
+            textBox_numOfLayers.Validating += textBox_numOfLayers_Validating;
             // 
             // tabControl_layerTabs
             // 
-            tabControl_layerTabs.Controls.Add(tabPage_layer1);
-            tabControl_layerTabs.Controls.Add(tabPage_layer2);
             tabControl_layerTabs.Location = new Point(0, 87);
             tabControl_layerTabs.Name = "tabControl_layerTabs";
             tabControl_layerTabs.SelectedIndex = 0;
             tabControl_layerTabs.Size = new Size(320, 284);
             tabControl_layerTabs.TabIndex = 6;
-            // 
-            // tabPage_layer1
-            // 
-            tabPage_layer1.Controls.Add(layerParametersPanel1);
-            tabPage_layer1.Location = new Point(4, 24);
-            tabPage_layer1.Name = "tabPage_layer1";
-            tabPage_layer1.Padding = new Padding(3);
-            tabPage_layer1.Size = new Size(312, 256);
-            tabPage_layer1.TabIndex = 0;
-            tabPage_layer1.Text = "Layer 1";
-            tabPage_layer1.UseVisualStyleBackColor = true;
-            // 
-            // layerParametersPanel1
-            // 
-            layerParametersPanel1.Location = new Point(0, 0);
-            layerParametersPanel1.MaximumSize = new Size(312, 256);
-            layerParametersPanel1.MinimumSize = new Size(312, 256);
-            layerParametersPanel1.Name = "layerParametersPanel1";
-            layerParametersPanel1.Size = new Size(312, 256);
-            layerParametersPanel1.TabIndex = 0;
-            // 
-            // tabPage_layer2
-            // 
-            tabPage_layer2.Location = new Point(4, 24);
-            tabPage_layer2.Name = "tabPage_layer2";
-            tabPage_layer2.Padding = new Padding(3);
-            tabPage_layer2.Size = new Size(312, 256);
-            tabPage_layer2.TabIndex = 1;
-            tabPage_layer2.Text = "Layer 2";
-            tabPage_layer2.UseVisualStyleBackColor = true;
             // 
             // button_propagateParams
             // 
@@ -175,8 +139,6 @@
             Controls.Add(label_numOfLayers);
             Name = "ParametersPanel";
             Size = new Size(320, 400);
-            tabControl_layerTabs.ResumeLayout(false);
-            tabPage_layer1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -190,10 +152,7 @@
         private TextBox textBox_canvasHeight;
         private TextBox textBox_numOfLayers;
         private TabControl tabControl_layerTabs;
-        private TabPage tabPage_layer1;
-        private TabPage tabPage_layer2;
         private Button button_propagateParams;
-        private LayerParametersPanel layerParametersPanel1;
         private Button button_buildPrediction;
     }
 }

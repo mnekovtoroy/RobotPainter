@@ -50,6 +50,7 @@
             pictureBox_sourceImage.Location = new Point(40, 40);
             pictureBox_sourceImage.Name = "pictureBox_sourceImage";
             pictureBox_sourceImage.Size = new Size(400, 300);
+            pictureBox_sourceImage.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox_sourceImage.TabIndex = 0;
             pictureBox_sourceImage.TabStop = false;
             // 
@@ -59,6 +60,7 @@
             pictureBox_prediction.Location = new Point(480, 40);
             pictureBox_prediction.Name = "pictureBox_prediction";
             pictureBox_prediction.Size = new Size(400, 300);
+            pictureBox_prediction.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox_prediction.TabIndex = 1;
             pictureBox_prediction.TabStop = false;
             // 
@@ -68,6 +70,7 @@
             pictureBox_lastPhoto.Location = new Point(40, 380);
             pictureBox_lastPhoto.Name = "pictureBox_lastPhoto";
             pictureBox_lastPhoto.Size = new Size(400, 300);
+            pictureBox_lastPhoto.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox_lastPhoto.TabIndex = 2;
             pictureBox_lastPhoto.TabStop = false;
             // 
@@ -114,6 +117,7 @@
             // 
             parametersPanel.Location = new Point(920, 40);
             parametersPanel.Name = "parametersPanel";
+            parametersPanel.NumOfLayers = 3;
             parametersPanel.Size = new Size(320, 400);
             parametersPanel.TabIndex = 7;
             // 

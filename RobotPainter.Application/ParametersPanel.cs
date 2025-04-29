@@ -15,12 +15,15 @@ namespace RobotPainter.Application
     public partial class ParametersPanel : UserControl
     {
         public EventHandler? CalculatePredictionButtonClicked;
+        public EventHandler? NewImageOpened;
 
         private readonly int defaultNumOfLayers = 3;
         private readonly int minNumOfLayers = 1;
         private readonly int maxNumOfLayers = 5;
 
         private int _numOfLayers;
+
+        public string? ImagePath { get; private set; }
 
         public int NumOfLayers
         {
@@ -159,6 +162,16 @@ namespace RobotPainter.Application
         private void button_calculatePrediction_Click(object sender, EventArgs e)
         {
             CalculatePredictionButtonClicked?.Invoke(this, e);
+        }
+
+        private void button_openImage_Click(object sender, EventArgs e)
+        {
+            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                ImagePath = openFileDialog.FileName;
+                label_fileName.Text = Path.GetFileName(ImagePath);
+                NewImageOpened?.Invoke(this, e);
+            }
         }
     }
 }

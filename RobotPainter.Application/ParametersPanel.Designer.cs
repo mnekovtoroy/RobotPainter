@@ -37,13 +37,17 @@
             tabControl_layerTabs = new TabControl();
             button_propagateParams = new Button();
             button_calculatePrediction = new Button();
+            openFileDialog = new OpenFileDialog();
+            button_openImage = new Button();
+            label_openSourceImage = new Label();
+            label_fileName = new Label();
             SuspendLayout();
             // 
             // label_numOfLayers
             // 
             label_numOfLayers.AutoSize = true;
             label_numOfLayers.Font = new Font("Segoe UI", 9F);
-            label_numOfLayers.Location = new Point(0, 61);
+            label_numOfLayers.Location = new Point(0, 90);
             label_numOfLayers.Name = "label_numOfLayers";
             label_numOfLayers.Size = new Size(101, 15);
             label_numOfLayers.TabIndex = 0;
@@ -52,7 +56,7 @@
             // label_canvasWidth
             // 
             label_canvasWidth.AutoSize = true;
-            label_canvasWidth.Location = new Point(0, 3);
+            label_canvasWidth.Location = new Point(0, 32);
             label_canvasWidth.Name = "label_canvasWidth";
             label_canvasWidth.Size = new Size(114, 15);
             label_canvasWidth.TabIndex = 1;
@@ -61,7 +65,7 @@
             // label_canvasHeight
             // 
             label_canvasHeight.AutoSize = true;
-            label_canvasHeight.Location = new Point(0, 32);
+            label_canvasHeight.Location = new Point(0, 61);
             label_canvasHeight.Name = "label_canvasHeight";
             label_canvasHeight.Size = new Size(118, 15);
             label_canvasHeight.TabIndex = 2;
@@ -70,9 +74,9 @@
             // textBox_cavasWidth
             // 
             textBox_cavasWidth.Font = new Font("Segoe UI", 9F);
-            textBox_cavasWidth.Location = new Point(124, 0);
+            textBox_cavasWidth.Location = new Point(124, 29);
             textBox_cavasWidth.Name = "textBox_cavasWidth";
-            textBox_cavasWidth.Size = new Size(50, 23);
+            textBox_cavasWidth.Size = new Size(68, 23);
             textBox_cavasWidth.TabIndex = 3;
             textBox_cavasWidth.Text = "400";
             textBox_cavasWidth.TextAlign = HorizontalAlignment.Center;
@@ -81,9 +85,9 @@
             // textBox_canvasHeight
             // 
             textBox_canvasHeight.Font = new Font("Segoe UI", 9F);
-            textBox_canvasHeight.Location = new Point(124, 29);
+            textBox_canvasHeight.Location = new Point(124, 58);
             textBox_canvasHeight.Name = "textBox_canvasHeight";
-            textBox_canvasHeight.Size = new Size(50, 23);
+            textBox_canvasHeight.Size = new Size(68, 23);
             textBox_canvasHeight.TabIndex = 4;
             textBox_canvasHeight.Text = "300";
             textBox_canvasHeight.TextAlign = HorizontalAlignment.Center;
@@ -92,9 +96,9 @@
             // textBox_numOfLayers
             // 
             textBox_numOfLayers.Font = new Font("Segoe UI", 9F);
-            textBox_numOfLayers.Location = new Point(124, 58);
+            textBox_numOfLayers.Location = new Point(124, 87);
             textBox_numOfLayers.Name = "textBox_numOfLayers";
-            textBox_numOfLayers.Size = new Size(50, 23);
+            textBox_numOfLayers.Size = new Size(68, 23);
             textBox_numOfLayers.TabIndex = 5;
             textBox_numOfLayers.Text = "3";
             textBox_numOfLayers.TextAlign = HorizontalAlignment.Center;
@@ -102,10 +106,10 @@
             // 
             // tabControl_layerTabs
             // 
-            tabControl_layerTabs.Location = new Point(0, 87);
+            tabControl_layerTabs.Location = new Point(0, 116);
             tabControl_layerTabs.Name = "tabControl_layerTabs";
             tabControl_layerTabs.SelectedIndex = 0;
-            tabControl_layerTabs.Size = new Size(320, 284);
+            tabControl_layerTabs.Size = new Size(320, 255);
             tabControl_layerTabs.TabIndex = 6;
             // 
             // button_propagateParams
@@ -128,10 +132,46 @@
             button_calculatePrediction.UseVisualStyleBackColor = true;
             button_calculatePrediction.Click += button_calculatePrediction_Click;
             // 
+            // openFileDialog
+            // 
+            openFileDialog.FileName = "openFileDialog";
+            openFileDialog.Filter = "\"Image Files|*.jpg;*.jpeg;*.png;*.gif;*.tif;...\"";
+            // 
+            // button_openImage
+            // 
+            button_openImage.Location = new Point(124, 0);
+            button_openImage.Name = "button_openImage";
+            button_openImage.Size = new Size(68, 23);
+            button_openImage.TabIndex = 9;
+            button_openImage.Text = "Browse...";
+            button_openImage.UseVisualStyleBackColor = true;
+            button_openImage.Click += button_openImage_Click;
+            // 
+            // label_openSourceImage
+            // 
+            label_openSourceImage.AutoSize = true;
+            label_openSourceImage.Location = new Point(0, 4);
+            label_openSourceImage.Name = "label_openSourceImage";
+            label_openSourceImage.Size = new Size(113, 15);
+            label_openSourceImage.TabIndex = 10;
+            label_openSourceImage.Text = "Open source image:";
+            // 
+            // label_fileName
+            // 
+            label_fileName.AutoSize = true;
+            label_fileName.Location = new Point(198, 4);
+            label_fileName.Name = "label_fileName";
+            label_fileName.Size = new Size(66, 15);
+            label_fileName.TabIndex = 11;
+            label_fileName.Text = "[File name]";
+            // 
             // ParametersPanel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(label_fileName);
+            Controls.Add(label_openSourceImage);
+            Controls.Add(button_openImage);
             Controls.Add(button_calculatePrediction);
             Controls.Add(button_propagateParams);
             Controls.Add(tabControl_layerTabs);
@@ -158,5 +198,9 @@
         private TabControl tabControl_layerTabs;
         private Button button_propagateParams;
         private Button button_calculatePrediction;
+        private OpenFileDialog openFileDialog;
+        private Button button_openImage;
+        private Label label_openSourceImage;
+        private Label label_fileName;
     }
 }

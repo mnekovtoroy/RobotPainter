@@ -65,7 +65,9 @@ namespace RobotPainter.Communications
             var files_sorted = file_creation_times.OrderBy(f => f.Value).ToList();
 
             Bitmap photo = new Bitmap(files_sorted[0].Key);
-            
+
+            throw new NotImplementedException();
+            Thread.Sleep(1000);
             //deleting old files
             for(int i = 1; i < files_sorted.Count; i++)
             {

@@ -389,11 +389,11 @@ namespace RobotPainter.ConsoleTest
         public static async Task CommunicationsTest()
         {
             var path_plt = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_plt\";
-            var path_img = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photos\";
+            var path_img = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photo\";
             var path_bmp = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
 
             //test_calligraphy_sedov.m --"t"
-            var root_path = new List<Point3D> {
+            /*var root_path = new List<Point3D> {
                 new Point3D(55.5483330293793, 32.8239968217536, 2.25000000000000),
                 new Point3D(51.9312381882220, 28.4611092298424, -0.155204257767549),
                 new Point3D(44.4715413462125, 19.4633305668608, -0.0264430111751386),
@@ -406,6 +406,22 @@ namespace RobotPainter.ConsoleTest
                 new Point3D(39.8531305999195, 40.5486397480948, -4.31891438445548),
                 new Point3D(44.7707287653652, 44.2888645387676, -4.36614738202227),
                 new Point3D(43.7607136814139, 45.4291249989077, 2.25000000000000)
+            };*/
+            var root_path = new List<Point3D>
+            {
+                new Point3D(79.1348643424727, 69.7979796195486, 2.25000000000000),
+                new Point3D(69.2162539687767, 54.7869283492907, -5.27656858094736),
+                new Point3D(46.8331458347884, 20.9118217438251, -4.19301301594283),
+                new Point3D(45.0087648943768, 12.4938053593536, -3.92231554424775),
+                new Point3D(47.8931853077501, 7.88004688058137, -3.28521233126072),
+                new Point3D(52.2728778644053, 8.92587981698648, -0.885440783855692),
+                new Point3D(55.3188216484262, 9.96329089237358, -0.112914417531491),
+                new Point3D(58.5221790381474, 10.9406597235817, -0.0162715460735159),
+                new Point3D(64.8522550402678, 15.1513537503450, -1.21971654439470),
+                new Point3D(75.9234748628144, 28.3506089620225, -4.01365872093339),
+                new Point3D(75.4154467839344, 43.3083051158532, -5.15824682963130),
+                new Point3D(69.0541045064654, 44.6894621276125, -3.53969184353383),
+                new Point3D(71.9730808719019, 46.3033833910149, 2.25000000000000)
             };
 
             IColorToCoordConverter color2coord = new ManualColorToCoord(new List<ColorLab> { new ColorLab() }, new PointD(0, 0), 3, 3, 10, 2);
@@ -421,13 +437,13 @@ namespace RobotPainter.ConsoleTest
 
             await robot.ApplyStrokes(new List<BrushstrokeInfo>() { brushstrokeInfo });
 
-            for(int i = 0; i < 3; i++)
+            /*for(int i = 0; i < 3; i++)
             {
                 Console.WriteLine($"taking photo {i + 1}");
                 var bmp = await robot.TakePhoto(path_img);
                 bmp.Save(path_bmp + $"image_{i + 1}.png");
                 Thread.Sleep(1000 * 10);
-            }
+            }*/
         }
     }
 }

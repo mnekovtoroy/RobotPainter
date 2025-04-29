@@ -44,7 +44,7 @@ namespace RobotPainter.Communications.Converting
                 }
                 if(stroke.Color != last_color || since_last_take_color == maxConsecStrokes)
                 {                    
-                    command_list.Add(new TakePaintCommand(_colorToCoord.ColorToCoord(stroke.Color)));
+                    //command_list.Add(new TakePaintCommand(_colorToCoord.ColorToCoord(stroke.Color)));
                     last_color = stroke.Color;
                     since_last_take_color = 0;
                 }
@@ -58,10 +58,10 @@ namespace RobotPainter.Communications.Converting
 
         private static void AddWashCycle(List<IPltCommand> command_list)
         {
-            command_list.Add(new PlaceWasherCommand());
+            /*command_list.Add(new PlaceWasherCommand());
             command_list.Add(new TakeWasherCommand());
             command_list.Add(new PlaceDryerCommand());
-            command_list.Add(new TakeDryerCommand());
+            command_list.Add(new TakeDryerCommand());*/
         }
     }
 }

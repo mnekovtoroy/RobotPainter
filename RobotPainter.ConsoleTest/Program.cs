@@ -1,3 +1,3 @@
 ﻿using RobotPainter.ConsoleTest;
 
-TestCases.ToPltTest();
+await TestCases.CommunicationsTest();

@@ -6,5 +6,10 @@ namespace RobotPainter.Application
         {
             InitializeComponent();
         }
+
+        public void MainForm_Load(object? sender, EventArgs e)
+        {
+            
+        }
     }
 }

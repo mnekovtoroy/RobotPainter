@@ -34,6 +34,7 @@
             label_sourceImage = new Label();
             label_lastPhoto = new Label();
             label_Prediction = new Label();
+            controlPanel1 = new ControlPanel();
             ((System.ComponentModel.ISupportInitialize)pictureBox_sourceImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox_prediction).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox_lastPhoto).BeginInit();
@@ -96,11 +97,20 @@
             label_Prediction.TabIndex = 5;
             label_Prediction.Text = "Prediction:";
             // 
+            // controlPanel1
+            // 
+            controlPanel1.Location = new Point(480, 380);
+            controlPanel1.MaximumSize = new Size(400, 300);
+            controlPanel1.MinimumSize = new Size(400, 300);
+            controlPanel1.Name = "controlPanel1";
+            controlPanel1.Size = new Size(400, 300);
+            controlPanel1.TabIndex = 6;
+            // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1064, 721);
+            AutoScaleMode = AutoScaleMode.None;
+            ClientSize = new Size(1264, 720);
+            Controls.Add(controlPanel1);
             Controls.Add(label_Prediction);
             Controls.Add(label_lastPhoto);
             Controls.Add(label_sourceImage);
@@ -124,5 +134,6 @@
         private Label label_sourceImage;
         private Label label_lastPhoto;
         private Label label_Prediction;
+        private ControlPanel controlPanel1;
     }
 }

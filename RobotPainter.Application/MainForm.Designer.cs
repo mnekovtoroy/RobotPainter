@@ -53,6 +53,7 @@
             pictureBox_sourceImage.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox_sourceImage.TabIndex = 0;
             pictureBox_sourceImage.TabStop = false;
+            pictureBox_sourceImage.DoubleClick += pictureBox_DoubleClick;
             // 
             // pictureBox_prediction
             // 
@@ -63,6 +64,7 @@
             pictureBox_prediction.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox_prediction.TabIndex = 1;
             pictureBox_prediction.TabStop = false;
+            pictureBox_prediction.DoubleClick += pictureBox_DoubleClick;
             // 
             // pictureBox_lastPhoto
             // 
@@ -73,6 +75,7 @@
             pictureBox_lastPhoto.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox_lastPhoto.TabIndex = 2;
             pictureBox_lastPhoto.TabStop = false;
+            pictureBox_lastPhoto.DoubleClick += pictureBox_DoubleClick;
             // 
             // label_sourceImage
             // 
@@ -165,6 +168,7 @@
             Controls.Add(pictureBox_lastPhoto);
             Controls.Add(pictureBox_prediction);
             Controls.Add(pictureBox_sourceImage);
+            MaximizeBox = false;
             Name = "MainForm";
             Text = "RobotPainter";
             Load += MainForm_Load;

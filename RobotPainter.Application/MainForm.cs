@@ -5,6 +5,7 @@ namespace RobotPainter.Application
         public MainForm()
         {
             InitializeComponent();
+            FormBorderStyle = FormBorderStyle.FixedSingle;
         }
 
         private Bitmap? image;
@@ -28,6 +29,26 @@ namespace RobotPainter.Application
         {
             pictureBox_sourceImage.BackColor = Color.Transparent;
             pictureBox_sourceImage.Image = image;
+        }
+
+        private void pictureBox_DoubleClick(object sender, EventArgs e)
+        {
+            if(((PictureBox)sender).Image == null)
+            {
+                return;
+            }
+
+            var picbox = new PictureBox();
+            picbox.Image = ((PictureBox)sender).Image;
+            picbox.SizeMode = PictureBoxSizeMode.Zoom;
+            picbox.Dock = DockStyle.Fill;
+
+            var newform = new Form();
+            newform.WindowState = FormWindowState.Maximized;
+            newform.Text = "Image view";
+            newform.Controls.Add(picbox);
+
+            newform.ShowDialog();
         }
     }
 }

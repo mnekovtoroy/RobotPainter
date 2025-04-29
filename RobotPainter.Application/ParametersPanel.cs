@@ -81,7 +81,11 @@ namespace RobotPainter.Application
                 for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
                 {
                     var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
-                    result.Add(layer_parameters_panel.BrushModel);
+                    var brush_model = layer_parameters_panel.BrushModel;
+                    if (brush_model != null)
+                    {
+                        result.Add(brush_model);
+                    }
                 }
                 return result;
             });
@@ -129,6 +133,7 @@ namespace RobotPainter.Application
                 for (int i = tabControl_layerTabs.TabPages.Count; i < NumOfLayers; i++)
                 {
                     var tab = new TabPage($"Layer {i + 1}");
+                    tab.AutoScroll = true;
                     tab.Controls.Add(new LayerParametersPanel());
                     tab.Controls[0].Location = new Point(0, 0);
                     tabControl_layerTabs.TabPages.Add(tab);

@@ -25,13 +25,13 @@ namespace RobotPainter.Application
             get
             {
                 var typeof_model = availableBrushModels[comboBox_brushModel.SelectedIndex];
-                return (IBrushModel?) Activator.CreateInstance(typeof_model);
+                return (IBrushModel?)Activator.CreateInstance(typeof_model);
             }
             set
             {
                 if (value == null) return;
                 int i = Array.IndexOf(availableBrushModels, value.GetType());
-                if(i != -1)
+                if (i != -1)
                 {
                     comboBox_brushModel.SelectedIndex = i;
                 }
@@ -46,22 +46,62 @@ namespace RobotPainter.Application
                 comboBox_brushModel.Items.Add(availableBrushModels[i].Name);
             }
             comboBox_brushModel.SelectedIndex = 0;
+
+            SetFieldsFromOptions(null, new StrokeSitesBuilder.Options(), new BrushstrokeBuilder.Options());
         }
 
         public StrokeSitesBuilder.Options GetStrokeSitesBuilderOptions()
         {
-            return new StrokeSitesBuilder.Options();
+            return new StrokeSitesBuilder.Options()
+            {
+                CanvasMaxStrokeLength = double.Parse(textBox_maxStrokeLength.Text),
+                L_tol = double.Parse(textBox_L_tol.Text),
+                MaxNormAngle = double.Parse(textBox_maxNormAngle.Text),
+                MaxBrushAngle = double.Parse(textBox_maxTurnAngle.Text)
+            };
         }
 
         public BrushstrokeBuilder.Options GetBrushstrokeBuilderOptions()
         {
-            return new BrushstrokeBuilder.Options();
+            return new BrushstrokeBuilder.Options()
+            {
+                MaxWidth = double.Parse(textBox_maxStrokeWidth.Text),
+                Overlap = double.Parse(textBox_overlap.Text),
+                StartOverheadCoeff = double.Parse(textBox_startOverheadCoeff.Text),
+                EndOverheadCoeff = double.Parse(textBox_endOverheadCoeff.Text),
+                SafeHeight = double.Parse(textBox_safeHeight.Text),
+                StartRunawayAngle = double.Parse(textBox_startRunawayAngle.Text),
+                EndRunawayAngle = double.Parse(textBox_endRunawayAngle.Text)
+            };
         }
 
-        public void SetFieldsFromOptions(IBrushModel brushModel, StrokeSitesBuilder.Options ssbOptions, BrushstrokeBuilder.Options bsbOptions)
+        public void SetFieldsFromOptions(IBrushModel? brushModel, StrokeSitesBuilder.Options ssbOptions, BrushstrokeBuilder.Options bsbOptions)
         {
-            this.BrushModel = brushModel;
+            BrushModel = brushModel;
+
+            //ssb options
+            textBox_maxStrokeLength.Text = ssbOptions.CanvasMaxStrokeLength.ToString();
+            textBox_L_tol.Text = ssbOptions.L_tol.ToString();
+            textBox_maxNormAngle.Text = ssbOptions.MaxNormAngle.ToString();
+            textBox_maxTurnAngle.Text = ssbOptions.MaxBrushAngle.ToString();
+
+            //bsb options
+            textBox_maxStrokeWidth.Text = bsbOptions.MaxWidth.ToString();
+            textBox_overlap.Text = bsbOptions.Overlap.ToString();
+            textBox_startOverheadCoeff.Text = bsbOptions.StartOverheadCoeff.ToString();
+            textBox_endOverheadCoeff.Text = bsbOptions.EndOverheadCoeff.ToString();
+            textBox_safeHeight.Text = bsbOptions.SafeHeight.ToString();
+            textBox_startRunawayAngle.Text = bsbOptions.StartRunawayAngle.ToString();
+            textBox_endRunawayAngle.Text = bsbOptions.EndRunawayAngle.ToString();
         }
 
+        private void textBox_DoubleValidating(object sender, CancelEventArgs e)
+        {
+            if (!double.TryParse(((TextBox)sender).Text, out _))
+            {
+                MessageBox.Show("Field must be a double.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.Cancel = true;
+            }
+        }
     }
 }

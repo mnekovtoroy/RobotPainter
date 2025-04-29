@@ -44,7 +44,7 @@ namespace RobotPainter.Application
         private void textBox_numOfLayers_Validating(object sender, CancelEventArgs e)
         {
             int new_numOfLayers;
-            if (!int.TryParse(textBox_numOfLayers.Text, out new_numOfLayers))
+            if (!int.TryParse(((TextBox)sender).Text, out new_numOfLayers))
             {
                 MessageBox.Show("Field must be an integer.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 ((TextBox)sender).Focus();
@@ -57,6 +57,15 @@ namespace RobotPainter.Application
                 return;
             }
             NumOfLayers = new_numOfLayers;
+        }
+
+        private void textBox_IntValidating(object sender, CancelEventArgs e)
+        {
+            if (!int.TryParse(((TextBox)sender).Text, out _))
+            {
+                MessageBox.Show("Field must be an integer.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ((TextBox)sender).Focus();
+            }
         }
 
         private void OnNumOfLayersChanged()
@@ -76,7 +85,6 @@ namespace RobotPainter.Application
                     var tab = new TabPage($"Layer {i + 1}");
                     tab.Controls.Add(new LayerParametersPanel());
                     tab.Controls[0].Location = new Point(0, 0);
-                    //tab.Controls[0].Show();
                     tabControl_layerTabs.TabPages.Add(tab);
                 }
             }

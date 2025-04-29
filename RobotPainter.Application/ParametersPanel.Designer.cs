@@ -72,29 +72,31 @@
             textBox_cavasWidth.Font = new Font("Segoe UI", 9F);
             textBox_cavasWidth.Location = new Point(124, 0);
             textBox_cavasWidth.Name = "textBox_cavasWidth";
-            textBox_cavasWidth.PlaceholderText = "400";
             textBox_cavasWidth.Size = new Size(50, 23);
             textBox_cavasWidth.TabIndex = 3;
+            textBox_cavasWidth.Text = "400";
             textBox_cavasWidth.TextAlign = HorizontalAlignment.Center;
+            textBox_cavasWidth.Validating += textBox_IntValidating;
             // 
             // textBox_canvasHeight
             // 
             textBox_canvasHeight.Font = new Font("Segoe UI", 9F);
             textBox_canvasHeight.Location = new Point(124, 29);
             textBox_canvasHeight.Name = "textBox_canvasHeight";
-            textBox_canvasHeight.PlaceholderText = "300";
             textBox_canvasHeight.Size = new Size(50, 23);
             textBox_canvasHeight.TabIndex = 4;
+            textBox_canvasHeight.Text = "300";
             textBox_canvasHeight.TextAlign = HorizontalAlignment.Center;
+            textBox_canvasHeight.Validating += textBox_IntValidating;
             // 
             // textBox_numOfLayers
             // 
             textBox_numOfLayers.Font = new Font("Segoe UI", 9F);
             textBox_numOfLayers.Location = new Point(124, 58);
             textBox_numOfLayers.Name = "textBox_numOfLayers";
-            textBox_numOfLayers.PlaceholderText = "3";
             textBox_numOfLayers.Size = new Size(50, 23);
             textBox_numOfLayers.TabIndex = 5;
+            textBox_numOfLayers.Text = "3";
             textBox_numOfLayers.TextAlign = HorizontalAlignment.Center;
             textBox_numOfLayers.Validating += textBox_numOfLayers_Validating;
             // 

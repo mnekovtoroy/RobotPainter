@@ -44,7 +44,6 @@
             // comboBox_brushModel
             // 
             comboBox_brushModel.FormattingEnabled = true;
-            comboBox_brushModel.Items.AddRange(new object[] { "Malevich 6" });
             comboBox_brushModel.Location = new Point(86, 3);
             comboBox_brushModel.Name = "comboBox_brushModel";
             comboBox_brushModel.Size = new Size(121, 23);

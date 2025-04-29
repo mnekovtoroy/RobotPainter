@@ -14,12 +14,39 @@ namespace RobotPainter.Application
 {
     public partial class LayerParametersPanel : UserControl
     {
+        private readonly Type[] availableBrushModels = new Type[]
+        {
+            typeof(BasicBrushModel),
+            typeof(DummyBrushModel)
+        };
+
+        public IBrushModel? BrushModel
+        {
+            get
+            {
+                var typeof_model = availableBrushModels[comboBox_brushModel.SelectedIndex];
+                return (IBrushModel?) Activator.CreateInstance(typeof_model);
+            }
+            set
+            {
+                if (value == null) return;
+                int i = Array.IndexOf(availableBrushModels, value.GetType());
+                if(i != -1)
+                {
+                    comboBox_brushModel.SelectedIndex = i;
+                }
+            }
+        }
+
         public LayerParametersPanel()
         {
             InitializeComponent();
+            for (int i = 0; i < availableBrushModels.Length; i++)
+            {
+                comboBox_brushModel.Items.Add(availableBrushModels[i].Name);
+            }
+            comboBox_brushModel.SelectedIndex = 0;
         }
-
-        public IBrushModel BrushModel { get; private set; }
 
         public StrokeSitesBuilder.Options GetStrokeSitesBuilderOptions()
         {
@@ -35,5 +62,6 @@ namespace RobotPainter.Application
         {
             this.BrushModel = brushModel;
         }
+
     }
 }

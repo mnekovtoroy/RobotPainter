@@ -98,6 +98,38 @@ namespace RobotPainter.Application
             });
         }
 
+        public void Disable()
+        {
+            button_openImage.Enabled = false;
+            textBox_canvasWidth.Enabled = false;
+            textBox_canvasHeight.Enabled = false;
+            textBox_numOfLayers.Enabled = false;
+
+            foreach(TabPage tab in tabControl_layerTabs.TabPages)
+            {
+                tab.Controls[0].Enabled = false;
+            }
+
+            button_propagateParams.Enabled = false;
+            button_calculatePrediction.Enabled = false;
+        }
+
+        public void Enable()
+        {
+            button_openImage.Enabled = true;
+            textBox_canvasWidth.Enabled = true;
+            textBox_canvasHeight.Enabled = true;
+            textBox_numOfLayers.Enabled = true;
+
+            foreach (TabPage tab in tabControl_layerTabs.TabPages)
+            {
+                tab.Controls[0].Enabled = true;
+            }
+
+            button_propagateParams.Enabled = true;
+            button_calculatePrediction.Enabled = true;
+        }
+
         private void textBox_numOfLayers_Validating(object sender, CancelEventArgs e)
         {
             int new_numOfLayers;

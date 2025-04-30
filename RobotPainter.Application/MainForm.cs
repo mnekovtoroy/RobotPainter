@@ -2,7 +2,6 @@ using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Communications;
-using SharpVoronoiLib.Exceptions;
 
 namespace RobotPainter.Application
 {
@@ -87,9 +86,37 @@ namespace RobotPainter.Application
             newform.ShowDialog();
         }
 
+        private void EnableControls()
+        {
+            parametersPanel.Invoke(() =>
+            {
+                parametersPanel.Enable();
+            });
+
+            controlPanel.Invoke(() =>
+            {
+                controlPanel.Enable();
+            });
+        }
+
+        private void DisableControls()
+        {
+            parametersPanel.Invoke(() =>
+            {
+                parametersPanel.Disable();
+            });
+
+            controlPanel.Invoke(() =>
+            {
+                controlPanel.Disable();
+            });
+        }
+
         private async void button_calculatePrediction_clicked(object? sender, EventArgs e)
         {
             if (sender == null) return;
+
+            DisableControls();
             var prediction = await CalculatePrediction((ParametersPanel)sender);
             pictureBox_prediction.Invoke(() =>
             {
@@ -97,6 +124,7 @@ namespace RobotPainter.Application
                 pictureBox_prediction.Image = prediction;
                 prediction_isRelevant = true;
             });
+            EnableControls();
         }
 
         //to do: change for multi-layer
@@ -140,7 +168,9 @@ namespace RobotPainter.Application
 
         private async void button_startDrawing_clicked(object? sender, EventArgs e)
         {
+            DisableControls();
             await StartDrawing();
+            EnableControls();
         }
 
         //to do: convert for every layer

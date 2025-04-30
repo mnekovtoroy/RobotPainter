@@ -55,6 +55,7 @@
             // 
             // button_stop
             // 
+            button_stop.Enabled = false;
             button_stop.Font = new Font("Segoe UI", 12F);
             button_stop.Location = new Point(210, 270);
             button_stop.Name = "button_stop";

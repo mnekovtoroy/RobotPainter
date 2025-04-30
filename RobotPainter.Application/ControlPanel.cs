@@ -23,5 +23,15 @@ namespace RobotPainter.Application
         {
             StartButtonClicked?.Invoke(this, e);
         }
+
+        public void Enable()
+        {
+            button_start.Enabled = true;
+        }
+
+        public void Disable()
+        {
+            button_start.Enabled = false;
+        }
     }
 }

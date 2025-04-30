@@ -12,9 +12,16 @@ namespace RobotPainter.Application
 {
     public partial class ControlPanel : UserControl
     {
+        public EventHandler? StartButtonClicked;
+
         public ControlPanel()
         {
             InitializeComponent();
+        }
+
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            StartButtonClicked?.Invoke(this, e);
         }
     }
 }

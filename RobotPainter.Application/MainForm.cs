@@ -1,18 +1,28 @@
 using RobotPainter.Calculations;
+using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
+using RobotPainter.Communications;
 using SharpVoronoiLib.Exceptions;
 
 namespace RobotPainter.Application
 {
     public partial class MainForm : Form
     {
+        IPainter painter;
+
         RobotPainterCalculator? calculator;
         private Bitmap? image;
+
+        private Bitmap? lastPhoto;
+
+        private bool prediction_isRelevant;
 
         public MainForm()
         {
             InitializeComponent();
+            painter = new BrushPainter();
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            prediction_isRelevant = false;
         }
 
 
@@ -20,6 +30,7 @@ namespace RobotPainter.Application
         {
             parametersPanel.NewImageOpened += UpdateImage;
             parametersPanel.CalculatePredictionButtonClicked += button_calculatePrediction_clicked;
+            controlPanel.StartButtonClicked += button_startDrawing_clicked;
         }
 
         private void UpdateImage(object? sender, EventArgs e)
@@ -34,8 +45,26 @@ namespace RobotPainter.Application
 
         private void OnImageUpdate()
         {
-            pictureBox_sourceImage.BackColor = Color.Transparent;
-            pictureBox_sourceImage.Image = image;
+            pictureBox_sourceImage.Invoke(() =>
+            {
+                pictureBox_sourceImage.BackColor = Color.Transparent;
+                pictureBox_sourceImage.Image = image;
+            });
+        }
+
+        private void OnPhotoUpdate()
+        {
+            pictureBox_lastPhoto.Invoke(() =>
+            {
+                pictureBox_lastPhoto.BackColor = Color.Transparent;
+                pictureBox_lastPhoto.Image = TransformPhoto(lastPhoto);
+            });
+        }
+
+        //to do: actually transform photo
+        private Bitmap? TransformPhoto(Bitmap? photo)
+        {
+            return photo;
         }
 
         private void pictureBox_DoubleClick(object sender, EventArgs e)
@@ -64,10 +93,13 @@ namespace RobotPainter.Application
             var prediction = await CalculatePrediction((ParametersPanel)sender);
             pictureBox_prediction.Invoke(() =>
             {
+                pictureBox_prediction.BackColor = Color.Transparent;
                 pictureBox_prediction.Image = prediction;
+                prediction_isRelevant = true;
             });
         }
 
+        //to do: change for multi-layer
         private async Task<Bitmap> CalculatePrediction(ParametersPanel parametersPanel)
         {
             if (image == null)
@@ -82,7 +114,6 @@ namespace RobotPainter.Application
             var brush_models = parametersPanel.GetBrushModelsForAllLayers();
 
             Bitmap result = new Bitmap(image.Width, image.Height);
-            //to do: change for multi-layer
             await Task.Run(() =>
             {
                 using (var g = Graphics.FromImage(result))
@@ -103,9 +134,75 @@ namespace RobotPainter.Application
                     }
                 }
             });
-
             Console.WriteLine("Prediction calculated.");
             return result;
+        }
+
+        private async void button_startDrawing_clicked(object? sender, EventArgs e)
+        {
+            await StartDrawing();
+        }
+
+        //to do: convert for every layer
+        private async Task StartDrawing()
+        {
+            if (image == null) return;
+
+            if (!prediction_isRelevant)
+            {
+                var prediction = await CalculatePrediction(parametersPanel);
+                pictureBox_prediction.Invoke(() =>
+                {
+                    pictureBox_prediction.BackColor = Color.Transparent;
+                    pictureBox_prediction.Image = prediction;
+                    prediction_isRelevant = true;
+                });
+            }
+
+            double canvas_width = Convert.ToDouble(parametersPanel.CanvasWidth);
+            double canvas_height = Convert.ToDouble(parametersPanel.CanvasHeight);
+
+            ((BrushPainter)painter).InitializePainter(new Bitmap(image.Width, image.Height), image.Width / canvas_width, image.Height / canvas_height, new BasicBrushModel());
+
+            var photo = await painter.GetFeedback();
+            lastPhoto = photo;
+            OnPhotoUpdate();
+
+            calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
+            calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
+
+            Console.WriteLine("Starting drawing...");
+            await Task.Run(async () =>
+            {
+                //for every layer
+                for (int i = 0; i < 1; i++)
+                {
+                    Console.WriteLine($"Layer {i + 1}: begin drawing");
+                    calculator.InitializeStrokeGenerator(5000, new StrokeGenerator.Options());
+                    var brushstrokes = calculator.GetAllBrushstrokes();
+                    for(int j = 0; j < brushstrokes.Count; j++)
+                    {
+                        await painter.ApplyStrokes([Mapper.Map(brushstrokes[j])]);
+
+                        if(j % 100 == 0)
+                        {
+                            Console.WriteLine($"Layer {i + 1}: {j + 1} strokes done");
+                            Console.WriteLine("Updating photo...");
+                            photo = await painter.GetFeedback();
+                            lastPhoto = photo;
+                            OnPhotoUpdate();
+                        }
+                    }
+
+                    photo = await painter.GetFeedback();
+                    lastPhoto = photo;
+                    OnPhotoUpdate();
+
+                    calculator.ApplyFeedback(TransformPhoto(lastPhoto));
+                    Console.WriteLine($"Layer {i + 1}: done");
+                }
+            });
+            Console.WriteLine("Drawing finished.");
         }
     }
 }

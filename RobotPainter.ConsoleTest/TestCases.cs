@@ -411,7 +411,7 @@ namespace RobotPainter.ConsoleTest
             IColorToCoordConverter color2coord = new ManualColorToCoord(new List<ColorLab> { new ColorLab() }, new PointD(0, 0), 3, 3, 10, 2);
             IPltConverter pltConverter = new PltConverter(color2coord);
 
-            var robot = await RobotController.Create(pltConverter, path_plt);
+            var robot = await RobotController.Create(pltConverter, path_plt, path_img);
 
             var brushstrokeInfo = new BrushstrokeInfo()
             {
@@ -424,7 +424,7 @@ namespace RobotPainter.ConsoleTest
             for(int i = 0; i < 3; i++)
             {
                 Console.WriteLine($"taking photo {i + 1}");
-                var bmp = await robot.TakePhoto(path_img);
+                var bmp = await robot.GetFeedback();
                 bmp.Save(path_bmp + $"image_{i + 1}.png");
                 Thread.Sleep(1000 * 10);
             }

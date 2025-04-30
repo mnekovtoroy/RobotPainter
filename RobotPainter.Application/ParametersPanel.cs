@@ -41,6 +41,10 @@ namespace RobotPainter.Application
             }
         }
 
+        public int CanvasWidth { get { return int.Parse(textBox_canvasWidth.Text); } }
+
+        public int CanvasHeight { get { return int.Parse(textBox_canvasHeight.Text); } }
+
         public ParametersPanel()
         {
             InitializeComponent();

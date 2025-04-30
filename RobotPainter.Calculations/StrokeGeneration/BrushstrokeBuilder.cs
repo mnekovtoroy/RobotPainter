@@ -11,7 +11,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public double xResizeCoeff;
             public double yResizeCoeff;
 
-            public IBrushModel brushModel = new BasicBrushModel();
+            public IBrushModel BrushModel = new BasicBrushModel();
 
             public double MaxWidth = 7.0;
             public double Overlap = 1.3;
@@ -28,7 +28,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             var root_path = GetBrushRootPath(desired_path, options);
             var brushstroke = new Brushstroke()
             {
-                brushModel = options.brushModel,
+                brushModel = options.BrushModel,
                 RootPath = root_path,
                 DesiredPath = desired_path,
                 Color = stroke_sites.MainColor
@@ -38,7 +38,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private static List<Point3D> GetBrushRootPath(List<Point3D> desired_path, Options options)
         {
-            return options.brushModel.CalculateBrushRootPath(desired_path);
+            return options.BrushModel.CalculateBrushRootPath(desired_path);
         }
 
         private static List<Point3D> GetDesiredPath(StrokeSites stroke_sites, Options options)
@@ -60,7 +60,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             {
                 var site_c = stroke_sites.involvedSites[i].Centroid;
                 double r = FindDesiredR(stroke_sites.involvedSites[i], options);
-                double z = options.brushModel.CalculateZCoordinate(r);
+                double z = options.BrushModel.CalculateZCoordinate(r);
                 result.Add(new Point3D(site_c.X, site_c.Y, z));
             }
 
@@ -112,7 +112,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             result.Add(new Point3D(ps.x, ps.y, 0.0));
 
             //middle
-            double z = options.brushModel.CalculateZCoordinate(r);
+            double z = options.BrushModel.CalculateZCoordinate(r);
             result.Add(new Point3D(pm.x, pm.y, z));
 
             //end

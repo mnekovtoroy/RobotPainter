@@ -31,7 +31,7 @@
             label_numOfLayers = new Label();
             label_canvasWidth = new Label();
             label_canvasHeight = new Label();
-            textBox_cavasWidth = new TextBox();
+            textBox_canvasWidth = new TextBox();
             textBox_canvasHeight = new TextBox();
             textBox_numOfLayers = new TextBox();
             tabControl_layerTabs = new TabControl();
@@ -73,14 +73,14 @@
             // 
             // textBox_cavasWidth
             // 
-            textBox_cavasWidth.Font = new Font("Segoe UI", 9F);
-            textBox_cavasWidth.Location = new Point(124, 29);
-            textBox_cavasWidth.Name = "textBox_cavasWidth";
-            textBox_cavasWidth.Size = new Size(68, 23);
-            textBox_cavasWidth.TabIndex = 3;
-            textBox_cavasWidth.Text = "400";
-            textBox_cavasWidth.TextAlign = HorizontalAlignment.Center;
-            textBox_cavasWidth.Validating += textBox_IntValidating;
+            textBox_canvasWidth.Font = new Font("Segoe UI", 9F);
+            textBox_canvasWidth.Location = new Point(124, 29);
+            textBox_canvasWidth.Name = "textBox_cavasWidth";
+            textBox_canvasWidth.Size = new Size(68, 23);
+            textBox_canvasWidth.TabIndex = 3;
+            textBox_canvasWidth.Text = "400";
+            textBox_canvasWidth.TextAlign = HorizontalAlignment.Center;
+            textBox_canvasWidth.Validating += textBox_IntValidating;
             // 
             // textBox_canvasHeight
             // 
@@ -177,7 +177,7 @@
             Controls.Add(tabControl_layerTabs);
             Controls.Add(textBox_numOfLayers);
             Controls.Add(textBox_canvasHeight);
-            Controls.Add(textBox_cavasWidth);
+            Controls.Add(textBox_canvasWidth);
             Controls.Add(label_canvasHeight);
             Controls.Add(label_canvasWidth);
             Controls.Add(label_numOfLayers);
@@ -192,7 +192,7 @@
         private Label label_numOfLayers;
         private Label label_canvasWidth;
         private Label label_canvasHeight;
-        private TextBox textBox_cavasWidth;
+        private TextBox textBox_canvasWidth;
         private TextBox textBox_canvasHeight;
         private TextBox textBox_numOfLayers;
         private TabControl tabControl_layerTabs;

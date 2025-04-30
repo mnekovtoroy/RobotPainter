@@ -61,7 +61,7 @@
             pictureBox_prediction.Location = new Point(480, 40);
             pictureBox_prediction.Name = "pictureBox_prediction";
             pictureBox_prediction.Size = new Size(400, 300);
-            pictureBox_prediction.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox_prediction.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox_prediction.TabIndex = 1;
             pictureBox_prediction.TabStop = false;
             pictureBox_prediction.DoubleClick += pictureBox_DoubleClick;
@@ -72,7 +72,7 @@
             pictureBox_lastPhoto.Location = new Point(40, 380);
             pictureBox_lastPhoto.Name = "pictureBox_lastPhoto";
             pictureBox_lastPhoto.Size = new Size(400, 300);
-            pictureBox_lastPhoto.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox_lastPhoto.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox_lastPhoto.TabIndex = 2;
             pictureBox_lastPhoto.TabStop = false;
             pictureBox_lastPhoto.DoubleClick += pictureBox_DoubleClick;

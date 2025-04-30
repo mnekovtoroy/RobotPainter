@@ -136,14 +136,15 @@ namespace RobotPainter.Application
             Console.WriteLine("Prediction calculation started...");
             double canvas_width = Convert.ToDouble(parametersPanel.CanvasWidth);
             double canvas_height = Convert.ToDouble(parametersPanel.CanvasHeight);
-            calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
-            calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
 
             var brush_models = parametersPanel.GetBrushModelsForAllLayers();
 
             Bitmap result = new Bitmap(image.Width, image.Height);
             await Task.Run(() =>
             {
+                calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
+                calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
+
                 using (var g = Graphics.FromImage(result))
                 {
                     //for every layer
@@ -198,12 +199,13 @@ namespace RobotPainter.Application
             lastPhoto = photo;
             OnPhotoUpdate();
 
-            calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
-            calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
-
-            Console.WriteLine("Starting drawing...");
             await Task.Run(async () =>
             {
+                calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
+                calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
+
+                Console.WriteLine("Starting drawing...");
+
                 //for every layer
                 for (int i = 0; i < 1; i++)
                 {

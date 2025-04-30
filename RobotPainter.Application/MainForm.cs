@@ -137,13 +137,13 @@ namespace RobotPainter.Application
             double canvas_width = Convert.ToDouble(parametersPanel.CanvasWidth);
             double canvas_height = Convert.ToDouble(parametersPanel.CanvasHeight);
 
-            var brush_models = parametersPanel.GetBrushModelsForAllLayers();
+            var all_layers_options = parametersPanel.GetAllLayerOptions();
 
             Bitmap result = new Bitmap(image.Width, image.Height);
             await Task.Run(() =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
-                calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
+                calculator.AllLayersOptions = all_layers_options;
 
                 using (var g = Graphics.FromImage(result))
                 {
@@ -157,7 +157,7 @@ namespace RobotPainter.Application
                         Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
                         foreach (var stroke in brushstrokes)
                         {
-                            brush_models[i].DrawStroke(g, new SolidBrush(stroke.Color.ToRgb()), stroke.RootPath, result.Width / canvas_width, result.Height / canvas_height);
+                            calculator.AllLayersOptions[i].BrushModel.DrawStroke(g, new SolidBrush(stroke.Color.ToRgb()), stroke.RootPath, result.Width / canvas_width, result.Height / canvas_height);
                         }
                         Console.WriteLine($"Layer {i + 1} prediction calculation: layer applied");
                     }

@@ -315,7 +315,7 @@ namespace RobotPainter.ConsoleTest
             double canvas_height = 300;
             var brush = new BasicBrushModel();
 
-            var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height, brush);
+            var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height);
             robot_painter.InitializeStrokeGenerator(sites_n, new StrokeGenerator.Options());
 
             var strokes = robot_painter.GetAllBrushstrokes();

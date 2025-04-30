@@ -1,4 +1,5 @@
-﻿using RobotPainter.Calculations.Brushes;
+﻿using RobotPainter.Calculations;
+using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
 using System;
 using System.Collections.Generic;
@@ -49,24 +50,21 @@ namespace RobotPainter.Application
             }
             comboBox_brushModel.SelectedIndex = 0;
 
-            SetFieldsFromOptions(null, new StrokeSitesBuilder.Options(), new BrushstrokeBuilder.Options());
+            SetFieldsFromOptions(RobotPainterCalculator.CreateLayerOptions());
         }
 
-        public StrokeSitesBuilder.Options GetStrokeSitesBuilderOptions()
+        public RobotPainterCalculator.LayerOptions GetLayerOptions()
         {
-            return new StrokeSitesBuilder.Options()
+            return new RobotPainterCalculator.LayerOptions()
             {
+                //StrokeSitesBuilder
                 CanvasMaxStrokeLength = double.Parse(textBox_maxStrokeLength.Text),
                 L_tol = double.Parse(textBox_L_tol.Text),
                 MaxNormAngle = double.Parse(textBox_maxNormAngle.Text),
-                MaxBrushAngle = double.Parse(textBox_maxTurnAngle.Text)
-            };
-        }
+                MaxBrushAngle = double.Parse(textBox_maxTurnAngle.Text),
 
-        public BrushstrokeBuilder.Options GetBrushstrokeBuilderOptions()
-        {
-            return new BrushstrokeBuilder.Options()
-            {
+                //BrushstrokeBuilder
+                BrushModel = this.BrushModel,
                 MaxWidth = double.Parse(textBox_maxStrokeWidth.Text),
                 Overlap = double.Parse(textBox_overlap.Text),
                 StartOverheadCoeff = double.Parse(textBox_startOverheadCoeff.Text),
@@ -77,24 +75,24 @@ namespace RobotPainter.Application
             };
         }
 
-        public void SetFieldsFromOptions(IBrushModel? brushModel, StrokeSitesBuilder.Options ssbOptions, BrushstrokeBuilder.Options bsbOptions)
+        public void SetFieldsFromOptions(RobotPainterCalculator.LayerOptions options)
         {
-            BrushModel = brushModel;
+            BrushModel = options.BrushModel;
 
             //ssb options
-            textBox_maxStrokeLength.Text = ssbOptions.CanvasMaxStrokeLength.ToString();
-            textBox_L_tol.Text = ssbOptions.L_tol.ToString();
-            textBox_maxNormAngle.Text = ssbOptions.MaxNormAngle.ToString();
-            textBox_maxTurnAngle.Text = ssbOptions.MaxBrushAngle.ToString();
+            textBox_maxStrokeLength.Text = options.CanvasMaxStrokeLength.ToString();
+            textBox_L_tol.Text = options.L_tol.ToString();
+            textBox_maxNormAngle.Text = options.MaxNormAngle.ToString();
+            textBox_maxTurnAngle.Text = options.MaxBrushAngle.ToString();
 
             //bsb options
-            textBox_maxStrokeWidth.Text = bsbOptions.MaxWidth.ToString();
-            textBox_overlap.Text = bsbOptions.Overlap.ToString();
-            textBox_startOverheadCoeff.Text = bsbOptions.StartOverheadCoeff.ToString();
-            textBox_endOverheadCoeff.Text = bsbOptions.EndOverheadCoeff.ToString();
-            textBox_safeHeight.Text = bsbOptions.SafeHeight.ToString();
-            textBox_startRunawayAngle.Text = bsbOptions.StartRunawayAngle.ToString();
-            textBox_endRunawayAngle.Text = bsbOptions.EndRunawayAngle.ToString();
+            textBox_maxStrokeWidth.Text = options.MaxWidth.ToString();
+            textBox_overlap.Text = options.Overlap.ToString();
+            textBox_startOverheadCoeff.Text = options.StartOverheadCoeff.ToString();
+            textBox_endOverheadCoeff.Text = options.EndOverheadCoeff.ToString();
+            textBox_safeHeight.Text = options.SafeHeight.ToString();
+            textBox_startRunawayAngle.Text = options.StartRunawayAngle.ToString();
+            textBox_endRunawayAngle.Text = options.EndRunawayAngle.ToString();
         }
 
         private void textBox_DoubleValidating(object sender, CancelEventArgs e)

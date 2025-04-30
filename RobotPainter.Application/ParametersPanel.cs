@@ -1,4 +1,5 @@
-﻿using RobotPainter.Calculations.Brushes;
+﻿using RobotPainter.Calculations;
+using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
 using System;
 using System.Collections.Generic;
@@ -53,47 +54,15 @@ namespace RobotPainter.Application
             NumOfLayers = defaultNumOfLayers;
         }
 
-        public List<StrokeSitesBuilder.Options> GetStrokeSitesBuilderOptionsForAllLayers()
+        public List<RobotPainterCalculator.LayerOptions> GetAllLayerOptions()
         {
             return tabControl_layerTabs.Invoke(() =>
             {
-                var result = new List<StrokeSitesBuilder.Options>();
+                var result = new List<RobotPainterCalculator.LayerOptions>();
                 for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
                 {
                     var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
-                    result.Add(layer_parameters_panel.GetStrokeSitesBuilderOptions());
-                }
-                return result;
-            });
-        }
-
-        public List<BrushstrokeBuilder.Options> GetBrushstrokeBuilderOptionsForAllLayers()
-        {
-            return tabControl_layerTabs.Invoke(() =>
-            {
-                var result = new List<BrushstrokeBuilder.Options>();
-                for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
-                {
-                    var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
-                    result.Add(layer_parameters_panel.GetBrushstrokeBuilderOptions());
-                }
-                return result;
-            });
-        }
-
-        public List<IBrushModel> GetBrushModelsForAllLayers()
-        {
-            return tabControl_layerTabs.Invoke(() =>
-            {
-                var result = new List<IBrushModel>();
-                for (int i = 0; i < tabControl_layerTabs.TabCount; i++)
-                {
-                    var layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
-                    var brush_model = layer_parameters_panel.BrushModel;
-                    if (brush_model != null)
-                    {
-                        result.Add(brush_model);
-                    }
+                    result.Add(layer_parameters_panel.GetLayerOptions());
                 }
                 return result;
             });
@@ -185,14 +154,12 @@ namespace RobotPainter.Application
         private void button_propagateParams_Click(object sender, EventArgs e)
         {
             var curr_layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[0].Controls[0];
-            var brushModel = curr_layer_parameters_panel.BrushModel;
-            var ssbOptions = curr_layer_parameters_panel.GetStrokeSitesBuilderOptions();
-            var bsbOptions = curr_layer_parameters_panel.GetBrushstrokeBuilderOptions();
+            var layerOptions = curr_layer_parameters_panel.GetLayerOptions();
 
             for (int i = 1; i < tabControl_layerTabs.TabCount; i++)
             {
                 curr_layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
-                curr_layer_parameters_panel.SetFieldsFromOptions(brushModel, ssbOptions, bsbOptions);
+                curr_layer_parameters_panel.SetFieldsFromOptions(layerOptions);
             }
             onParameterChanged(sender, e);
         }

@@ -16,6 +16,7 @@ namespace RobotPainter.Application
     {
         public EventHandler? CalculatePredictionButtonClicked;
         public EventHandler? NewImageOpened;
+        public EventHandler? ParameterChanged;
 
         private readonly int defaultNumOfLayers = 3;
         private readonly int minNumOfLayers = 1;
@@ -105,7 +106,7 @@ namespace RobotPainter.Application
             textBox_canvasHeight.Enabled = false;
             textBox_numOfLayers.Enabled = false;
 
-            foreach(TabPage tab in tabControl_layerTabs.TabPages)
+            foreach (TabPage tab in tabControl_layerTabs.TabPages)
             {
                 tab.Controls[0].Enabled = false;
             }
@@ -175,6 +176,7 @@ namespace RobotPainter.Application
                     tab.AutoScroll = true;
                     tab.Controls.Add(new LayerParametersPanel());
                     tab.Controls[0].Location = new Point(0, 0);
+                    ((LayerParametersPanel)tab.Controls[0]).ParameterChanged += onParameterChanged;
                     tabControl_layerTabs.TabPages.Add(tab);
                 }
             }
@@ -191,8 +193,8 @@ namespace RobotPainter.Application
             {
                 curr_layer_parameters_panel = (LayerParametersPanel)tabControl_layerTabs.TabPages[i].Controls[0];
                 curr_layer_parameters_panel.SetFieldsFromOptions(brushModel, ssbOptions, bsbOptions);
-
             }
+            onParameterChanged(sender, e);
         }
 
         private void button_calculatePrediction_Click(object sender, EventArgs e)
@@ -202,12 +204,18 @@ namespace RobotPainter.Application
 
         private void button_openImage_Click(object sender, EventArgs e)
         {
-            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ImagePath = openFileDialog.FileName;
                 label_fileName.Text = Path.GetFileName(ImagePath);
                 NewImageOpened?.Invoke(this, e);
             }
+            onParameterChanged(sender, e);
+        }
+
+        private void onParameterChanged(object? sender, EventArgs e)
+        {
+            ParameterChanged?.Invoke(this, e);
         }
     }
 }

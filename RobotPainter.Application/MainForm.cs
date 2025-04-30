@@ -24,11 +24,11 @@ namespace RobotPainter.Application
             prediction_isRelevant = false;
         }
 
-
         public void MainForm_Load(object? sender, EventArgs e)
         {
             parametersPanel.NewImageOpened += UpdateImage;
             parametersPanel.CalculatePredictionButtonClicked += button_calculatePrediction_clicked;
+            parametersPanel.ParameterChanged += (object? sender, EventArgs e) => prediction_isRelevant = false;
             controlPanel.StartButtonClicked += button_startDrawing_clicked;
         }
 

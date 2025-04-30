@@ -71,15 +71,16 @@
             label_canvasHeight.TabIndex = 2;
             label_canvasHeight.Text = "Canvas height (mm):";
             // 
-            // textBox_cavasWidth
+            // textBox_canvasWidth
             // 
             textBox_canvasWidth.Font = new Font("Segoe UI", 9F);
             textBox_canvasWidth.Location = new Point(124, 29);
-            textBox_canvasWidth.Name = "textBox_cavasWidth";
+            textBox_canvasWidth.Name = "textBox_canvasWidth";
             textBox_canvasWidth.Size = new Size(68, 23);
             textBox_canvasWidth.TabIndex = 3;
             textBox_canvasWidth.Text = "400";
             textBox_canvasWidth.TextAlign = HorizontalAlignment.Center;
+            textBox_canvasWidth.TextChanged += onParameterChanged;
             textBox_canvasWidth.Validating += textBox_IntValidating;
             // 
             // textBox_canvasHeight
@@ -91,6 +92,7 @@
             textBox_canvasHeight.TabIndex = 4;
             textBox_canvasHeight.Text = "300";
             textBox_canvasHeight.TextAlign = HorizontalAlignment.Center;
+            textBox_canvasHeight.TextChanged += onParameterChanged;
             textBox_canvasHeight.Validating += textBox_IntValidating;
             // 
             // textBox_numOfLayers
@@ -102,6 +104,7 @@
             textBox_numOfLayers.TabIndex = 5;
             textBox_numOfLayers.Text = "3";
             textBox_numOfLayers.TextAlign = HorizontalAlignment.Center;
+            textBox_numOfLayers.TextChanged += onParameterChanged;
             textBox_numOfLayers.Validating += textBox_numOfLayers_Validating;
             // 
             // tabControl_layerTabs

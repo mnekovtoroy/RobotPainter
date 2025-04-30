@@ -14,6 +14,8 @@ namespace RobotPainter.Application
 {
     public partial class LayerParametersPanel : UserControl
     {
+        public EventHandler? ParameterChanged;
+
         private readonly Type[] availableBrushModels = new Type[]
         {
             typeof(BasicBrushModel),
@@ -102,6 +104,11 @@ namespace RobotPainter.Application
                 MessageBox.Show("Field must be a double.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
             }
+        }
+
+        private void onParameterChanged(object sender, EventArgs e)
+        {
+            ParameterChanged?.Invoke(this, e);
         }
     }
 }

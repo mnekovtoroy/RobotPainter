@@ -72,6 +72,7 @@
             comboBox_brushModel.Name = "comboBox_brushModel";
             comboBox_brushModel.Size = new Size(121, 23);
             comboBox_brushModel.TabIndex = 1;
+            comboBox_brushModel.SelectedIndexChanged += onParameterChanged;
             // 
             // label_ssbOptions
             // 
@@ -98,6 +99,7 @@
             textBox_maxStrokeLength.Name = "textBox_maxStrokeLength";
             textBox_maxStrokeLength.Size = new Size(145, 23);
             textBox_maxStrokeLength.TabIndex = 4;
+            textBox_maxStrokeLength.TextChanged += onParameterChanged;
             textBox_maxStrokeLength.Validating += textBox_DoubleValidating;
             // 
             // textBox_L_tol
@@ -106,6 +108,7 @@
             textBox_L_tol.Name = "textBox_L_tol";
             textBox_L_tol.Size = new Size(145, 23);
             textBox_L_tol.TabIndex = 6;
+            textBox_L_tol.TextChanged += onParameterChanged;
             textBox_L_tol.Validating += textBox_DoubleValidating;
             // 
             // label_L_tol
@@ -123,6 +126,7 @@
             textBox_maxNormAngle.Name = "textBox_maxNormAngle";
             textBox_maxNormAngle.Size = new Size(145, 23);
             textBox_maxNormAngle.TabIndex = 8;
+            textBox_maxNormAngle.TextChanged += onParameterChanged;
             textBox_maxNormAngle.Validating += textBox_DoubleValidating;
             // 
             // label_maxNormAngle
@@ -140,6 +144,7 @@
             textBox_maxTurnAngle.Name = "textBox_maxTurnAngle";
             textBox_maxTurnAngle.Size = new Size(145, 23);
             textBox_maxTurnAngle.TabIndex = 10;
+            textBox_maxTurnAngle.TextChanged += onParameterChanged;
             textBox_maxTurnAngle.Validating += textBox_DoubleValidating;
             // 
             // label_maxTurnAngle
@@ -167,6 +172,7 @@
             textBox_maxStrokeWidth.Name = "textBox_maxStrokeWidth";
             textBox_maxStrokeWidth.Size = new Size(145, 23);
             textBox_maxStrokeWidth.TabIndex = 13;
+            textBox_maxStrokeWidth.TextChanged += onParameterChanged;
             textBox_maxStrokeWidth.Validating += textBox_DoubleValidating;
             // 
             // label_maxStrokeWidth
@@ -184,6 +190,7 @@
             textBox_overlap.Name = "textBox_overlap";
             textBox_overlap.Size = new Size(145, 23);
             textBox_overlap.TabIndex = 15;
+            textBox_overlap.TextChanged += onParameterChanged;
             textBox_overlap.Validating += textBox_DoubleValidating;
             // 
             // label_overlap
@@ -201,6 +208,7 @@
             textBox_startOverheadCoeff.Name = "textBox_startOverheadCoeff";
             textBox_startOverheadCoeff.Size = new Size(145, 23);
             textBox_startOverheadCoeff.TabIndex = 17;
+            textBox_startOverheadCoeff.TextChanged += onParameterChanged;
             textBox_startOverheadCoeff.Validating += textBox_DoubleValidating;
             // 
             // label_startOverheadCoeff
@@ -218,6 +226,7 @@
             textBox_endOverheadCoeff.Name = "textBox_endOverheadCoeff";
             textBox_endOverheadCoeff.Size = new Size(145, 23);
             textBox_endOverheadCoeff.TabIndex = 19;
+            textBox_endOverheadCoeff.TextChanged += onParameterChanged;
             textBox_endOverheadCoeff.Validating += textBox_DoubleValidating;
             // 
             // label_endOverheadCoeff
@@ -235,6 +244,7 @@
             textBox_safeHeight.Name = "textBox_safeHeight";
             textBox_safeHeight.Size = new Size(145, 23);
             textBox_safeHeight.TabIndex = 21;
+            textBox_safeHeight.TextChanged += onParameterChanged;
             textBox_safeHeight.Validating += textBox_DoubleValidating;
             // 
             // label_safeHeight
@@ -252,6 +262,7 @@
             textBox_startRunawayAngle.Name = "textBox_startRunawayAngle";
             textBox_startRunawayAngle.Size = new Size(145, 23);
             textBox_startRunawayAngle.TabIndex = 23;
+            textBox_startRunawayAngle.TextChanged += onParameterChanged;
             textBox_startRunawayAngle.Validating += textBox_DoubleValidating;
             // 
             // label_startRunawayAngle
@@ -269,6 +280,7 @@
             textBox_endRunawayAngle.Name = "textBox_endRunawayAngle";
             textBox_endRunawayAngle.Size = new Size(145, 23);
             textBox_endRunawayAngle.TabIndex = 25;
+            textBox_endRunawayAngle.TextChanged += onParameterChanged;
             textBox_endRunawayAngle.Validating += textBox_DoubleValidating;
             // 
             // label_endRunawayAngle

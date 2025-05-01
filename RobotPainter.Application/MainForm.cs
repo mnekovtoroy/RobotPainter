@@ -148,7 +148,7 @@ namespace RobotPainter.Application
             double canvas_width = Convert.ToDouble(parametersPanel.CanvasWidth);
             double canvas_height = Convert.ToDouble(parametersPanel.CanvasHeight);
 
-            var all_layers_options = parametersPanel.GetAllLayerOptions();
+            var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
 
             Bitmap result = new Bitmap(image.Width, image.Height);
             await Task.Run(() =>
@@ -162,7 +162,7 @@ namespace RobotPainter.Application
                     for (int i = 0; i < 1; i++)
                     {
                         Console.WriteLine($"Layer {i + 1} prediction calculation...");
-                        calculator.InitializeStrokeGenerator(5000, new StrokeGenerator.Options());
+                        calculator.InitializeStrokeGenerator();
                         Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
                         var brushstrokes = calculator.GetAllBrushstrokes();
                         Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
@@ -210,18 +210,19 @@ namespace RobotPainter.Application
             lastPhoto = photo;
             OnPhotoUpdate();
 
+            var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
+
             await Task.Run(async () =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
-                calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
+                calculator.AllLayersOptions = all_layers_options;
 
                 DrawingStarted?.Invoke(this, new DrawingStartedEventArgs() { TotalLayers = calculator.NumOfLayers });
 
                 //for every layer
                 for (int i = 0; i < 1; i++)
                 {
-                    Console.WriteLine($"Layer {i + 1}: begin drawing");
-                    calculator.InitializeStrokeGenerator(5000, new StrokeGenerator.Options());
+                    calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
                     for(int j = 0; j < brushstrokes.Count; j++)
                     {
@@ -248,7 +249,6 @@ namespace RobotPainter.Application
                 }
                 DrawingEnded?.Invoke(this, EventArgs.Empty);
             });
-            Console.WriteLine("Drawing finished.");
         }
     }
 }

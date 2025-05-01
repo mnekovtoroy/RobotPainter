@@ -57,6 +57,14 @@ namespace RobotPainter.Application
         {
             return new RobotPainterCalculator.LayerOptions()
             {
+                NVoronoi = int.Parse(textBox_voronoiSites.Text),
+
+                //StrokeGenerator
+                RelaxationIterations = int.Parse(textBox_relaxationIterations.Text),
+                LpullIterations = int.Parse(textBox_lPullIterations.Text),
+                LpullMaxStep = double.Parse(textBox_lPullMaxStep.Text),
+                RollingAverageN = int.Parse(textBox_rollingAvgN.Text),
+
                 //StrokeSitesBuilder
                 CanvasMaxStrokeLength = double.Parse(textBox_maxStrokeLength.Text),
                 L_tol = double.Parse(textBox_L_tol.Text),
@@ -79,6 +87,14 @@ namespace RobotPainter.Application
         {
             BrushModel = options.BrushModel;
 
+            textBox_voronoiSites.Text = options.NVoronoi.ToString();
+
+            //sg options
+            textBox_relaxationIterations.Text = options.RelaxationIterations.ToString();
+            textBox_lPullIterations.Text = options.LpullIterations.ToString();
+            textBox_lPullMaxStep.Text = options.LpullMaxStep.ToString();
+            textBox_rollingAvgN.Text = options.RollingAverageN.ToString();
+
             //ssb options
             textBox_maxStrokeLength.Text = options.CanvasMaxStrokeLength.ToString();
             textBox_L_tol.Text = options.L_tol.ToString();
@@ -100,6 +116,15 @@ namespace RobotPainter.Application
             if (!double.TryParse(((TextBox)sender).Text, out _))
             {
                 MessageBox.Show("Field must be a double.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.Cancel = true;
+            }
+        }
+
+        private void textBox_IntValidating(object sender, CancelEventArgs e)
+        {
+            if (!int.TryParse(((TextBox)sender).Text, out _))
+            {
+                MessageBox.Show("Field must be an integer.", "Input error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
             }
         }

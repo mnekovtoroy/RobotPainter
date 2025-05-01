@@ -10,6 +10,13 @@ namespace RobotPainter.Calculations
         public class LayerOptions
         {
             public double ErrorTolerance = 1.0;
+            public int NVoronoi = 5000;
+
+            //StrokeGenerator
+            public int RelaxationIterations;
+            public int LpullIterations;
+            public double LpullMaxStep;
+            public int RollingAverageN;
 
             //StrokeSitesBuilder
             public double CanvasMaxStrokeLength;
@@ -38,6 +45,7 @@ namespace RobotPainter.Calculations
 
         private int _currLayer = 0;
         public int CurrLayer { get { return _currLayer; } }
+        public int NumOfLayers { get { return AllLayersOptions == null ? 0 : AllLayersOptions.Count; } }
 
         public List<LayerOptions> AllLayersOptions { get; set; }
 
@@ -53,10 +61,13 @@ namespace RobotPainter.Calculations
         }
 
         private StrokeGenerator strokeGenerator;
-        public void InitializeStrokeGenerator(int n_voronoi, StrokeGenerator.Options options)
+        public void InitializeStrokeGenerator()
         {
             //int n_voronoi = StrokeGenerator.CalculateDesiredVoronoiN(target_stroke_width);
-            strokeGenerator = new StrokeGenerator(targetLabBitmap, n_voronoi, options);
+            strokeGenerator = new StrokeGenerator(
+                targetLabBitmap,
+                AllLayersOptions[CurrLayer].NVoronoi,
+                MapStrokeGeneratorOptions(AllLayersOptions[CurrLayer]));
         }
 
         public List<Brushstroke> GetAllBrushstrokes()
@@ -112,6 +123,16 @@ namespace RobotPainter.Calculations
             Console.WriteLine("applying feedback not impleneted");
         }
 
+        public StrokeGenerator.Options MapStrokeGeneratorOptions(LayerOptions layerOptions)
+        {
+            return new StrokeGenerator.Options()
+            {
+                RelaxationIterations = layerOptions.RelaxationIterations,
+                LpullIterations = layerOptions.LpullIterations,
+                LpullMaxStep = layerOptions.LpullMaxStep,
+                RollingAverageN = layerOptions.RollingAverageN
+            };
+        }
 
         private StrokeSitesBuilder.Options MapStrokeSitesBuilderOptions(LayerOptions layerOptions)
         {
@@ -145,11 +166,20 @@ namespace RobotPainter.Calculations
             };
         }
 
-        public static LayerOptions CreateLayerOptions(StrokeSitesBuilder.Options ssb_options = null, BrushstrokeBuilder.Options bsb_options = null)
+        public static LayerOptions CreateLayerOptions(
+            StrokeGenerator.Options sg_options = null,
+            StrokeSitesBuilder.Options ssb_options = null, 
+            BrushstrokeBuilder.Options bsb_options = null)
         {
             var layerOptions = new LayerOptions();
+            StrokeGenerator.Options sg_from = sg_options == null ? new StrokeGenerator.Options() : sg_options;
             StrokeSitesBuilder.Options ssb_from = ssb_options == null ? new StrokeSitesBuilder.Options() : ssb_options;
             BrushstrokeBuilder.Options bsb_from = bsb_options == null ? new BrushstrokeBuilder.Options() : bsb_options;
+
+            layerOptions.RelaxationIterations = sg_from.RelaxationIterations;
+            layerOptions.LpullIterations = sg_from.LpullIterations;
+            layerOptions.LpullMaxStep = sg_from.LpullMaxStep;
+            layerOptions.RollingAverageN = sg_from.RollingAverageN;
 
             layerOptions.CanvasMaxStrokeLength = ssb_from.CanvasMaxStrokeLength;
             layerOptions.L_tol = ssb_from.L_tol;

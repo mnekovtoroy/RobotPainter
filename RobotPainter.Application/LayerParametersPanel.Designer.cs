@@ -54,6 +54,17 @@
             label_startRunawayAngle = new Label();
             textBox_endRunawayAngle = new TextBox();
             label_endRunawayAngle = new Label();
+            textBox_rollingAvgN = new TextBox();
+            label_rollingAvgN = new Label();
+            textBox_lPullMaxStep = new TextBox();
+            label_lPullMaxStep = new Label();
+            textBox_lPullIterations = new TextBox();
+            label_lPullIterations = new Label();
+            textBox_voronoiSites = new TextBox();
+            label_voronoiSites = new Label();
+            label_sgOptions = new Label();
+            textBox_relaxationIterations = new TextBox();
+            label_relaxationIterations = new Label();
             SuspendLayout();
             // 
             // label_brushModel
@@ -78,7 +89,7 @@
             // 
             label_ssbOptions.AutoSize = true;
             label_ssbOptions.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label_ssbOptions.Location = new Point(3, 34);
+            label_ssbOptions.Location = new Point(3, 208);
             label_ssbOptions.Name = "label_ssbOptions";
             label_ssbOptions.Size = new Size(154, 15);
             label_ssbOptions.TabIndex = 2;
@@ -87,7 +98,7 @@
             // label_maxStrokeLength
             // 
             label_maxStrokeLength.AutoSize = true;
-            label_maxStrokeLength.Location = new Point(3, 63);
+            label_maxStrokeLength.Location = new Point(3, 237);
             label_maxStrokeLength.Name = "label_maxStrokeLength";
             label_maxStrokeLength.Size = new Size(138, 15);
             label_maxStrokeLength.TabIndex = 3;
@@ -95,7 +106,7 @@
             // 
             // textBox_maxStrokeLength
             // 
-            textBox_maxStrokeLength.Location = new Point(147, 60);
+            textBox_maxStrokeLength.Location = new Point(147, 234);
             textBox_maxStrokeLength.Name = "textBox_maxStrokeLength";
             textBox_maxStrokeLength.Size = new Size(145, 23);
             textBox_maxStrokeLength.TabIndex = 4;
@@ -104,7 +115,7 @@
             // 
             // textBox_L_tol
             // 
-            textBox_L_tol.Location = new Point(147, 89);
+            textBox_L_tol.Location = new Point(147, 263);
             textBox_L_tol.Name = "textBox_L_tol";
             textBox_L_tol.Size = new Size(145, 23);
             textBox_L_tol.TabIndex = 6;
@@ -114,7 +125,7 @@
             // label_L_tol
             // 
             label_L_tol.AutoSize = true;
-            label_L_tol.Location = new Point(106, 92);
+            label_L_tol.Location = new Point(106, 266);
             label_L_tol.Name = "label_L_tol";
             label_L_tol.Size = new Size(35, 15);
             label_L_tol.TabIndex = 5;
@@ -122,7 +133,7 @@
             // 
             // textBox_maxNormAngle
             // 
-            textBox_maxNormAngle.Location = new Point(147, 118);
+            textBox_maxNormAngle.Location = new Point(147, 292);
             textBox_maxNormAngle.Name = "textBox_maxNormAngle";
             textBox_maxNormAngle.Size = new Size(145, 23);
             textBox_maxNormAngle.TabIndex = 8;
@@ -132,7 +143,7 @@
             // label_maxNormAngle
             // 
             label_maxNormAngle.AutoSize = true;
-            label_maxNormAngle.Location = new Point(44, 121);
+            label_maxNormAngle.Location = new Point(44, 295);
             label_maxNormAngle.Name = "label_maxNormAngle";
             label_maxNormAngle.Size = new Size(97, 15);
             label_maxNormAngle.TabIndex = 7;
@@ -140,7 +151,7 @@
             // 
             // textBox_maxTurnAngle
             // 
-            textBox_maxTurnAngle.Location = new Point(147, 147);
+            textBox_maxTurnAngle.Location = new Point(147, 321);
             textBox_maxTurnAngle.Name = "textBox_maxTurnAngle";
             textBox_maxTurnAngle.Size = new Size(145, 23);
             textBox_maxTurnAngle.TabIndex = 10;
@@ -150,7 +161,7 @@
             // label_maxTurnAngle
             // 
             label_maxTurnAngle.AutoSize = true;
-            label_maxTurnAngle.Location = new Point(51, 150);
+            label_maxTurnAngle.Location = new Point(51, 324);
             label_maxTurnAngle.Name = "label_maxTurnAngle";
             label_maxTurnAngle.Size = new Size(90, 15);
             label_maxTurnAngle.TabIndex = 9;
@@ -160,7 +171,7 @@
             // 
             label_bsbOptions.AutoSize = true;
             label_bsbOptions.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label_bsbOptions.Location = new Point(3, 179);
+            label_bsbOptions.Location = new Point(3, 353);
             label_bsbOptions.Name = "label_bsbOptions";
             label_bsbOptions.Size = new Size(162, 15);
             label_bsbOptions.TabIndex = 11;
@@ -168,7 +179,7 @@
             // 
             // textBox_maxStrokeWidth
             // 
-            textBox_maxStrokeWidth.Location = new Point(147, 205);
+            textBox_maxStrokeWidth.Location = new Point(147, 379);
             textBox_maxStrokeWidth.Name = "textBox_maxStrokeWidth";
             textBox_maxStrokeWidth.Size = new Size(145, 23);
             textBox_maxStrokeWidth.TabIndex = 13;
@@ -178,7 +189,7 @@
             // label_maxStrokeWidth
             // 
             label_maxStrokeWidth.AutoSize = true;
-            label_maxStrokeWidth.Location = new Point(7, 208);
+            label_maxStrokeWidth.Location = new Point(7, 382);
             label_maxStrokeWidth.Name = "label_maxStrokeWidth";
             label_maxStrokeWidth.Size = new Size(134, 15);
             label_maxStrokeWidth.TabIndex = 12;
@@ -186,7 +197,7 @@
             // 
             // textBox_overlap
             // 
-            textBox_overlap.Location = new Point(147, 234);
+            textBox_overlap.Location = new Point(147, 408);
             textBox_overlap.Name = "textBox_overlap";
             textBox_overlap.Size = new Size(145, 23);
             textBox_overlap.TabIndex = 15;
@@ -196,7 +207,7 @@
             // label_overlap
             // 
             label_overlap.AutoSize = true;
-            label_overlap.Location = new Point(57, 237);
+            label_overlap.Location = new Point(57, 411);
             label_overlap.Name = "label_overlap";
             label_overlap.Size = new Size(84, 15);
             label_overlap.TabIndex = 14;
@@ -204,7 +215,7 @@
             // 
             // textBox_startOverheadCoeff
             // 
-            textBox_startOverheadCoeff.Location = new Point(147, 263);
+            textBox_startOverheadCoeff.Location = new Point(147, 437);
             textBox_startOverheadCoeff.Name = "textBox_startOverheadCoeff";
             textBox_startOverheadCoeff.Size = new Size(145, 23);
             textBox_startOverheadCoeff.TabIndex = 17;
@@ -214,7 +225,7 @@
             // label_startOverheadCoeff
             // 
             label_startOverheadCoeff.AutoSize = true;
-            label_startOverheadCoeff.Location = new Point(25, 266);
+            label_startOverheadCoeff.Location = new Point(25, 440);
             label_startOverheadCoeff.Name = "label_startOverheadCoeff";
             label_startOverheadCoeff.Size = new Size(116, 15);
             label_startOverheadCoeff.TabIndex = 16;
@@ -222,7 +233,7 @@
             // 
             // textBox_endOverheadCoeff
             // 
-            textBox_endOverheadCoeff.Location = new Point(147, 292);
+            textBox_endOverheadCoeff.Location = new Point(147, 466);
             textBox_endOverheadCoeff.Name = "textBox_endOverheadCoeff";
             textBox_endOverheadCoeff.Size = new Size(145, 23);
             textBox_endOverheadCoeff.TabIndex = 19;
@@ -232,7 +243,7 @@
             // label_endOverheadCoeff
             // 
             label_endOverheadCoeff.AutoSize = true;
-            label_endOverheadCoeff.Location = new Point(29, 295);
+            label_endOverheadCoeff.Location = new Point(29, 469);
             label_endOverheadCoeff.Name = "label_endOverheadCoeff";
             label_endOverheadCoeff.Size = new Size(112, 15);
             label_endOverheadCoeff.TabIndex = 18;
@@ -240,7 +251,7 @@
             // 
             // textBox_safeHeight
             // 
-            textBox_safeHeight.Location = new Point(147, 321);
+            textBox_safeHeight.Location = new Point(147, 495);
             textBox_safeHeight.Name = "textBox_safeHeight";
             textBox_safeHeight.Size = new Size(145, 23);
             textBox_safeHeight.TabIndex = 21;
@@ -250,7 +261,7 @@
             // label_safeHeight
             // 
             label_safeHeight.AutoSize = true;
-            label_safeHeight.Location = new Point(72, 324);
+            label_safeHeight.Location = new Point(72, 498);
             label_safeHeight.Name = "label_safeHeight";
             label_safeHeight.Size = new Size(69, 15);
             label_safeHeight.TabIndex = 20;
@@ -258,7 +269,7 @@
             // 
             // textBox_startRunawayAngle
             // 
-            textBox_startRunawayAngle.Location = new Point(147, 350);
+            textBox_startRunawayAngle.Location = new Point(147, 524);
             textBox_startRunawayAngle.Name = "textBox_startRunawayAngle";
             textBox_startRunawayAngle.Size = new Size(145, 23);
             textBox_startRunawayAngle.TabIndex = 23;
@@ -268,7 +279,7 @@
             // label_startRunawayAngle
             // 
             label_startRunawayAngle.AutoSize = true;
-            label_startRunawayAngle.Location = new Point(27, 353);
+            label_startRunawayAngle.Location = new Point(27, 527);
             label_startRunawayAngle.Name = "label_startRunawayAngle";
             label_startRunawayAngle.Size = new Size(114, 15);
             label_startRunawayAngle.TabIndex = 22;
@@ -276,7 +287,7 @@
             // 
             // textBox_endRunawayAngle
             // 
-            textBox_endRunawayAngle.Location = new Point(147, 379);
+            textBox_endRunawayAngle.Location = new Point(147, 553);
             textBox_endRunawayAngle.Name = "textBox_endRunawayAngle";
             textBox_endRunawayAngle.Size = new Size(145, 23);
             textBox_endRunawayAngle.TabIndex = 25;
@@ -286,17 +297,123 @@
             // label_endRunawayAngle
             // 
             label_endRunawayAngle.AutoSize = true;
-            label_endRunawayAngle.Location = new Point(31, 382);
+            label_endRunawayAngle.Location = new Point(31, 556);
             label_endRunawayAngle.Name = "label_endRunawayAngle";
             label_endRunawayAngle.Size = new Size(110, 15);
             label_endRunawayAngle.TabIndex = 24;
             label_endRunawayAngle.Text = "End runaway angle:";
+            // 
+            // textBox_rollingAvgN
+            // 
+            textBox_rollingAvgN.Location = new Point(144, 147);
+            textBox_rollingAvgN.Name = "textBox_rollingAvgN";
+            textBox_rollingAvgN.Size = new Size(145, 23);
+            textBox_rollingAvgN.TabIndex = 34;
+            textBox_rollingAvgN.Validating += textBox_IntValidating;
+            // 
+            // label_rollingAvgN
+            // 
+            label_rollingAvgN.AutoSize = true;
+            label_rollingAvgN.Location = new Point(35, 150);
+            label_rollingAvgN.Name = "label_rollingAvgN";
+            label_rollingAvgN.Size = new Size(103, 15);
+            label_rollingAvgN.TabIndex = 33;
+            label_rollingAvgN.Text = "Rolling average N:";
+            // 
+            // textBox_lPullMaxStep
+            // 
+            textBox_lPullMaxStep.Location = new Point(144, 118);
+            textBox_lPullMaxStep.Name = "textBox_lPullMaxStep";
+            textBox_lPullMaxStep.Size = new Size(145, 23);
+            textBox_lPullMaxStep.TabIndex = 32;
+            textBox_lPullMaxStep.Validating += textBox_DoubleValidating;
+            // 
+            // label_lPullMaxStep
+            // 
+            label_lPullMaxStep.AutoSize = true;
+            label_lPullMaxStep.Location = new Point(51, 121);
+            label_lPullMaxStep.Name = "label_lPullMaxStep";
+            label_lPullMaxStep.Size = new Size(87, 15);
+            label_lPullMaxStep.TabIndex = 31;
+            label_lPullMaxStep.Text = "Lpull max step:";
+            // 
+            // textBox_lPullIterations
+            // 
+            textBox_lPullIterations.Location = new Point(144, 89);
+            textBox_lPullIterations.Name = "textBox_lPullIterations";
+            textBox_lPullIterations.Size = new Size(145, 23);
+            textBox_lPullIterations.TabIndex = 30;
+            textBox_lPullIterations.Validating += textBox_IntValidating;
+            // 
+            // label_lPullIterations
+            // 
+            label_lPullIterations.AutoSize = true;
+            label_lPullIterations.Location = new Point(50, 92);
+            label_lPullIterations.Name = "label_lPullIterations";
+            label_lPullIterations.Size = new Size(88, 15);
+            label_lPullIterations.TabIndex = 29;
+            label_lPullIterations.Text = "Lpull iterations:";
+            // 
+            // textBox_voronoiSites
+            // 
+            textBox_voronoiSites.Location = new Point(144, 60);
+            textBox_voronoiSites.Name = "textBox_voronoiSites";
+            textBox_voronoiSites.Size = new Size(145, 23);
+            textBox_voronoiSites.TabIndex = 28;
+            textBox_voronoiSites.Validating += textBox_IntValidating;
+            // 
+            // label_voronoiSites
+            // 
+            label_voronoiSites.AutoSize = true;
+            label_voronoiSites.Location = new Point(61, 63);
+            label_voronoiSites.Name = "label_voronoiSites";
+            label_voronoiSites.Size = new Size(77, 15);
+            label_voronoiSites.TabIndex = 27;
+            label_voronoiSites.Text = "Voronoi sites:";
+            // 
+            // label_sgOptions
+            // 
+            label_sgOptions.AutoSize = true;
+            label_sgOptions.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            label_sgOptions.Location = new Point(3, 34);
+            label_sgOptions.Name = "label_sgOptions";
+            label_sgOptions.Size = new Size(150, 15);
+            label_sgOptions.TabIndex = 26;
+            label_sgOptions.Text = "StrokeGenerator options:";
+            // 
+            // textBox_relaxationIterations
+            // 
+            textBox_relaxationIterations.Location = new Point(144, 176);
+            textBox_relaxationIterations.Name = "textBox_relaxationIterations";
+            textBox_relaxationIterations.Size = new Size(145, 23);
+            textBox_relaxationIterations.TabIndex = 36;
+            textBox_relaxationIterations.Validating += textBox_IntValidating;
+            // 
+            // label_relaxationIterations
+            // 
+            label_relaxationIterations.AutoSize = true;
+            label_relaxationIterations.Location = new Point(21, 179);
+            label_relaxationIterations.Name = "label_relaxationIterations";
+            label_relaxationIterations.Size = new Size(117, 15);
+            label_relaxationIterations.TabIndex = 35;
+            label_relaxationIterations.Text = "Relaxation iterations:";
             // 
             // LayerParametersPanel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlLightLight;
+            Controls.Add(textBox_relaxationIterations);
+            Controls.Add(label_relaxationIterations);
+            Controls.Add(textBox_rollingAvgN);
+            Controls.Add(label_rollingAvgN);
+            Controls.Add(textBox_lPullMaxStep);
+            Controls.Add(label_lPullMaxStep);
+            Controls.Add(textBox_lPullIterations);
+            Controls.Add(label_lPullIterations);
+            Controls.Add(textBox_voronoiSites);
+            Controls.Add(label_voronoiSites);
+            Controls.Add(label_sgOptions);
             Controls.Add(textBox_endRunawayAngle);
             Controls.Add(label_endRunawayAngle);
             Controls.Add(textBox_startRunawayAngle);
@@ -326,7 +443,7 @@
             MaximumSize = new Size(295, 0);
             MinimumSize = new Size(259, 0);
             Name = "LayerParametersPanel";
-            Size = new Size(295, 415);
+            Size = new Size(295, 579);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -359,5 +476,16 @@
         private Label label_startRunawayAngle;
         private TextBox textBox_endRunawayAngle;
         private Label label_endRunawayAngle;
+        private TextBox textBox_rollingAvgN;
+        private Label label_rollingAvgN;
+        private TextBox textBox_lPullMaxStep;
+        private Label label_lPullMaxStep;
+        private TextBox textBox_lPullIterations;
+        private Label label_lPullIterations;
+        private TextBox textBox_voronoiSites;
+        private Label label_voronoiSites;
+        private Label label_sgOptions;
+        private TextBox textBox_relaxationIterations;
+        private Label label_relaxationIterations;
     }
 }

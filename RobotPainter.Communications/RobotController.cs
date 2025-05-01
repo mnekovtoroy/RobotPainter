@@ -4,10 +4,22 @@ using System.Drawing;
 
 namespace RobotPainter.Communications
 {
-    public class RobotController
+    public class RobotController : IPainter
     {
-        private string _tempPath;
+        private string _photoFolderPath;
+        public string PhotoFolderPath
+        {
+            get
+            {
+                return _photoFolderPath;
+            }
+            set
+            {
+                _photoFolderPath = value;
+            }
+        }
 
+        private string _tempPath;
         public string TempPath { 
             get 
             { 
@@ -22,21 +34,22 @@ namespace RobotPainter.Communications
         private PaintingController _controller;
         private IPltConverter _pltConverter;
 
-        private RobotController(IPltConverter pltConverter, string temp_path, PaintingController controller)
+        private RobotController(IPltConverter pltConverter, string temp_path, string photo_folder_path, PaintingController controller)
         {
             _tempPath = temp_path;
+            _photoFolderPath = photo_folder_path;
             _pltConverter = pltConverter;
             _controller = controller;
         }
 
-        public static async Task<RobotController> Create(IPltConverter pltConverter, string temp_path, string controllerIp = null)
+        public static async Task<RobotController> Create(IPltConverter pltConverter, string temp_path, string photo_folder_path, string controllerIp = null)
         {
             PaintingController controller;
             if (controllerIp == null)
                 controller = await PaintingController.CreateController();
             else
                 controller = await PaintingController.CreateController(controllerIp);
-            return new RobotController(pltConverter, temp_path, controller);
+            return new RobotController(pltConverter, temp_path, photo_folder_path, controller);
         }
 
         public async Task ApplyStrokes(List<BrushstrokeInfo> strokes)
@@ -49,12 +62,12 @@ namespace RobotPainter.Communications
             await SendPltCommands(path_plt);
         }
 
-        public async Task<Bitmap> TakePhoto(string photo_folder_path)
+        public async Task<Bitmap> GetFeedback()
         {
             await _controller.TakeaPhoto();
 
             //retrieve the photo
-            string[] files = Directory.GetFiles(photo_folder_path);
+            string[] files = Directory.GetFiles(_photoFolderPath);
 
             var file_creation_times = new Dictionary<string, DateTime>();
 

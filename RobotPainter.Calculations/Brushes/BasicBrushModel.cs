@@ -15,8 +15,6 @@ namespace RobotPainter.Calculations.Brushes
 			public List<double> ds = new List<double>();
 		}
 
-		public readonly static string model_name = "Malevich 6";
-
         public readonly static PointD[] footprint = [
             new PointD(0, 0),
             new PointD(0.131666625322442, 0.0416667685714476),

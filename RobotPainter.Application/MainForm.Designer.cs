@@ -120,7 +120,6 @@
             // 
             parametersPanel.Location = new Point(920, 40);
             parametersPanel.Name = "parametersPanel";
-            parametersPanel.NumOfLayers = 3;
             parametersPanel.Size = new Size(320, 400);
             parametersPanel.TabIndex = 7;
             // 

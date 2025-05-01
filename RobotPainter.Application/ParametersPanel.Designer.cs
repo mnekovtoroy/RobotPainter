@@ -102,7 +102,6 @@
             textBox_numOfLayers.Name = "textBox_numOfLayers";
             textBox_numOfLayers.Size = new Size(68, 23);
             textBox_numOfLayers.TabIndex = 5;
-            textBox_numOfLayers.Text = "3";
             textBox_numOfLayers.TextAlign = HorizontalAlignment.Center;
             textBox_numOfLayers.TextChanged += onParameterChanged;
             textBox_numOfLayers.Validating += textBox_numOfLayers_Validating;

@@ -315,8 +315,10 @@ namespace RobotPainter.ConsoleTest
             double canvas_height = 300;
             var brush = new BasicBrushModel();
 
-            var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height, brush);
-            robot_painter.InitializeStrokeGenerator(sites_n, new StrokeGenerator.Options());
+            var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height);
+            robot_painter.AllLayersOptions = [RobotPainterCalculator.CreateLayerOptions()];
+            robot_painter.AllLayersOptions[0].NVoronoi = sites_n;
+            robot_painter.InitializeStrokeGenerator();
 
             var strokes = robot_painter.GetAllBrushstrokes();
             Console.WriteLine($"Number of strokes: {strokes.Count}");
@@ -427,7 +429,7 @@ namespace RobotPainter.ConsoleTest
             IColorToCoordConverter color2coord = new ManualColorToCoord(new List<ColorLab> { new ColorLab() }, new PointD(0, 0), 3, 3, 10, 2);
             IPltConverter pltConverter = new PltConverter(color2coord);
 
-            var robot = await RobotController.Create(pltConverter, path_plt);
+            var robot = await RobotController.Create(pltConverter, path_plt, path_img);
 
             var brushstrokeInfo = new BrushstrokeInfo()
             {
@@ -440,7 +442,7 @@ namespace RobotPainter.ConsoleTest
             /*for(int i = 0; i < 3; i++)
             {
                 Console.WriteLine($"taking photo {i + 1}");
-                var bmp = await robot.TakePhoto(path_img);
+                var bmp = await robot.GetFeedback();
                 bmp.Save(path_bmp + $"image_{i + 1}.png");
                 Thread.Sleep(1000 * 10);
             }*/

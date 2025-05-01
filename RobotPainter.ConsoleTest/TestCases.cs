@@ -447,5 +447,19 @@ namespace RobotPainter.ConsoleTest
                 Thread.Sleep(1000 * 10);
             }*/
         }
+
+        public static void VoronoiNCalculationsTest()
+        {
+            double canvas_width = 300;
+            double canvas_height = 300;
+            double max_width = 5;
+            double overlap = 1;
+
+
+            Console.WriteLine($"Canvas width: {canvas_width}; Canvas heiht: {canvas_height};");
+            Console.WriteLine($"Stroke width: {max_width}; Overlap: {overlap};");
+            int voronoiN = RobotPainterCalculator.CalculateNVoronoiByStrokeWidth(canvas_width, canvas_height, max_width, overlap);
+            Console.WriteLine($"Calculated voronoi N: {voronoiN}");
+        }
     }
 }

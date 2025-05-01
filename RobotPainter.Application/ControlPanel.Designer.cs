@@ -38,8 +38,8 @@
             label_timePassedDisplay = new Label();
             label_timeEstCurrLayer = new Label();
             label_timeEstCurrLayerDisplay = new Label();
-            label_timeEstAllLayers = new Label();
-            label_timeEstAllLayersDisplay = new Label();
+            label_totalStrokes = new Label();
+            label_totalStrokesDisplay = new Label();
             SuspendLayout();
             // 
             // button_start
@@ -88,7 +88,7 @@
             // 
             label_currentLayer.AutoSize = true;
             label_currentLayer.Font = new Font("Segoe UI", 12F);
-            label_currentLayer.Location = new Point(0, 47);
+            label_currentLayer.Location = new Point(0, 94);
             label_currentLayer.Name = "label_currentLayer";
             label_currentLayer.Size = new Size(104, 21);
             label_currentLayer.TabIndex = 4;
@@ -98,7 +98,7 @@
             // 
             label_currentLayerDisplay.AutoSize = true;
             label_currentLayerDisplay.Font = new Font("Segoe UI", 12F);
-            label_currentLayerDisplay.Location = new Point(0, 68);
+            label_currentLayerDisplay.Location = new Point(0, 115);
             label_currentLayerDisplay.Name = "label_currentLayerDisplay";
             label_currentLayerDisplay.Size = new Size(82, 21);
             label_currentLayerDisplay.TabIndex = 5;
@@ -108,7 +108,7 @@
             // 
             label_timePassed.AutoSize = true;
             label_timePassed.Font = new Font("Segoe UI", 12F);
-            label_timePassed.Location = new Point(0, 94);
+            label_timePassed.Location = new Point(0, 47);
             label_timePassed.Name = "label_timePassed";
             label_timePassed.Size = new Size(99, 21);
             label_timePassed.TabIndex = 6;
@@ -118,7 +118,7 @@
             // 
             label_timePassedDisplay.AutoSize = true;
             label_timePassedDisplay.Font = new Font("Segoe UI", 12F);
-            label_timePassedDisplay.Location = new Point(0, 115);
+            label_timePassedDisplay.Location = new Point(0, 68);
             label_timePassedDisplay.Name = "label_timePassedDisplay";
             label_timePassedDisplay.Size = new Size(82, 21);
             label_timePassedDisplay.TabIndex = 7;
@@ -130,9 +130,9 @@
             label_timeEstCurrLayer.Font = new Font("Segoe UI", 12F);
             label_timeEstCurrLayer.Location = new Point(0, 141);
             label_timeEstCurrLayer.Name = "label_timeEstCurrLayer";
-            label_timeEstCurrLayer.Size = new Size(238, 21);
+            label_timeEstCurrLayer.Size = new Size(240, 21);
             label_timeEstCurrLayer.TabIndex = 8;
-            label_timeEstCurrLayer.Text = "Time estimation for current level:";
+            label_timeEstCurrLayer.Text = "Time estimation for current layer:";
             // 
             // label_timeEstCurrLayerDisplay
             // 
@@ -140,35 +140,35 @@
             label_timeEstCurrLayerDisplay.Font = new Font("Segoe UI", 12F);
             label_timeEstCurrLayerDisplay.Location = new Point(0, 162);
             label_timeEstCurrLayerDisplay.Name = "label_timeEstCurrLayerDisplay";
-            label_timeEstCurrLayerDisplay.Size = new Size(60, 21);
+            label_timeEstCurrLayerDisplay.Size = new Size(82, 21);
             label_timeEstCurrLayerDisplay.TabIndex = 9;
-            label_timeEstCurrLayerDisplay.Text = "--h:--m";
+            label_timeEstCurrLayerDisplay.Text = "--h:--m:--s";
             // 
-            // label_timeEstAllLayers
+            // label_totalStrokes
             // 
-            label_timeEstAllLayers.AutoSize = true;
-            label_timeEstAllLayers.Font = new Font("Segoe UI", 12F);
-            label_timeEstAllLayers.Location = new Point(0, 188);
-            label_timeEstAllLayers.Name = "label_timeEstAllLayers";
-            label_timeEstAllLayers.Size = new Size(213, 21);
-            label_timeEstAllLayers.TabIndex = 10;
-            label_timeEstAllLayers.Text = "Time estimatoin for all layers:";
+            label_totalStrokes.AutoSize = true;
+            label_totalStrokes.Font = new Font("Segoe UI", 12F);
+            label_totalStrokes.Location = new Point(0, 188);
+            label_totalStrokes.Name = "label_totalStrokes";
+            label_totalStrokes.Size = new Size(138, 21);
+            label_totalStrokes.TabIndex = 10;
+            label_totalStrokes.Text = "Total strokes done:";
             // 
-            // label_timeEstAllLayersDisplay
+            // label_totalStrokesDisplay
             // 
-            label_timeEstAllLayersDisplay.AutoSize = true;
-            label_timeEstAllLayersDisplay.Font = new Font("Segoe UI", 12F);
-            label_timeEstAllLayersDisplay.Location = new Point(0, 209);
-            label_timeEstAllLayersDisplay.Name = "label_timeEstAllLayersDisplay";
-            label_timeEstAllLayersDisplay.Size = new Size(60, 21);
-            label_timeEstAllLayersDisplay.TabIndex = 11;
-            label_timeEstAllLayersDisplay.Text = "--h:--m";
+            label_totalStrokesDisplay.AutoSize = true;
+            label_totalStrokesDisplay.Font = new Font("Segoe UI", 12F);
+            label_totalStrokesDisplay.Location = new Point(0, 209);
+            label_totalStrokesDisplay.Name = "label_totalStrokesDisplay";
+            label_totalStrokesDisplay.Size = new Size(22, 21);
+            label_totalStrokesDisplay.TabIndex = 11;
+            label_totalStrokesDisplay.Text = "--";
             // 
             // ControlPanel
             // 
             AutoScaleMode = AutoScaleMode.None;
-            Controls.Add(label_timeEstAllLayersDisplay);
-            Controls.Add(label_timeEstAllLayers);
+            Controls.Add(label_totalStrokesDisplay);
+            Controls.Add(label_totalStrokes);
             Controls.Add(label_timeEstCurrLayerDisplay);
             Controls.Add(label_timeEstCurrLayer);
             Controls.Add(label_timePassedDisplay);
@@ -199,7 +199,7 @@
         private Label label_timePassedDisplay;
         private Label label_timeEstCurrLayer;
         private Label label_timeEstCurrLayerDisplay;
-        private Label label_timeEstAllLayers;
-        private Label label_timeEstAllLayersDisplay;
+        private Label label_totalStrokes;
+        private Label label_totalStrokesDisplay;
     }
 }

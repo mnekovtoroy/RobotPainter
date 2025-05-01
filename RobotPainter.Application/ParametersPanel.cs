@@ -19,7 +19,7 @@ namespace RobotPainter.Application
         public EventHandler? NewImageOpened;
         public EventHandler? ParameterChanged;
 
-        private readonly int defaultNumOfLayers = 3;
+        private readonly int defaultNumOfLayers = 1;
         private readonly int minNumOfLayers = 1;
         private readonly int maxNumOfLayers = 5;
 

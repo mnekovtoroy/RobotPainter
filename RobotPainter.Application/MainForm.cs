@@ -1,3 +1,4 @@
+using RobotPainter.Application.CustomEventArgs;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
@@ -7,6 +8,11 @@ namespace RobotPainter.Application
 {
     public partial class MainForm : Form
     {
+        EventHandler<DrawingStartedEventArgs>? DrawingStarted;
+        EventHandler? DrawingEnded;
+        EventHandler<LayerCompletedEventArgs>? LayerCompleted;
+        EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
+
         IPainter painter;
 
         RobotPainterCalculator? calculator;
@@ -30,6 +36,11 @@ namespace RobotPainter.Application
             parametersPanel.CalculatePredictionButtonClicked += button_calculatePrediction_clicked;
             parametersPanel.ParameterChanged += (object? sender, EventArgs e) => prediction_isRelevant = false;
             controlPanel.StartButtonClicked += button_startDrawing_clicked;
+
+            DrawingStarted += controlPanel.onDrawingStarted;
+            DrawingEnded += controlPanel.onDrawingEnded;
+            LayerCompleted += controlPanel.onLayerCompletion;
+            StrokeCompleted += controlPanel.onStrokeCompletion;
         }
 
         private void UpdateImage(object? sender, EventArgs e)
@@ -204,7 +215,7 @@ namespace RobotPainter.Application
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.AllLayersOptions.Add(RobotPainterCalculator.CreateLayerOptions());
 
-                Console.WriteLine("Starting drawing...");
+                DrawingStarted?.Invoke(this, new DrawingStartedEventArgs() { TotalLayers = calculator.NumOfLayers });
 
                 //for every layer
                 for (int i = 0; i < 1; i++)
@@ -216,9 +227,10 @@ namespace RobotPainter.Application
                     {
                         await painter.ApplyStrokes([Mapper.Map(brushstrokes[j])]);
 
+                        StrokeCompleted?.Invoke(this, new() { StrokeIndex = j, TotalStrokes = brushstrokes.Count });
+
                         if(j % 100 == 0)
                         {
-                            Console.WriteLine($"Layer {i + 1}: {j + 1} strokes done");
                             Console.WriteLine("Updating photo...");
                             photo = await painter.GetFeedback();
                             lastPhoto = photo;
@@ -226,13 +238,15 @@ namespace RobotPainter.Application
                         }
                     }
 
+                    LayerCompleted?.Invoke(this, new() { LayerIndex = i, TotalLayers = calculator.NumOfLayers });
+
                     photo = await painter.GetFeedback();
                     lastPhoto = photo;
                     OnPhotoUpdate();
 
                     calculator.ApplyFeedback(TransformPhoto(lastPhoto));
-                    Console.WriteLine($"Layer {i + 1}: done");
                 }
+                DrawingEnded?.Invoke(this, EventArgs.Empty);
             });
             Console.WriteLine("Drawing finished.");
         }

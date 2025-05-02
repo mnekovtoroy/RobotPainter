@@ -87,6 +87,8 @@ namespace RobotPainter.Calculations
             strokeGenerator = new StrokeGenerator(
                 targetLabBitmap,
                 AllLayersOptions[CurrLayer].NVoronoi,
+                isPaintedOn,
+                colorError,
                 MapStrokeGeneratorOptions(AllLayersOptions[CurrLayer]));
         }
 

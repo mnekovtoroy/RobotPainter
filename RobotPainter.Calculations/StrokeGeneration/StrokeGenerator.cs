@@ -8,6 +8,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
     {
         public class Options
         {
+            public double ErrorLeniency = 5.0;
+
             public int RelaxationIterations = 5;
             public int LpullIterations = 2;
             public double LpullMaxStep = 2.0;
@@ -31,6 +33,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
         public double[,] u;
         public double[,] v;
 
+        Dictionary<VoronoiSite, bool> sitesToPaint;
+
         private int width;
         private int height;
 
@@ -38,7 +42,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<StrokeSites> strokes = new List<StrokeSites>();
 
-        public StrokeGenerator(LabBitmap target_image, int n_voronoi, Options options)
+        public StrokeGenerator(LabBitmap target_image, int n_voronoi, bool[,] is_painted, double[,] error, Options options)
         {
             image = target_image;
             (u,v) = ImageProcessor.LNormWithRollAvg(image, options.RollingAverageN);
@@ -52,6 +56,60 @@ namespace RobotPainter.Calculations.StrokeGeneration
             sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
             unassigned_sites = sites.Select(x => x).ToList();
             siteToStroke = new Dictionary<VoronoiSite, StrokeSites>();
+
+            sitesToPaint = CalculateSitesToPaint(is_painted, error);
+        }
+
+        private Dictionary<VoronoiSite, bool> CalculateSitesToPaint(bool[,] is_painted, double[,] error)
+        {
+            var mask = GetVoronoiMask();
+
+            var total_error = new Dictionary<VoronoiSite, double>();
+            var pixel_count = new Dictionary<VoronoiSite, int>();
+
+            var result = sites.Select(s => new KeyValuePair<VoronoiSite, bool>(s, false)).ToDictionary();
+
+            for(int x = 0; x < width; x++)
+            {
+                for(int y = 0; y < height; y++)
+                {
+                    var site = sites[mask[x, y]];
+
+                    if (result[site])
+                        break;
+
+                    if (!is_painted[x,y])
+                    {
+                        result[site] = true;
+                        if(total_error.ContainsKey(site))
+                        {
+                            total_error.Remove(site);
+                            pixel_count.Remove(site);
+                        }
+                        break;
+                    }
+
+                    if(total_error.ContainsKey(site))
+                    {
+                        total_error[site] += error[x, y];
+                        pixel_count[site]++;
+                    }
+                    else
+                    {
+                        total_error.Add(site, error[x, y]);
+                        pixel_count.Add(site, 1);
+                    }
+                }
+            }
+            foreach(var site_error in total_error)
+            {
+                var avg_error = site_error.Value / pixel_count[site_error.Key];
+                if(avg_error > options.ErrorLeniency)
+                {
+                    result[site_error.Key] = true;
+                }
+            }
+            return result;
         }
 
         public void Lfit(int iterations, double max_step_per_i)
@@ -131,6 +189,11 @@ namespace RobotPainter.Calculations.StrokeGeneration
         public bool IsSiteReserved(VoronoiSite site)
         {
             return !unassigned_sites.Contains(site);
+        }
+
+        public bool IsSiteToPaint(VoronoiSite site)
+        {
+            return sitesToPaint.ContainsKey(site) && sitesToPaint[site];
         }
 
         private void ClearSitesList()

@@ -138,7 +138,7 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new StrokeGenerator(lbmp, 200, new StrokeGenerator.Options());
+            var voronoi = new StrokeGenerator(lbmp, 200, new bool[image.Width, image.Height], new double[image.Width, image.Height], new StrokeGenerator.Options());
             DateTime start = DateTime.Now;
             int[,] mask = voronoi.GetVoronoiMask();
             DateTime end = DateTime.Now;
@@ -182,7 +182,7 @@ namespace RobotPainter.ConsoleTest
             double[,] u, v;
             (u, v) = ImageProcessor.LNormWithRollAvg(lbmp, 3);
 
-            var voronoi = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
+            var voronoi = new StrokeGenerator(lbmp, sites_n, new bool[image.Width, image.Height], new double[image.Width, image.Height], new StrokeGenerator.Options());
 
             int[] check_intervals = new int[] { 1, 2, 5};
 
@@ -216,7 +216,7 @@ namespace RobotPainter.ConsoleTest
 
             LabBitmap lbmp = new LabBitmap(image);
 
-            var generator = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
+            var generator = new StrokeGenerator(lbmp, sites_n, new bool[image.Width, image.Height], new double[image.Width, image.Height], new StrokeGenerator.Options());
 
             generator.Lfit(20, 2.0);
 
@@ -255,7 +255,7 @@ namespace RobotPainter.ConsoleTest
             LabBitmap lbmp = new LabBitmap(image);
 
             var brushModel = new BasicBrushModel();
-            var generator = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
+            var generator = new StrokeGenerator(lbmp, sites_n, new bool[image.Width, image.Height], new double[image.Width, image.Height], new StrokeGenerator.Options());
 
             generator.Lfit(20, 2.0);
 
@@ -341,7 +341,7 @@ namespace RobotPainter.ConsoleTest
             int n_clusters = 8;
 
             var lbmp = new LabBitmap(image);
-            var generator = new StrokeGenerator(lbmp, sites_n, new StrokeGenerator.Options());
+            var generator = new StrokeGenerator(lbmp, sites_n, new bool[image.Width, image.Height], new double[image.Width, image.Height], new StrokeGenerator.Options());
 
             List<ColorLab> all_colors = generator.sites.Select(s => s.Centroid).Select(c => new ColorLab(generator.image.GetPixel(Convert.ToInt32(c.X), Convert.ToInt32(c.Y)).L, 0, 0)).ToList();
 ;

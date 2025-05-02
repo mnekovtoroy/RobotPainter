@@ -44,12 +44,25 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
                 PointD norm_v = new PointD(vx, vy);
 
-                VoronoiSite next_site = GetAdjasentSite(stroke_sites, last_site, norm_v, prev_v, options);
-
-                if (!IsValidSite(stroke_sites, next_site))
+                var next_site_candidates = GetNextSiteCandidates(stroke_sites, last_site, norm_v, prev_v, options);
+                if (next_site_candidates == null || next_site_candidates.Count == 0)
                     break;
-                var next_centroid = next_site.Centroid;
-                if (!IsValidExpand(stroke_sites, last_centroid, next_centroid, curr_length, options))
+
+                VoronoiSite next_site = null;
+                VoronoiPoint next_centroid = null;
+                for(int i = 0; i < next_site_candidates.Count; i++)
+                {
+                    if (!IsValidSite(stroke_sites, next_site_candidates[i]))
+                        continue;
+                    next_centroid = next_site_candidates[i].Centroid;
+                    if (!IsValidExpand(stroke_sites, last_centroid, next_centroid, curr_length, options))
+                        continue;
+
+                    next_site = next_site_candidates[i];
+                    break;
+                }
+
+                if (next_site == null)
                     break;
 
                 curr_length += Math.Sqrt(Math.Pow(next_centroid.X - last_centroid.X, 2) + Math.Pow(next_centroid.Y - last_centroid.Y, 2));
@@ -86,12 +99,25 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
                 PointD norm_v = new PointD(vx, vy);
 
-                VoronoiSite next_site = GetAdjasentSite(stroke_sites, last_site, norm_v, prev_v, options);
-
-                if (!IsValidSite(stroke_sites, next_site))
+                var next_site_candidates = GetNextSiteCandidates(stroke_sites, last_site, norm_v, prev_v, options);
+                if (next_site_candidates == null || next_site_candidates.Count == 0)
                     break;
-                var next_centroid = next_site.Centroid;
-                if (!IsValidExpand(stroke_sites, last_centroid, next_centroid, curr_length, options))
+
+                VoronoiSite next_site = null;
+                VoronoiPoint next_centroid = null;
+                for (int i = 0; i < next_site_candidates.Count; i++)
+                {
+                    if (!IsValidSite(stroke_sites, next_site_candidates[i]))
+                        continue;
+                    next_centroid = next_site_candidates[i].Centroid;
+                    if (!IsValidExpand(stroke_sites, last_centroid, next_centroid, curr_length, options))
+                        continue;
+
+                    next_site = next_site_candidates[i];
+                    break;
+                }
+
+                if (next_site == null)
                     break;
 
                 curr_length += Math.Sqrt(Math.Pow((next_centroid.X - last_centroid.X) * options.xResizeCoeff, 2) + Math.Pow((next_centroid.Y - last_centroid.Y) * options.yResizeCoeff, 2));
@@ -136,7 +162,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 && stroke_sites.strokeGenerator.IsSiteToPaint(site);
         }
 
-        private static VoronoiSite GetAdjasentSite(StrokeSites stroke_sites, VoronoiSite site, PointD norm, PointD prev_v, Options options)
+        private static List<VoronoiSite> GetNextSiteCandidates(StrokeSites stroke_sites, VoronoiSite site, PointD norm, PointD prev_v, Options options)
         {
             var candidates = new Dictionary<VoronoiSite, double>();
             //var neighbors = site.Neighbours;
@@ -204,8 +230,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
             {
                 return null;
             }
-            var result = candidates.OrderBy(c => c.Value).First();
-            return result.Key;
+            //var result = candidates.OrderBy(c => c.Value).First();
+            return candidates.OrderBy(c => c.Value).Select(c => c.Key).ToList();
         }
 
         public static PointD VoronoiPointToPointD(VoronoiPoint p)

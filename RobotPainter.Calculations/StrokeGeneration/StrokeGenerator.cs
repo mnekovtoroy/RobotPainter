@@ -8,6 +8,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
     {
         public class Options
         {
+            public double ErrorLeniency = 3.0;
+
             public int RelaxationIterations = 5;
             public int LpullIterations = 2;
             public double LpullMaxStep = 2.0;
@@ -23,6 +25,14 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return plane.Sites;
         }
 
+        public static int CalculateDesiredVoronoiN(double canvas_width, double canvas_height, double stroke_width, double overlap)
+        {
+            const double safety_overhead = 4;
+
+            double non_overlapped = stroke_width - 2.0 * overlap;
+            return Convert.ToInt32(((canvas_width * canvas_height) / (non_overlapped * non_overlapped)) * safety_overhead);
+        }
+
         public List<VoronoiSite> sites;
 
         private Dictionary<VoronoiSite, StrokeSites> siteToStroke;
@@ -31,6 +41,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
         public double[,] u;
         public double[,] v;
 
+        Dictionary<VoronoiSite, bool> sitesToPaint;
+
         private int width;
         private int height;
 
@@ -38,7 +50,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public List<StrokeSites> strokes = new List<StrokeSites>();
 
-        public StrokeGenerator(LabBitmap target_image, int n_voronoi, Options options)
+        public StrokeGenerator(LabBitmap target_image, int n_voronoi, bool[,] is_painted, double[,] error, Options options)
         {
             image = target_image;
             (u,v) = ImageProcessor.LNormWithRollAvg(image, options.RollingAverageN);
@@ -49,9 +61,65 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height, options.RelaxationIterations);
             Lfit(options.LpullIterations, options.LpullMaxStep);
-            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
-            unassigned_sites = sites.Select(x => x).ToList();
+            ClearSitesList();
+            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(Math.Floor(s.Centroid.X)), Convert.ToInt32(Math.Floor(s.Centroid.Y))).L).ToList();
+            
+            sitesToPaint = CalculateSitesToPaint(is_painted, error);
+            
+            unassigned_sites = sites.Where(s => sitesToPaint[s]).ToList();
             siteToStroke = new Dictionary<VoronoiSite, StrokeSites>();
+        }
+
+        private Dictionary<VoronoiSite, bool> CalculateSitesToPaint(bool[,] is_painted, double[,] error)
+        {
+            var mask = GetVoronoiMask();
+
+            var total_error = new Dictionary<VoronoiSite, double>();
+            var pixel_count = new Dictionary<VoronoiSite, int>();
+
+            var result = sites.Select(s => new KeyValuePair<VoronoiSite, bool>(s, false)).ToDictionary();
+
+            for(int x = 0; x < width; x++)
+            {
+                for(int y = 0; y < height; y++)
+                {
+                    var site = sites[mask[x, y]];
+
+                    if (result[site])
+                        continue;
+
+                    if (!is_painted[x,y])
+                    {
+                        result[site] = true;
+                        if(total_error.ContainsKey(site))
+                        {
+                            total_error.Remove(site);
+                            pixel_count.Remove(site);
+                        }
+                        continue;
+                    }
+
+                    if(total_error.ContainsKey(site))
+                    {
+                        total_error[site] += error[x, y];
+                        pixel_count[site]++;
+                    }
+                    else
+                    {
+                        total_error.Add(site, error[x, y]);
+                        pixel_count.Add(site, 1);
+                    }
+                }
+            }
+            foreach(var site_error in total_error)
+            {
+                var avg_error = site_error.Value / pixel_count[site_error.Key];
+                if(avg_error > options.ErrorLeniency)
+                {
+                    result[site_error.Key] = true;
+                }
+            }
+            return result;
         }
 
         public void Lfit(int iterations, double max_step_per_i)
@@ -87,6 +155,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 
             }
             unassigned_sites = sites.Select(x => x).ToList();
+            sitesToPaint = null;
+            siteToStroke = null;
         }
 
         List<VoronoiSite> unassigned_sites;
@@ -130,12 +200,18 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool IsSiteReserved(VoronoiSite site)
         {
-            return !unassigned_sites.Contains(site);
+            //return !unassigned_sites.Contains(site);
+            return siteToStroke.ContainsKey(site);
+        }
+
+        public bool IsSiteToPaint(VoronoiSite site)
+        {
+            return sitesToPaint.ContainsKey(site) && sitesToPaint[site];
         }
 
         private void ClearSitesList()
         {
-            sites.RemoveAll(x => x.Cell == null);
+            sites.RemoveAll(x => x.Cell == null || x.Cell.Count() == 0);
         }
 
         private (double, double) CalculateSiteLPull(VoronoiSite site)
@@ -144,12 +220,12 @@ namespace RobotPainter.Calculations.StrokeGeneration
             //possible optimization: use site.Cell instead of points
             var points = site.Points;
             var centroid = site.Centroid;
-            int cx = Convert.ToInt32(centroid.X);
-            int cy = Convert.ToInt32(centroid.Y);
+            int cx = Convert.ToInt32(Math.Floor(centroid.X));
+            int cy = Convert.ToInt32(Math.Floor(centroid.Y));
             foreach(var point in site.Points)
             {
-                int px = Convert.ToInt32(point.X);
-                int py = Convert.ToInt32(point.Y);
+                int px = Convert.ToInt32(Math.Floor(point.X));
+                int py = Convert.ToInt32(Math.Floor(point.Y));
                 double L_diff = Math.Abs(image.GetPixel(px, py).L - image.GetPixel(cx, cy).L);
                 x_pull += -(point.X - centroid.X) * L_diff / points.Count();
                 y_pull += -(point.Y - centroid.Y) * L_diff / points.Count();
@@ -239,11 +315,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
 
             return result;
-        }
-
-        public static int CalculateDesiredVoronoiN(double target_stroke_width)
-        {
-            throw new NotImplementedException();
         }
     }
 }

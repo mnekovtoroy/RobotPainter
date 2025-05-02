@@ -36,7 +36,7 @@
             //checking if intersection point is on the segment & the ray
             bool isBetweenXS = x_i >= Math.Min(s_x0, s_x1) && x_i <= Math.Max(s_x0, s_x1);
             bool isBetweenYS = y_i >= Math.Min(s_y0, s_y1) && y_i <= Math.Max(s_y0, s_y1);
-            bool isOnS = (s_dx <= 1e-5 || isBetweenXS) && (s_dy <= 1e-5 || isBetweenYS); //in case segment line is parallel to either of the axes, to exclude numerical error
+            bool isOnS = (Math.Abs(s_dx) <= 1e-5 || isBetweenXS) && (Math.Abs(s_dy) <= 1e-5 || isBetweenYS); //in case segment line is parallel to either of the axes, to exclude numerical error
 
             bool isOnV = (v_dx * (x_i - v_x0) + v_dy * (y_i - v_y0)) > 0;
 
@@ -99,9 +99,24 @@
             return new PointD(p.x * M[0, 0] + p.y * M[0, 1], p.x * M[1, 0] + p.y * M[1, 1]);
         }
 
+        public static PointD RotateCounterClockwise(PointD p, double degree)
+        {
+            double[,] M = new double[2,2];
+            double cos = Math.Cos(degree * Math.PI / 180.0);
+            double sin = Math.Sin(degree * Math.PI / 180.0);
+            M[0, 0] = cos; M[0, 1] = -sin;
+            M[1, 0] = sin; M[1, 1] = cos;
+            return Rotate(p, M);
+        }
+
         public static PointD Scale(PointD p, double x_scale_coeff, double y_scale_coeff)
         {
             return new PointD(p.x * x_scale_coeff, p.y * y_scale_coeff);
+        }
+
+        public static double Dot(PointD p1, PointD p2)
+        {
+            return p1.x * p2.x + p1.y * p2.y;
         }
     }
 }

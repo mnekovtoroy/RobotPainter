@@ -15,20 +15,25 @@
             {
                 for(int j = 0; j < bmp.Height; j++)
                 {
-                    double min_dist = double.MaxValue;
-                    int min_dist_i = -1;
-                    for(int k = 0; k < Colors.Count; k++)
-                    {
-                        if (bmp.GetPixel(i, j).DeltaE76(Colors[k]) < min_dist)
-                        {
-                            min_dist = bmp.GetPixel(i, j).DeltaE76(Colors[k]);
-                            min_dist_i = k;
-                        }
-                    }
-                    bmp.SetPixel(i, j, Colors[min_dist_i]);
+                    bmp.SetPixel(i, j, Apply(bmp.GetPixel(i,j)));
                 }
             }
             return bmp;
+        }
+
+        public ColorLab Apply(ColorLab color)
+        {
+            double min_dist = double.MaxValue;
+            int min_dist_i = -1;
+            for (int k = 0; k < Colors.Count; k++)
+            {
+                if (color.DeltaE76(Colors[k]) < min_dist)
+                {
+                    min_dist = color.DeltaE76(Colors[k]);
+                    min_dist_i = k;
+                }
+            }
+            return Colors[min_dist_i];
         }
     }
 }

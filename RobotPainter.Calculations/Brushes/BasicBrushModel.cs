@@ -160,7 +160,7 @@ namespace RobotPainter.Calculations.Brushes
 
             var footprint_points = footprint.Select(p => Geometry.Rotate(w * p, Mrot) + offset).ToList();
             var footprint_scaled = footprint_points.Select(p => new PointD(p.x * x_scale_coeff, p.y * y_scale_coeff));
-            var result = footprint_scaled.Select(p => new Point(Convert.ToInt32(p.x), Convert.ToInt32(p.y))).ToList();
+            var result = footprint_scaled.Select(p => new Point(Convert.ToInt32(Math.Floor(p.x)), Convert.ToInt32(Math.Floor(p.y)))).ToList();
             return result;
         }
 

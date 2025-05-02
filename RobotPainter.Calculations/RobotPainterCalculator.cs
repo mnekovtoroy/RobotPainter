@@ -43,6 +43,11 @@ namespace RobotPainter.Calculations
         private LabBitmap targetLabBitmap;
         private LabBitmap lastFeedback;
 
+        private Palette palette;
+
+        private bool[,] isPaintedOn;
+        private double[,] colorError;
+
         private int _currLayer = 0;
         public int CurrLayer { get { return _currLayer; } }
         public int NumOfLayers { get { return AllLayersOptions == null ? 0 : AllLayersOptions.Count; } }
@@ -56,8 +61,15 @@ namespace RobotPainter.Calculations
             canvasHeight = canvas_height;
 
             targetLabBitmap = new LabBitmap(_targetImage);
+            isPaintedOn = new bool[targetLabBitmap.Width, targetLabBitmap.Height];
+            colorError = new double[targetLabBitmap.Width, targetLabBitmap.Height];
 
             AllLayersOptions = new List<LayerOptions>();
+        }
+
+        public void SetInitialCanvas(Bitmap initial_canvas)
+        {
+            lastFeedback = new LabBitmap(initial_canvas);
         }
 
         private StrokeGenerator strokeGenerator;
@@ -67,6 +79,8 @@ namespace RobotPainter.Calculations
             strokeGenerator = new StrokeGenerator(
                 targetLabBitmap,
                 AllLayersOptions[CurrLayer].NVoronoi,
+                isPaintedOn,
+                colorError,
                 MapStrokeGeneratorOptions(AllLayersOptions[CurrLayer]));
         }
 
@@ -114,16 +128,42 @@ namespace RobotPainter.Calculations
                 return false;
 
             //initialize stroke generator for that layer
-
+            _currLayer++;
             return true;
         }
 
         public void ApplyFeedback(Bitmap feedback)
         {
-            Console.WriteLine("applying feedback not impleneted");
+            if(lastFeedback == null)
+            {
+                throw new Exception("Initial canvas state must be set. Call RobotPainterCalculator.SetInitialCanvas to do that");
+            }
+
+            var new_feedback = new LabBitmap(feedback);
+
+            const double margin_of_error = 0.5;
+
+            for(int i = 0; i < feedback.Width; i++)
+            {
+                for(int j = 0; j < feedback.Height; j++)
+                {
+                    //checking if a pixel been painted on
+                    if (!isPaintedOn[i,j] && 
+                        lastFeedback.GetPixel(i, j).DeltaE76(new_feedback.GetPixel(i, j)) > margin_of_error)
+                    {
+                        isPaintedOn[i, j] = true;
+                    }
+
+                    //calculating color error
+                    //var paletted_target = palette.Apply(targetLabBitmap.GetPixel(i, j));
+                    var paletted_target = targetLabBitmap.GetPixel(i, j);
+                    colorError[i, j] = paletted_target.DeltaE76(new_feedback.GetPixel(i,j));
+                }
+            }
+            lastFeedback = new_feedback;
         }
 
-        public StrokeGenerator.Options MapStrokeGeneratorOptions(LayerOptions layerOptions)
+        private StrokeGenerator.Options MapStrokeGeneratorOptions(LayerOptions layerOptions)
         {
             return new StrokeGenerator.Options()
             {

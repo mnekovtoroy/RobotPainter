@@ -14,6 +14,8 @@
 
         public static PointD Substract(PointD a, PointD b) => new PointD(a.x - b.x, a.y - b.y);
 
+        public static PointD Invert(PointD a) => new PointD(-a.x, -a.y);
+
         public static PointD Multiply(double a, PointD b) => new PointD(a* b.x, a* b.y);
 
         public static PointD Divide(PointD a, double b) => new PointD(a.x / b, a.y / b);
@@ -27,6 +29,8 @@
         public static PointD operator *(PointD a, double b) => Multiply(b, a);
 
         public static PointD operator /(PointD a, double b) => Divide(a, b);
+
+        public static PointD operator -(PointD a) => Invert(a);
 
         public static bool operator ==(PointD a, PointD b) => a.x == b.x && a.y == b.y;
 

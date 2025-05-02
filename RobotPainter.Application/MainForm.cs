@@ -151,28 +151,44 @@ namespace RobotPainter.Application
             var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
 
             Bitmap result = new Bitmap(image.Width, image.Height);
+
             await Task.Run(() =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.AllLayersOptions = all_layers_options;
+                calculator.SetInitialCanvas(result);
 
-                using (var g = Graphics.FromImage(result))
+                int[] num_of_strokes = new int[calculator.NumOfLayers];
+                //for every layer
+                for (int i = 0; i < calculator.NumOfLayers; i++)
                 {
-                    //for every layer
-                    for (int i = 0; i < 1; i++)
+                    Console.WriteLine($"Layer {i + 1} prediction calculation...");
+                    calculator.InitializeStrokeGenerator();
+                    Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
+                    var brushstrokes = calculator.GetAllBrushstrokes();
+                    num_of_strokes[i] = brushstrokes.Count;
+                    Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
+
+                    using (var g = Graphics.FromImage(result))
                     {
-                        Console.WriteLine($"Layer {i + 1} prediction calculation...");
-                        calculator.InitializeStrokeGenerator();
-                        Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
-                        var brushstrokes = calculator.GetAllBrushstrokes();
-                        Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
                         foreach (var stroke in brushstrokes)
                         {
                             calculator.AllLayersOptions[i].BrushModel.DrawStroke(g, new SolidBrush(stroke.Color.ToRgb()), stroke.RootPath, result.Width / canvas_width, result.Height / canvas_height);
                         }
-                        Console.WriteLine($"Layer {i + 1} prediction calculation: layer applied");
                     }
+                    calculator.ApplyFeedback(result);
+                    calculator.AdvanceLayer();
+                    Console.WriteLine($"Layer {i + 1} prediction calculation: layer applied");
                 }
+
+                int total_strokes = 0;
+                Console.WriteLine("Stroke count:");
+                for (int i = 0; i < num_of_strokes.Length; i++)
+                {
+                    Console.WriteLine($"Layer {i + 1}: {num_of_strokes[i]} strokes");
+                    total_strokes += num_of_strokes[i];
+                }
+                Console.WriteLine($"Total predicted strokes: {total_strokes}");
             });
             Console.WriteLine("Prediction calculated.");
             return result;
@@ -216,11 +232,12 @@ namespace RobotPainter.Application
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.AllLayersOptions = all_layers_options;
+                calculator.SetInitialCanvas(TransformPhoto(photo));
 
                 DrawingStarted?.Invoke(this, new DrawingStartedEventArgs() { TotalLayers = calculator.NumOfLayers });
 
                 //for every layer
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < calculator.NumOfLayers; i++)
                 {
                     calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
@@ -241,11 +258,13 @@ namespace RobotPainter.Application
 
                     LayerCompleted?.Invoke(this, new() { LayerIndex = i, TotalLayers = calculator.NumOfLayers });
 
-                    photo = await painter.GetFeedback();
-                    lastPhoto = photo;
-                    OnPhotoUpdate();
+                    var feedback = await painter.GetFeedback();
+                    lastPhoto = feedback;
 
                     calculator.ApplyFeedback(TransformPhoto(lastPhoto));
+                    calculator.AdvanceLayer();
+                    
+                    OnPhotoUpdate();
                 }
                 DrawingEnded?.Invoke(this, EventArgs.Empty);
             });

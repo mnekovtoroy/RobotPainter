@@ -27,7 +27,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public static int CalculateDesiredVoronoiN(double canvas_width, double canvas_height, double stroke_width, double overlap)
         {
-            const double safety_overhead = 2;
+            const double safety_overhead = 4;
 
             double non_overlapped = stroke_width - 2.0 * overlap;
             return Convert.ToInt32(((canvas_width * canvas_height) / (non_overlapped * non_overlapped)) * safety_overhead);
@@ -61,7 +61,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height, options.RelaxationIterations);
             Lfit(options.LpullIterations, options.LpullMaxStep);
-            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
+            ClearSitesList();
+            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(Math.Floor(s.Centroid.X)), Convert.ToInt32(Math.Floor(s.Centroid.Y))).L).ToList();
             
             sitesToPaint = CalculateSitesToPaint(is_painted, error);
             
@@ -210,7 +211,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private void ClearSitesList()
         {
-            sites.RemoveAll(x => x.Cell == null);
+            sites.RemoveAll(x => x.Cell == null || x.Cell.Count() == 0);
         }
 
         private (double, double) CalculateSiteLPull(VoronoiSite site)
@@ -219,12 +220,12 @@ namespace RobotPainter.Calculations.StrokeGeneration
             //possible optimization: use site.Cell instead of points
             var points = site.Points;
             var centroid = site.Centroid;
-            int cx = Convert.ToInt32(centroid.X);
-            int cy = Convert.ToInt32(centroid.Y);
+            int cx = Convert.ToInt32(Math.Floor(centroid.X));
+            int cy = Convert.ToInt32(Math.Floor(centroid.Y));
             foreach(var point in site.Points)
             {
-                int px = Convert.ToInt32(point.X);
-                int py = Convert.ToInt32(point.Y);
+                int px = Convert.ToInt32(Math.Floor(point.X));
+                int py = Convert.ToInt32(Math.Floor(point.Y));
                 double L_diff = Math.Abs(image.GetPixel(px, py).L - image.GetPixel(cx, cy).L);
                 x_pull += -(point.X - centroid.X) * L_diff / points.Count();
                 y_pull += -(point.Y - centroid.Y) * L_diff / points.Count();

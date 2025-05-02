@@ -36,8 +36,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             while (curr_length < options.CanvasMaxStrokeLength)
             {
-                int lc_ix = Convert.ToInt32(last_centroid.X);
-                int lc_iy = Convert.ToInt32(last_centroid.Y);
+                int lc_ix = Convert.ToInt32(Math.Floor(last_centroid.X));
+                int lc_iy = Convert.ToInt32(Math.Floor(last_centroid.Y));
 
                 double vx = stroke_sites.strokeGenerator.u[lc_ix, lc_iy];
                 double vy = stroke_sites.strokeGenerator.v[lc_ix, lc_iy];
@@ -78,7 +78,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
             while (curr_length < options.CanvasMaxStrokeLength)
             {
-                int lc_ix = Convert.ToInt32(last_centroid.X);
+                int lc_ix = Convert.ToInt32(Math.Floor(last_centroid.X));
                 int lc_iy = Convert.ToInt32(last_centroid.Y);
 
                 double vx = -stroke_sites.strokeGenerator.u[lc_ix, lc_iy];
@@ -177,8 +177,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 if (Geometry.Dot(triag_1_p1 - e_start, triag_1_p2 - e_start) > 0)
                 {
                     PointD p1 = new PointD((triag_1_p1.x + triag_1_p2.x) / 2.0, (triag_1_p1.y + triag_1_p2.y) / 2.0);
-                    int x = Convert.ToInt32(p1.x);
-                    int y = Convert.ToInt32(p1.y);
+                    int x = Convert.ToInt32(Math.Floor(p1.x));
+                    int y = Convert.ToInt32(Math.Floor(p1.y));
                     if(Math.Abs(stroke_sites.strokeGenerator.image.GetPixel(x, y).L - stroke_sites.MainColor.L) > options.L_tol)
                     {
                         outside_color_variance = false;
@@ -187,8 +187,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 if (Geometry.Dot(triag_2_p1 - e_end, triag_2_p2 - e_end) > 0)
                 {
                     PointD p2 = new PointD((triag_2_p1.x + triag_2_p2.x) / 2.0, (triag_2_p1.y + triag_2_p2.y) / 2.0);
-                    int x = Convert.ToInt32(p2.x);
-                    int y = Convert.ToInt32(p2.y);
+                    int x = Convert.ToInt32(Math.Floor(p2.x));
+                    int y = Convert.ToInt32(Math.Floor(p2.y));
                     if (Math.Abs(stroke_sites.strokeGenerator.image.GetPixel(x, y).L - stroke_sites.MainColor.L) > options.L_tol)
                     {
                         outside_color_variance = false;

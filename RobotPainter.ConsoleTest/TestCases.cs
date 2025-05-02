@@ -467,22 +467,23 @@ namespace RobotPainter.ConsoleTest
         public static void FeedbackTest()
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
-            Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int[] sites_n = [ 20000, 50000 ];
-            double[] overlap = [ 1.5, 1.0 ];
-            double canvas_width = 300;
+            Bitmap image = new Bitmap(path + "test3.jpg");
+            double[] max_width = [7, 5, 3];
+            double[] overlap = [1.5, 1.0, 0.5];
+            double canvas_width = 400;
             double canvas_height = 300;
             var brush = new BasicBrushModel();
 
             var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height);
             robot_painter.AllLayersOptions = new List<RobotPainterCalculator.LayerOptions>();
 
-            for(int i = 0; i < sites_n.Length; i++)
+            for(int i = 0; i < max_width.Length; i++)
             {
                 var layer_options = RobotPainterCalculator.CreateLayerOptions();
 
-                layer_options.NVoronoi = sites_n[i];
+                layer_options.MaxWidth = max_width[i];
                 layer_options.Overlap = overlap[i];
+                layer_options.NVoronoi = StrokeGenerator.CalculateDesiredVoronoiN(canvas_width, canvas_height, max_width[i], overlap[i]);
 
                 robot_painter.AllLayersOptions.Add(layer_options);
             }
@@ -513,11 +514,11 @@ namespace RobotPainter.ConsoleTest
                     var stroke_path = strokes[j].DesiredPath.Select(p => (Convert.ToInt32(p.x * image.Width / canvas_width), Convert.ToInt32(p.y * image.Height / canvas_height))).ToList();
                     VoronoiVisualizer.VisualizeStrokeInline(strokes_visuals, stroke_path, Color.Blue, Color.Red, 1);
                 }
-                strokes_visuals.Save(path + @$"layer_test\strokes_layer_{i}.png");
+                strokes_visuals.Save(path + @$"layer_test2\strokes_layer_{i}.png");
 
                 robot_painter.ApplyFeedback(result);
                 robot_painter.AdvanceLayer();
-                result.Save(path + @$"layer_test\layer_{i}.png");
+                result.Save(path + @$"layer_test2\layer_{i}.png");
 
             }
 

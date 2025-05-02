@@ -467,11 +467,11 @@ namespace RobotPainter.ConsoleTest
         public static void FeedbackTest()
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
-            Bitmap image = new Bitmap(path + "test_picture3.jpg");
+            Bitmap image = new Bitmap(path + "test_ball2.jpg");
             double[] max_width = [7];
             double[] overlap = [1.5];
-            double canvas_width = 100;
-            double canvas_height = 180;
+            double canvas_width = 300;
+            double canvas_height = 300;
             var brush = new BasicBrushModel();
 
             var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height);

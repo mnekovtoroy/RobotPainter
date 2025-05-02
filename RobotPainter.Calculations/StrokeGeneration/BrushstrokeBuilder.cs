@@ -14,9 +14,9 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public IBrushModel BrushModel = new BasicBrushModel();
 
             public double MaxWidth = 7.0;
-            public double Overlap = 1.3;
+            public double Overlap = 1.0;
             public double StartOverheadCoeff = 1.5;
-            public double EndOverheadCoeff = 1.5;
+            public double EndOverheadCoeff = 1.2;
             public double SafeHeight = 2.0;
             public double StartRunawayAngle = 30.0;
             public double EndRunawayAngle = 80.0;
@@ -51,7 +51,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private static List<Point3D> BaseDesiredPath(StrokeSites stroke_sites, Options options)
         {
-            if (stroke_sites.involvedSites.Count == 1) 
+            if (stroke_sites.involvedSites.Count == 1)
                 return SingleSiteBaseDesiredPath(stroke_sites, options);
 
             var result = new List<Point3D>();
@@ -92,7 +92,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             var v = stroke_reg.StartingNorm;
 
-            if(Geometry.Norm(v) == 0)
+            if (Geometry.Norm(v) == 0)
             {
                 v.x = options.xResizeCoeff >= options.yResizeCoeff ? 1.0 : 0.0;
                 v.y = options.xResizeCoeff < options.yResizeCoeff ? 1.0 : 0.0;
@@ -105,18 +105,40 @@ namespace RobotPainter.Calculations.StrokeGeneration
             var site = stroke_reg.startingSite;
             var centroid = stroke_reg.startingCentroid;
             double r = FindDesiredR(site, options);
+            double z = options.BrushModel.CalculateZCoordinate(r);
 
             var pm = new PointD(centroid.X, centroid.Y);
+
+            //shorter edge should be the starting one
+            var edge1 = GetIntersectingEdge(site, pm, pm - v);
+            var edge2 = GetIntersectingEdge(site, pm, pm + v);
+            PointD v1 = new PointD(edge1.End.X - edge1.Start.X, edge1.End.Y - edge1.Start.Y);
+            PointD v2 = new PointD(edge2.End.X - edge2.Start.X, edge2.End.Y - edge2.Start.Y);
+            PointD vp = Geometry.RotateCounterClockwise(v, 90);
+            if (Geometry.CalculateAngleDeg(v1, vp) > 90)
+                v1 = -v1;
+            if (Geometry.CalculateAngleDeg(v2, vp) > 90)
+                v2 = -v2;
+            double l1 = Geometry.Dot(v1, vp);
+            double l2 = Geometry.Dot(v2, vp);
+            var s_edge = l1 < l2 ? edge1 : edge2;
+            var e_edge = l1 >= l2 ? edge1 : edge2;
+            if (l1 >= l2)
+                v = -v;
+
             //start
-            PointD ps = pm - v * r * options.StartOverheadCoeff;
+            var ps_0 = Geometry.GetRaySegmentIntersectionPoint(pm.x, pm.y, -v.x, -v.y, s_edge.Start.X, s_edge.Start.Y, s_edge.End.X, s_edge.End.Y).Value;
+            PointD ps = pm + (ps_0 - pm) * options.StartOverheadCoeff;
             result.Add(new Point3D(ps.x, ps.y, 0.0));
+            //result.Add(new Point3D(ps_0.x, ps_0.y, z / 2.0));
 
             //middle
-            double z = options.BrushModel.CalculateZCoordinate(r);
             result.Add(new Point3D(pm.x, pm.y, z));
 
             //end
-            PointD pe = pm + v * r * options.EndOverheadCoeff;
+            var pe_0 = Geometry.GetRaySegmentIntersectionPoint(pm.x, pm.y, v.x, v.y, e_edge.Start.X, e_edge.Start.Y, e_edge.End.X, e_edge.End.Y).Value;
+            PointD pe = pm + (pe_0 - pm) * options.EndOverheadCoeff;
+            //result.Add(new Point3D(pe_0.x, pe_0.y, z / 2.0));
             result.Add(new Point3D(pe.x, pe.y, 0.0));
 
             return result;
@@ -151,7 +173,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 options.SafeHeight / Math.Tan(options.EndRunawayAngle * Math.PI / 180.0);
 
             double d = Math.Sqrt(Math.Pow(list[0].x - list[1].x, 2) + Math.Pow(list[0].y - list[1].y, 2));
-            PointD start_v = new PointD((list[0].x - list[1].x) / d, (list[0].y - list[0].y) / d);
+            PointD start_v = new PointD((list[0].x - list[1].x) / d, (list[0].y - list[1].y) / d);
 
             d = Math.Sqrt(Math.Pow(list[list.Count - 1].x - list[list.Count - 2].x, 2) + Math.Pow(list[list.Count - 1].y - list[list.Count - 2].y, 2));
             PointD end_v = new PointD((list[list.Count - 1].x - list[list.Count - 2].x) / d, (list[list.Count - 1].y - list[list.Count - 2].y) / d);
@@ -175,8 +197,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             foreach(var p in points)
             {
                 PointD curr_p = new PointD(p.X, p.Y);
-                PointD r_v = new PointD((curr_p.x - p_centroid.x) * options.xResizeCoeff, (curr_p.y - p_centroid.y) * options.yResizeCoeff);
-                double r = Geometry.Norm(r_v);
+                double r = Geometry.Norm(curr_p - p_centroid);
                 if(r > desired_r)
                 {
                     desired_r = r;

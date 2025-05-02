@@ -249,8 +249,8 @@ namespace RobotPainter.ConsoleTest
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
             int sites_n = 1000;
-            double canvas_width = 300;
-            double canvas_height = 300;
+            double canvas_width = 100;
+            double canvas_height = 100;
 
             LabBitmap lbmp = new LabBitmap(image);
 
@@ -262,7 +262,8 @@ namespace RobotPainter.ConsoleTest
             generator.CalculateAllStorkes(new StrokeSitesBuilder.Options()
             {
                 xResizeCoeff = canvas_width / image.Width,
-                yResizeCoeff = canvas_height / image.Height
+                yResizeCoeff = canvas_height / image.Height,
+                L_tol = 100.0
             });
             var stroke_visualised = generator.GetColoredStrokeMap();
 
@@ -300,7 +301,7 @@ namespace RobotPainter.ConsoleTest
                 var test = stroke_skeleton.points.Select(p => p.z).ToList();
                 VoronoiVisualizer.VisualizeVoronoiInline(result_image, stroke.involvedSites, Color.Blue, Color.Red, 1);
                 VoronoiVisualizer.VisualizeStrokeInline(result_image, brushstroke.DesiredPath.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Green, Color.Orange, 1);
-                VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);
+                //VoronoiVisualizer.VisualizeStrokeInline(result_image, stroke_skeleton.points.Select(p => (Convert.ToInt32(p.x * x_scale), Convert.ToInt32(p.y * y_scale))).ToList(), Color.Red, Color.Blue, 0);
                 VoronoiVisualizer.VisualisePointsInline(result_image, [(brushstroke.DesiredPath[0].x * x_scale, brushstroke.DesiredPath[0].y * y_scale)], Color.Pink, 1);
             }
             result_image.Save(path + @"brushmodel_test\actual_strokes.png");

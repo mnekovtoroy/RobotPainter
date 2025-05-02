@@ -310,7 +310,7 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 50000;
+            int sites_n = 5000;
             double canvas_width = 300;
             double canvas_height = 300;
             var brush = new BasicBrushModel();
@@ -458,7 +458,7 @@ namespace RobotPainter.ConsoleTest
 
             Console.WriteLine($"Canvas width: {canvas_width}; Canvas heiht: {canvas_height};");
             Console.WriteLine($"Stroke width: {max_width}; Overlap: {overlap};");
-            int voronoiN = StrokeGenerator.CalculateNVoronoiByStrokeWidth(canvas_width, canvas_height, max_width, overlap);
+            int voronoiN = StrokeGenerator.CalculateDesiredVoronoiN(canvas_width, canvas_height, max_width, overlap);
             Console.WriteLine($"Calculated voronoi N: {voronoiN}");
         }
     }

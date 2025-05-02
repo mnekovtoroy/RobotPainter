@@ -25,7 +25,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return plane.Sites;
         }
 
-        public static int CalculateNVoronoiByStrokeWidth(double canvas_width, double canvas_height, double stroke_width, double overlap)
+        public static int CalculateDesiredVoronoiN(double canvas_width, double canvas_height, double stroke_width, double overlap)
         {
             const double safety_overhead = 4;
 
@@ -62,10 +62,11 @@ namespace RobotPainter.Calculations.StrokeGeneration
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height, options.RelaxationIterations);
             Lfit(options.LpullIterations, options.LpullMaxStep);
             sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(s.Centroid.X), Convert.ToInt32(s.Centroid.Y)).L).ToList();
-            unassigned_sites = sites.Select(x => x).ToList();
-            siteToStroke = new Dictionary<VoronoiSite, StrokeSites>();
-
+            
             sitesToPaint = CalculateSitesToPaint(is_painted, error);
+            
+            unassigned_sites = sites.Where(s => sitesToPaint[s]).ToList();
+            siteToStroke = new Dictionary<VoronoiSite, StrokeSites>();
         }
 
         private Dictionary<VoronoiSite, bool> CalculateSitesToPaint(bool[,] is_painted, double[,] error)
@@ -84,7 +85,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                     var site = sites[mask[x, y]];
 
                     if (result[site])
-                        break;
+                        continue;
 
                     if (!is_painted[x,y])
                     {
@@ -94,7 +95,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                             total_error.Remove(site);
                             pixel_count.Remove(site);
                         }
-                        break;
+                        continue;
                     }
 
                     if(total_error.ContainsKey(site))
@@ -310,11 +311,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
 
             return result;
-        }
-
-        public static int CalculateDesiredVoronoiN(double target_stroke_width)
-        {
-            throw new NotImplementedException();
         }
     }
 }

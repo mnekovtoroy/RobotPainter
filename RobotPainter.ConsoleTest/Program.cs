@@ -1,3 +1,3 @@
 ﻿using RobotPainter.ConsoleTest;
 
-TestCases.VoronoiNCalculationsTest();
+TestCases.FullBrushModelTest();

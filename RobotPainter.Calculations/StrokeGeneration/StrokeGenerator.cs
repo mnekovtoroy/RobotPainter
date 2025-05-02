@@ -25,6 +25,14 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return plane.Sites;
         }
 
+        public static int CalculateNVoronoiByStrokeWidth(double canvas_width, double canvas_height, double stroke_width, double overlap)
+        {
+            const double safety_overhead = 4;
+
+            double non_overlapped = stroke_width - 2.0 * overlap;
+            return Convert.ToInt32(((canvas_width * canvas_height) / (non_overlapped * non_overlapped)) * safety_overhead);
+        }
+
         public List<VoronoiSite> sites;
 
         private Dictionary<VoronoiSite, StrokeSites> siteToStroke;

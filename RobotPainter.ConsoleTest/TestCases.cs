@@ -458,7 +458,7 @@ namespace RobotPainter.ConsoleTest
 
             Console.WriteLine($"Canvas width: {canvas_width}; Canvas heiht: {canvas_height};");
             Console.WriteLine($"Stroke width: {max_width}; Overlap: {overlap};");
-            int voronoiN = RobotPainterCalculator.CalculateNVoronoiByStrokeWidth(canvas_width, canvas_height, max_width, overlap);
+            int voronoiN = StrokeGenerator.CalculateNVoronoiByStrokeWidth(canvas_width, canvas_height, max_width, overlap);
             Console.WriteLine($"Calculated voronoi N: {voronoiN}");
         }
     }

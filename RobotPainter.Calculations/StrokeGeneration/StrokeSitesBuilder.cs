@@ -130,8 +130,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         private static bool IsValidSite(StrokeSites stroke_sites, VoronoiSite site)
         {
-            return site != null 
-                && !stroke_sites.involvedSites.Contains(site) 
+            return site != null
+                && !stroke_sites.involvedSites.Contains(site)
                 && !stroke_sites.strokeGenerator.IsSiteReserved(site)
                 && stroke_sites.strokeGenerator.IsSiteToPaint(site);
         }

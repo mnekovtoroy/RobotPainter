@@ -128,7 +128,7 @@ namespace RobotPainter.Calculations
                 return false;
 
             //initialize stroke generator for that layer
-
+            _currLayer++;
             return true;
         }
 
@@ -155,7 +155,8 @@ namespace RobotPainter.Calculations
                     }
 
                     //calculating color error
-                    var paletted_target = palette.Apply(targetLabBitmap.GetPixel(i, j));
+                    //var paletted_target = palette.Apply(targetLabBitmap.GetPixel(i, j));
+                    var paletted_target = targetLabBitmap.GetPixel(i, j);
                     colorError[i, j] = paletted_target.DeltaE76(new_feedback.GetPixel(i,j));
                 }
             }

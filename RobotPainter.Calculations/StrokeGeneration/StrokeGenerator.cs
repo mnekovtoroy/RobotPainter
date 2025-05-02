@@ -8,7 +8,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
     {
         public class Options
         {
-            public double ErrorLeniency = 5.0;
+            public double ErrorLeniency = 3.0;
 
             public int RelaxationIterations = 5;
             public int LpullIterations = 2;
@@ -197,7 +197,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public bool IsSiteReserved(VoronoiSite site)
         {
-            return !unassigned_sites.Contains(site);
+            //return !unassigned_sites.Contains(site);
+            return siteToStroke.ContainsKey(site);
         }
 
         public bool IsSiteToPaint(VoronoiSite site)

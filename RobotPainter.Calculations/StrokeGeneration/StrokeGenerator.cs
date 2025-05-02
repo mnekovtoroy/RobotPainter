@@ -27,7 +27,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
         public static int CalculateDesiredVoronoiN(double canvas_width, double canvas_height, double stroke_width, double overlap)
         {
-            const double safety_overhead = 4;
+            const double safety_overhead = 2;
 
             double non_overlapped = stroke_width - 2.0 * overlap;
             return Convert.ToInt32(((canvas_width * canvas_height) / (non_overlapped * non_overlapped)) * safety_overhead);
@@ -154,6 +154,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 
             }
             unassigned_sites = sites.Select(x => x).ToList();
+            sitesToPaint = null;
+            siteToStroke = null;
         }
 
         List<VoronoiSite> unassigned_sites;

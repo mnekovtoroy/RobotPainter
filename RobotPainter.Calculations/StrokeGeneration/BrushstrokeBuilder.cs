@@ -14,7 +14,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public IBrushModel BrushModel = new BasicBrushModel();
 
             public double MaxWidth = 7.0;
-            public double Overlap = 1.0;
+            public double Overlap = 1.5;
             public double StartOverheadCoeff = 1.5;
             public double EndOverheadCoeff = 1.2;
             public double SafeHeight = 2.0;
@@ -101,7 +101,6 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 v = v / Geometry.Norm(v);
             }
 
-
             var site = stroke_reg.startingSite;
             var centroid = stroke_reg.startingCentroid;
             double r = FindDesiredR(site, options);
@@ -155,7 +154,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             foreach(var edge in edges)
             {
                 if(Geometry.CheckRaySegmentIntersection(
-                    p1.x, p1.y, p1.x - p0.x, p1.y - p0.y,
+                    p0.x, p0.y, p1.x - p0.x, p1.y - p0.y,
                     edge.Start.X, edge.Start.Y, edge.End.X, edge.End.Y))
                     { return edge; }
             }

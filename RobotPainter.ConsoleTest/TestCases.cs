@@ -248,23 +248,28 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 1000;
-            double canvas_width = 100;
-            double canvas_height = 100;
+            double canvas_width = 150;
+            double canvas_height = 150;
 
+            var ssb_opt = new StrokeSitesBuilder.Options()
+            {
+                xResizeCoeff = canvas_width / image.Width,
+                yResizeCoeff = canvas_height / image.Height
+            };
+            var bbs_opt = new BrushstrokeBuilder.Options()
+            {
+                xResizeCoeff = canvas_width / image.Width,
+                yResizeCoeff = canvas_height / image.Height
+            };
+            var sg_opt = new StrokeGenerator.Options();
+
+            int sites_n = StrokeGenerator.CalculateDesiredVoronoiN(canvas_width, canvas_height, bbs_opt.MaxWidth, bbs_opt.Overlap);
             LabBitmap lbmp = new LabBitmap(image);
 
             var brushModel = new BasicBrushModel();
-            var generator = new StrokeGenerator(lbmp, sites_n, new bool[image.Width, image.Height], new double[image.Width, image.Height], new StrokeGenerator.Options());
+            var generator = new StrokeGenerator(lbmp, sites_n, new bool[image.Width, image.Height], new double[image.Width, image.Height], sg_opt);
 
-            generator.Lfit(20, 2.0);
-
-            generator.CalculateAllStorkes(new StrokeSitesBuilder.Options()
-            {
-                xResizeCoeff = canvas_width / image.Width,
-                yResizeCoeff = canvas_height / image.Height,
-                L_tol = 100.0
-            });
+            generator.CalculateAllStorkes(ssb_opt);
             var stroke_visualised = generator.GetColoredStrokeMap();
 
             VoronoiVisualizer.VisualizeVoronoiInline(image, generator.sites, Color.Blue, Color.Blue, 0);
@@ -281,11 +286,7 @@ namespace RobotPainter.ConsoleTest
             for(int i = 0; i < n_brushstrokes_to_draw; i++)
             {
                 var stroke = generator.strokes[i];
-                var brushstroke = BrushstrokeBuilder.GenerateBrushstroke(stroke, new BrushstrokeBuilder.Options()
-                {
-                    xResizeCoeff = canvas_width / image.Width,
-                    yResizeCoeff = canvas_height / image.Height
-                });
+                var brushstroke = BrushstrokeBuilder.GenerateBrushstroke(stroke, bbs_opt);
 
                 using(var g = Graphics.FromImage(result_image))
                 {
@@ -311,7 +312,7 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 5000;
+            int sites_n = 15000;
             double canvas_width = 300;
             double canvas_height = 300;
             var brush = new BasicBrushModel();

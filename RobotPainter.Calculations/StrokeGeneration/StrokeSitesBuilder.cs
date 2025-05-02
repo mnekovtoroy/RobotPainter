@@ -139,16 +139,63 @@ namespace RobotPainter.Calculations.StrokeGeneration
         private static VoronoiSite GetAdjasentSite(StrokeSites stroke_sites, VoronoiSite site, PointD norm, PointD prev_v, Options options)
         {
             var candidates = new Dictionary<VoronoiSite, double>();
-            var neighbors = site.Neighbours;
+            //var neighbors = site.Neighbours;
+            var edges = site.Cell;
             var centroid = site.Centroid;
-            foreach (var neighbor in neighbors)
+            foreach (var edge in edges)
             {
+                if (edge.Right == null || edge.Left == null)
+                    continue;
+
+                var neighbor = edge.Right == site ? edge.Left : edge.Right;
+
                 var neighbor_c = neighbor.Centroid;
                 var v_n = new PointD(neighbor_c.X - centroid.X, neighbor_c.Y - centroid.Y);
 
                 double brush_angle = Geometry.Norm(prev_v) != 0 ? Geometry.CalculateAngleDeg(v_n, prev_v) : 0.0;
                 double norm_angle = Geometry.CalculateAngleDeg(v_n, norm);
-                if (brush_angle <= options.MaxBrushAngle && norm_angle <= options.MaxNormAngle)
+
+                if(brush_angle > options.MaxBrushAngle || norm_angle > options.MaxNormAngle)
+                    continue;
+
+                //on a triangle formed by connecting edges (in case when the outside angle between them < 90)
+                //check middle point of an opposite side to that angle
+                var triag_edges1 = edge.Neighbours.Where(e => e.Start == edge.Start || e.End == edge.Start).ToList();
+                var triag_edges2 = edge.Neighbours.Where(e => e.Start == edge.End || e.End == edge.End).ToList();
+                if (triag_edges1.Count != 2 || triag_edges2.Count != 2)
+                    throw new Exception("idk");
+
+                PointD triag_1_p1 = VoronoiPointToPointD(triag_edges1[0].Start == edge.Start ? triag_edges1[0].End : triag_edges1[0].Start);
+                PointD triag_1_p2 = VoronoiPointToPointD(triag_edges1[1].Start == edge.Start ? triag_edges1[1].End : triag_edges1[1].Start);
+                PointD triag_2_p1 = VoronoiPointToPointD(triag_edges2[0].Start == edge.End ? triag_edges2[0].End : triag_edges2[0].End);
+                PointD triag_2_p2 = VoronoiPointToPointD(triag_edges2[1].Start == edge.End ? triag_edges2[1].End : triag_edges2[1].End);
+                PointD e_start = VoronoiPointToPointD(edge.Start);
+                PointD e_end = VoronoiPointToPointD(edge.End);
+
+
+                bool outside_color_variance = true;
+                if (Geometry.Dot(triag_1_p1 - e_start, triag_1_p2 - e_start) > 0)
+                {
+                    PointD p1 = new PointD((triag_1_p1.x + triag_1_p2.x) / 2.0, (triag_1_p1.y + triag_1_p2.y) / 2.0);
+                    int x = Convert.ToInt32(p1.x);
+                    int y = Convert.ToInt32(p1.y);
+                    if(Math.Abs(stroke_sites.strokeGenerator.image.GetPixel(x, y).L - stroke_sites.MainColor.L) > options.L_tol)
+                    {
+                        outside_color_variance = false;
+                    }
+                }
+                if (Geometry.Dot(triag_2_p1 - e_end, triag_2_p2 - e_end) > 0)
+                {
+                    PointD p2 = new PointD((triag_2_p1.x + triag_2_p2.x) / 2.0, (triag_2_p1.y + triag_2_p2.y) / 2.0);
+                    int x = Convert.ToInt32(p2.x);
+                    int y = Convert.ToInt32(p2.y);
+                    if (Math.Abs(stroke_sites.strokeGenerator.image.GetPixel(x, y).L - stroke_sites.MainColor.L) > options.L_tol)
+                    {
+                        outside_color_variance = false;
+                    }
+                }
+
+                if (outside_color_variance)
                 {
                     candidates.Add(neighbor, norm_angle);
                 }
@@ -159,6 +206,11 @@ namespace RobotPainter.Calculations.StrokeGeneration
             }
             var result = candidates.OrderBy(c => c.Value).First();
             return result.Key;
+        }
+
+        public static PointD VoronoiPointToPointD(VoronoiPoint p)
+        {
+            return new PointD(p.X, p.Y);
         }
     }
 }

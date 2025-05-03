@@ -4,11 +4,11 @@ namespace RobotPainter.Application.PhotoTransforming
 {
     public class PhotoTransformer : IPhotoTransformer
     {
-        private Point whitePoint = new Point(1803, 763);
-        private Point blackPoint = new Point(3015, 15);
+        private Point whitePoint = new Point(3015, 15);
+        private Point blackPoint = new Point(1803, 763);
 
-        private Point canvasUpperLeft = new Point(100, 100);
-        private Size canvasSize = new Size(1000, 2000);
+        private Point canvasUpperLeft = new Point(1024, 904);
+        private Size canvasSize = new Size(3397, 2542);
 
         private Rectangle canvasArea;
 
@@ -32,7 +32,6 @@ namespace RobotPainter.Application.PhotoTransforming
 
             //idk if its needed
             cropped.Dispose();
-            resized.Dispose();
             return resized;
         }
     }

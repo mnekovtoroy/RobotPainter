@@ -9,6 +9,7 @@ using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
 using RobotPainter.Communications;
 using RobotPainter.Communications.Converting;
+using RobotPainter.Application.PhotoTransforming;
 
 namespace RobotPainter.ConsoleTest
 {
@@ -526,24 +527,6 @@ namespace RobotPainter.ConsoleTest
 
         public static void WhiteBalanceTest()
         {
-            /*var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
-
-            var img = new Bitmap(path + "image_2.png");
-
-            var lab = new LabBitmap(img);
-
-            Point white_point = new Point(1803, 763);
-            Point black_point = new Point(3015, 15);
-
-            ColorLab perfect_white = lab.GetPixel(black_point.X, black_point.Y);
-            ColorLab perfect_black = lab.GetPixel(white_point.X, white_point.Y);
-
-            var balanced_lab = ImageProcessor.WhiteBalance(lab, perfect_white, perfect_black);
-
-            var balanced_img = balanced_lab.ToBitmap();
-
-            balanced_img.Save(path + "balanced2.png");*/
-
             var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
 
             var img = new Bitmap(path + "image_1.png");
@@ -557,6 +540,19 @@ namespace RobotPainter.ConsoleTest
             ImageProcessor.WhiteBalance(img, perfect_white, perfect_black);
 
             img.Save(path + "balanced2.png");
+        }
+
+        public static void PhotoTransformingTest()
+        {
+            PhotoTransformer transformer = new PhotoTransformer();
+
+            var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+
+            var img = new Bitmap(path + "image_1.png");
+
+            var transformed = transformer.Transform(img, 800, 600);
+
+            transformed.Save(path + "transformed.png");
         }
     }
 }

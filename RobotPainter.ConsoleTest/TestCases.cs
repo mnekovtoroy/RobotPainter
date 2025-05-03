@@ -9,6 +9,7 @@ using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Visualization;
 using RobotPainter.Communications;
 using RobotPainter.Communications.Converting;
+using RobotPainter.Application.PhotoTransforming;
 
 namespace RobotPainter.ConsoleTest
 {
@@ -312,14 +313,14 @@ namespace RobotPainter.ConsoleTest
         {
             string path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_images\";
             Bitmap image = new Bitmap(path + "test_ball2.jpg");
-            int sites_n = 15000;
+            //int sites_n = 15000;
             double canvas_width = 300;
             double canvas_height = 300;
             var brush = new BasicBrushModel();
 
             var robot_painter = new RobotPainterCalculator(image, canvas_width, canvas_height);
             robot_painter.AllLayersOptions = [RobotPainterCalculator.CreateLayerOptions()];
-            robot_painter.AllLayersOptions[0].NVoronoi = sites_n;
+            //robot_painter.AllLayersOptions[0].NVoronoi = sites_n;
             robot_painter.InitializeStrokeGenerator();
 
             var strokes = robot_painter.GetAllBrushstrokes();
@@ -483,7 +484,7 @@ namespace RobotPainter.ConsoleTest
 
                 layer_options.MaxWidth = max_width[i];
                 layer_options.Overlap = overlap[i];
-                layer_options.NVoronoi = StrokeGenerator.CalculateDesiredVoronoiN(canvas_width, canvas_height, max_width[i], overlap[i]);
+                //layer_options.NVoronoi = StrokeGenerator.CalculateDesiredVoronoiN(canvas_width, canvas_height, max_width[i], overlap[i]);
                 layer_options.ErrorTolerance = 5.0;
                 layer_options.RollingAverageN = 15;
 
@@ -521,10 +522,37 @@ namespace RobotPainter.ConsoleTest
                 robot_painter.ApplyFeedback(result);
                 robot_painter.AdvanceLayer();
                 result.Save(path + @$"layer_picture_test\layer_{i}.png");
-
             }
+        }
 
-            
+        public static void WhiteBalanceTest()
+        {
+            var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+
+            var img = new Bitmap(path + "image_1.png");
+
+            Point white_point = new Point(1803, 763);
+            Point black_point = new Point(3015, 15);
+
+            Color perfect_white = img.GetPixel(black_point.X, black_point.Y);
+            Color perfect_black = img.GetPixel(white_point.X, white_point.Y);
+
+            ImageProcessor.WhiteBalance(img, perfect_white, perfect_black);
+
+            img.Save(path + "balanced2.png");
+        }
+
+        public static void PhotoTransformingTest()
+        {
+            PhotoTransformer transformer = new PhotoTransformer();
+
+            var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+
+            var img = new Bitmap(path + "image_1.png");
+
+            var transformed = transformer.Transform(img, 800, 600);
+
+            transformed.Save(path + "transformed.png");
         }
     }
 }

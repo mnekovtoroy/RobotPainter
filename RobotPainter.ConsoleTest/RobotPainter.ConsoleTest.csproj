@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RobotPainter.Application\RobotPainter.Application.csproj" />
     <ProjectReference Include="..\RobotPainter.Calculations\RobotPainter.Calculations.csproj" />
     <ProjectReference Include="..\RobotPainter.Communications\RobotPainter.Communications.csproj" />
     <ProjectReference Include="..\RobotPainter.Core\RobotPainter.Core.csproj" />

@@ -1,4 +1,5 @@
 using RobotPainter.Application.CustomEventArgs;
+using RobotPainter.Application.PhotoTransforming;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
@@ -16,6 +17,7 @@ namespace RobotPainter.Application
         EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
 
         IPainter painter;
+        IPhotoTransformer photoTransformer;
 
         RobotPainterCalculator? calculator;
         private Bitmap? image;
@@ -28,6 +30,7 @@ namespace RobotPainter.Application
         {
             InitializeComponent();
             painter = new BrushPainter();
+            photoTransformer = new DummyTransformer();
             FormBorderStyle = FormBorderStyle.FixedSingle;
             prediction_isRelevant = false;
         }
@@ -65,19 +68,20 @@ namespace RobotPainter.Application
             });
         }
 
-        private void OnPhotoUpdate()
+
+        private async Task UpdatePhoto(Bitmap photo)
         {
+            if (photo == null || image == null) return;
+            var transformed = await Task.Run(() =>
+            {
+                return photoTransformer.Transform(photo, image.Width, image.Height);
+            });
+            photo.Dispose();
             pictureBox_lastPhoto.Invoke(() =>
             {
                 pictureBox_lastPhoto.BackColor = Color.Transparent;
-                pictureBox_lastPhoto.Image = TransformPhoto(lastPhoto);
+                pictureBox_lastPhoto.Image = transformed;
             });
-        }
-
-        //to do: actually transform photo
-        private Bitmap? TransformPhoto(Bitmap? photo)
-        {
-            return photo;
         }
 
         private void pictureBox_DoubleClick(object sender, EventArgs e)
@@ -228,7 +232,7 @@ namespace RobotPainter.Application
 
             var photo = await painter.GetFeedback();
             lastPhoto = photo;
-            OnPhotoUpdate();
+            _ = UpdatePhoto(new Bitmap(lastPhoto));
 
             var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
 
@@ -236,7 +240,7 @@ namespace RobotPainter.Application
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.AllLayersOptions = all_layers_options;
-                calculator.SetInitialCanvas(TransformPhoto(photo));
+                calculator.SetInitialCanvas(photoTransformer.Transform(photo, image.Width, image.Height));
 
                 DrawingStarted?.Invoke(this, new DrawingStartedEventArgs() { TotalLayers = calculator.NumOfLayers });
 
@@ -247,7 +251,6 @@ namespace RobotPainter.Application
                     var brushstrokes = calculator.GetAllBrushstrokes();
 
                     LayerStarted?.Invoke(this, EventArgs.Empty);
-
                     for (int j = 0; j < brushstrokes.Count; j++)
                     {
                         await painter.ApplyStrokes([Mapper.Map(brushstrokes[j])]);
@@ -258,20 +261,21 @@ namespace RobotPainter.Application
                         {
                             Console.WriteLine("Updating photo...");
                             photo = await painter.GetFeedback();
+                            lastPhoto.Dispose();
                             lastPhoto = photo;
-                            OnPhotoUpdate();
+                            _ = UpdatePhoto(new Bitmap(lastPhoto));
                         }
                     }
 
                     LayerCompleted?.Invoke(this, new() { LayerIndex = i, TotalLayers = calculator.NumOfLayers });
 
                     var feedback = await painter.GetFeedback();
+                    lastPhoto.Dispose();
                     lastPhoto = feedback;
+                    _ = UpdatePhoto(new Bitmap(lastPhoto));
 
-                    calculator.ApplyFeedback(TransformPhoto(lastPhoto));
+                    calculator.ApplyFeedback(photoTransformer.Transform(feedback, image.Width, image.Height));
                     calculator.AdvanceLayer();
-
-                    OnPhotoUpdate();
                 }
                 DrawingEnded?.Invoke(this, EventArgs.Empty);
             });

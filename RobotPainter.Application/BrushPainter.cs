@@ -45,7 +45,7 @@ namespace RobotPainter.Application
 
         public async Task<Bitmap> GetFeedback()
         {
-            return Canvas;
+            return new Bitmap(Canvas);
         }
     }
 }

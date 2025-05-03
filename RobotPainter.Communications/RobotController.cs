@@ -83,8 +83,11 @@ namespace RobotPainter.Communications
             var file_creation_times = new Dictionary<string, DateTime>();
 
             Bitmap photo = null;
-            while(photo == null)
+            int k = 0;
+            int k_max = 10;
+            while(photo == null && k < k_max)
             {
+                k++;
                 try
                 {
                     foreach (string file in files)
@@ -105,8 +108,11 @@ namespace RobotPainter.Communications
                 {
                     Console.WriteLine("Failed to open or delete a file:");
                     Console.WriteLine(ex.Message);
+                    Thread.Sleep(1000);
                 }
             }
+            if (photo == null)
+                throw new Exception("Couldn't retrieve a photo.");
             return photo;
         }
 

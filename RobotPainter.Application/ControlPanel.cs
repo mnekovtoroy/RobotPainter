@@ -17,6 +17,7 @@ namespace RobotPainter.Application
         public EventHandler? StartButtonClicked;
 
         private DateTime drawingStartTime;
+        private DateTime layerStartTime;
         private int totalStrokesCompleted;
         private int lastStrokeIndex;
         private DateTime lastStrokeCompletedTime;
@@ -50,6 +51,7 @@ namespace RobotPainter.Application
             Invoke(() =>
             {
                 drawingStartTime = DateTime.UtcNow;
+
                 totalStrokesCompleted = 0;
                 lastStrokeIndex = -1;
                 label_timePassedDisplay.Text = "--h:--m:--s";
@@ -58,6 +60,14 @@ namespace RobotPainter.Application
                 //start the timer
                 isTimerRunning = true;
                 Task.Run(Timer);
+            });
+        }
+
+        public void onLayerStarted(object? sender, EventArgs e)
+        {
+            Invoke(() =>
+            {
+                layerStartTime = DateTime.UtcNow;
             });
         }
 
@@ -77,6 +87,7 @@ namespace RobotPainter.Application
             Invoke(() =>
             {
                 lastStrokeIndex = -1;
+                label_timeEstCurrLayerDisplay.Text = $"--h:--m:--s";
                 UpdateLayerFrames(e);
             });
         }
@@ -91,7 +102,7 @@ namespace RobotPainter.Application
                 lastStrokeCompletedTime = DateTime.UtcNow;
 
                 var strokes_left = e.TotalStrokes - lastStrokeIndex - 1;
-                var time_left = CalculateTimePrediction(totalStrokesCompleted, strokes_left, lastStrokeCompletedTime, drawingStartTime);
+                var time_left = CalculateTimePrediction(stroke_i + 1, strokes_left, lastStrokeCompletedTime, layerStartTime);
 
                 UpdateCurrentLayerFrames(e, time_left);
                 UpdateTotalStrokesCompletedFrame(totalStrokesCompleted);
@@ -154,9 +165,9 @@ namespace RobotPainter.Application
             }
         }
 
-        private static TimeSpan CalculateTimePrediction(int strokes_completed, int strokes_left, DateTime last_stroke_completion, DateTime drawing_start)
+        private static TimeSpan CalculateTimePrediction(int strokes_completed, int strokes_left, DateTime last_stroke_completion, DateTime layer_start)
         {
-            TimeSpan time_passed = last_stroke_completion - drawing_start;
+            TimeSpan time_passed = last_stroke_completion - layer_start;
             TimeSpan avg_stroke_time = time_passed / strokes_completed;
             TimeSpan time_left = strokes_left * avg_stroke_time;
             return time_left;

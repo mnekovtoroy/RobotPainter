@@ -9,10 +9,9 @@ namespace RobotPainter.Calculations
     {
         public class LayerOptions
         {
-            public double ErrorTolerance = 1.0;
-            public int NVoronoi = 5000;
 
             //StrokeGenerator
+            public double ErrorTolerance;
             public int RelaxationIterations;
             public int LpullIterations;
             public double LpullMaxStep;
@@ -75,10 +74,10 @@ namespace RobotPainter.Calculations
         private StrokeGenerator strokeGenerator;
         public void InitializeStrokeGenerator()
         {
-            //int n_voronoi = StrokeGenerator.CalculateDesiredVoronoiN(target_stroke_width);
+            int n_voronoi = StrokeGenerator.CalculateDesiredVoronoiN(canvasWidth, canvasHeight, AllLayersOptions[CurrLayer].MaxWidth, AllLayersOptions[CurrLayer].Overlap);
             strokeGenerator = new StrokeGenerator(
                 targetLabBitmap,
-                AllLayersOptions[CurrLayer].NVoronoi,
+                n_voronoi,
                 isPaintedOn,
                 colorError,
                 MapStrokeGeneratorOptions(AllLayersOptions[CurrLayer]));
@@ -167,6 +166,7 @@ namespace RobotPainter.Calculations
         {
             return new StrokeGenerator.Options()
             {
+                ErrorTolerance = layerOptions.ErrorTolerance,
                 RelaxationIterations = layerOptions.RelaxationIterations,
                 LpullIterations = layerOptions.LpullIterations,
                 LpullMaxStep = layerOptions.LpullMaxStep,
@@ -216,6 +216,7 @@ namespace RobotPainter.Calculations
             StrokeSitesBuilder.Options ssb_from = ssb_options == null ? new StrokeSitesBuilder.Options() : ssb_options;
             BrushstrokeBuilder.Options bsb_from = bsb_options == null ? new BrushstrokeBuilder.Options() : bsb_options;
 
+            layerOptions.ErrorTolerance = sg_from.ErrorTolerance;
             layerOptions.RelaxationIterations = sg_from.RelaxationIterations;
             layerOptions.LpullIterations = sg_from.LpullIterations;
             layerOptions.LpullMaxStep = sg_from.LpullMaxStep;

@@ -60,8 +60,8 @@
             label_lPullMaxStep = new Label();
             textBox_lPullIterations = new TextBox();
             label_lPullIterations = new Label();
-            textBox_voronoiSites = new TextBox();
-            label_voronoiSites = new Label();
+            textBox_errorTolerance = new TextBox();
+            label_errorTolerance = new Label();
             label_sgOptions = new Label();
             textBox_relaxationIterations = new TextBox();
             label_relaxationIterations = new Label();
@@ -354,22 +354,22 @@
             label_lPullIterations.TabIndex = 29;
             label_lPullIterations.Text = "Lpull iterations:";
             // 
-            // textBox_voronoiSites
+            // textBox_errorTolerance
             // 
-            textBox_voronoiSites.Location = new Point(144, 60);
-            textBox_voronoiSites.Name = "textBox_voronoiSites";
-            textBox_voronoiSites.Size = new Size(145, 23);
-            textBox_voronoiSites.TabIndex = 28;
-            textBox_voronoiSites.Validating += textBox_IntValidating;
+            textBox_errorTolerance.Location = new Point(144, 60);
+            textBox_errorTolerance.Name = "textBox_errorTolerance";
+            textBox_errorTolerance.Size = new Size(145, 23);
+            textBox_errorTolerance.TabIndex = 28;
+            textBox_errorTolerance.Validating += textBox_DoubleValidating;
             // 
-            // label_voronoiSites
+            // label_errorTolerance
             // 
-            label_voronoiSites.AutoSize = true;
-            label_voronoiSites.Location = new Point(61, 63);
-            label_voronoiSites.Name = "label_voronoiSites";
-            label_voronoiSites.Size = new Size(77, 15);
-            label_voronoiSites.TabIndex = 27;
-            label_voronoiSites.Text = "Voronoi sites:";
+            label_errorTolerance.AutoSize = true;
+            label_errorTolerance.Location = new Point(51, 63);
+            label_errorTolerance.Name = "label_errorTolerance";
+            label_errorTolerance.Size = new Size(87, 15);
+            label_errorTolerance.TabIndex = 27;
+            label_errorTolerance.Text = "Error tolerance:";
             // 
             // label_sgOptions
             // 
@@ -411,8 +411,8 @@
             Controls.Add(label_lPullMaxStep);
             Controls.Add(textBox_lPullIterations);
             Controls.Add(label_lPullIterations);
-            Controls.Add(textBox_voronoiSites);
-            Controls.Add(label_voronoiSites);
+            Controls.Add(textBox_errorTolerance);
+            Controls.Add(label_errorTolerance);
             Controls.Add(label_sgOptions);
             Controls.Add(textBox_endRunawayAngle);
             Controls.Add(label_endRunawayAngle);
@@ -482,8 +482,8 @@
         private Label label_lPullMaxStep;
         private TextBox textBox_lPullIterations;
         private Label label_lPullIterations;
-        private TextBox textBox_voronoiSites;
-        private Label label_voronoiSites;
+        private TextBox textBox_errorTolerance;
+        private Label label_errorTolerance;
         private Label label_sgOptions;
         private TextBox textBox_relaxationIterations;
         private Label label_relaxationIterations;

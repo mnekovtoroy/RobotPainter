@@ -3,6 +3,7 @@ using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Communications;
+using System.Drawing.Imaging;
 
 namespace RobotPainter.Application
 {
@@ -10,6 +11,7 @@ namespace RobotPainter.Application
     {
         EventHandler<DrawingStartedEventArgs>? DrawingStarted;
         EventHandler? DrawingEnded;
+        EventHandler? LayerStarted;
         EventHandler<LayerCompletedEventArgs>? LayerCompleted;
         EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
 
@@ -39,6 +41,7 @@ namespace RobotPainter.Application
 
             DrawingStarted += controlPanel.onDrawingStarted;
             DrawingEnded += controlPanel.onDrawingEnded;
+            LayerStarted += controlPanel.onLayerStarted;
             LayerCompleted += controlPanel.onLayerCompletion;
             StrokeCompleted += controlPanel.onStrokeCompletion;
         }
@@ -79,7 +82,7 @@ namespace RobotPainter.Application
 
         private void pictureBox_DoubleClick(object sender, EventArgs e)
         {
-            if(((PictureBox)sender).Image == null)
+            if (((PictureBox)sender).Image == null)
             {
                 return;
             }
@@ -88,6 +91,7 @@ namespace RobotPainter.Application
             picbox.Image = ((PictureBox)sender).Image;
             picbox.SizeMode = PictureBoxSizeMode.Zoom;
             picbox.Dock = DockStyle.Fill;
+            picbox.ContextMenuStrip = contextMenuStrip_pictureBox;
 
             var newform = new Form();
             newform.WindowState = FormWindowState.Maximized;
@@ -151,28 +155,44 @@ namespace RobotPainter.Application
             var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
 
             Bitmap result = new Bitmap(image.Width, image.Height);
+
             await Task.Run(() =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.AllLayersOptions = all_layers_options;
+                calculator.SetInitialCanvas(result);
 
-                using (var g = Graphics.FromImage(result))
+                int[] num_of_strokes = new int[calculator.NumOfLayers];
+                //for every layer
+                for (int i = 0; i < calculator.NumOfLayers; i++)
                 {
-                    //for every layer
-                    for (int i = 0; i < 1; i++)
+                    Console.WriteLine($"Layer {i + 1} prediction calculation...");
+                    calculator.InitializeStrokeGenerator();
+                    Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
+                    var brushstrokes = calculator.GetAllBrushstrokes();
+                    num_of_strokes[i] = brushstrokes.Count;
+                    Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
+
+                    using (var g = Graphics.FromImage(result))
                     {
-                        Console.WriteLine($"Layer {i + 1} prediction calculation...");
-                        calculator.InitializeStrokeGenerator();
-                        Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
-                        var brushstrokes = calculator.GetAllBrushstrokes();
-                        Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
                         foreach (var stroke in brushstrokes)
                         {
                             calculator.AllLayersOptions[i].BrushModel.DrawStroke(g, new SolidBrush(stroke.Color.ToRgb()), stroke.RootPath, result.Width / canvas_width, result.Height / canvas_height);
                         }
-                        Console.WriteLine($"Layer {i + 1} prediction calculation: layer applied");
                     }
+                    calculator.ApplyFeedback(result);
+                    calculator.AdvanceLayer();
+                    Console.WriteLine($"Layer {i + 1} prediction calculation: layer applied");
                 }
+
+                int total_strokes = 0;
+                Console.WriteLine("Stroke count:");
+                for (int i = 0; i < num_of_strokes.Length; i++)
+                {
+                    Console.WriteLine($"Layer {i + 1}: {num_of_strokes[i]} strokes");
+                    total_strokes += num_of_strokes[i];
+                }
+                Console.WriteLine($"Total predicted strokes: {total_strokes}");
             });
             Console.WriteLine("Prediction calculated.");
             return result;
@@ -216,21 +236,25 @@ namespace RobotPainter.Application
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.AllLayersOptions = all_layers_options;
+                calculator.SetInitialCanvas(TransformPhoto(photo));
 
                 DrawingStarted?.Invoke(this, new DrawingStartedEventArgs() { TotalLayers = calculator.NumOfLayers });
 
                 //for every layer
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < calculator.NumOfLayers; i++)
                 {
                     calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
-                    for(int j = 0; j < brushstrokes.Count; j++)
+
+                    LayerStarted?.Invoke(this, EventArgs.Empty);
+
+                    for (int j = 0; j < brushstrokes.Count; j++)
                     {
                         await painter.ApplyStrokes([Mapper.Map(brushstrokes[j])]);
 
                         StrokeCompleted?.Invoke(this, new() { StrokeIndex = j, TotalStrokes = brushstrokes.Count });
 
-                        if(j % 100 == 0)
+                        if (j % 100 == 0)
                         {
                             Console.WriteLine("Updating photo...");
                             photo = await painter.GetFeedback();
@@ -241,14 +265,42 @@ namespace RobotPainter.Application
 
                     LayerCompleted?.Invoke(this, new() { LayerIndex = i, TotalLayers = calculator.NumOfLayers });
 
-                    photo = await painter.GetFeedback();
-                    lastPhoto = photo;
-                    OnPhotoUpdate();
+                    var feedback = await painter.GetFeedback();
+                    lastPhoto = feedback;
 
                     calculator.ApplyFeedback(TransformPhoto(lastPhoto));
+                    calculator.AdvanceLayer();
+
+                    OnPhotoUpdate();
                 }
                 DrawingEnded?.Invoke(this, EventArgs.Empty);
             });
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var toolStripItem = (ToolStripItem?)sender;
+            var contextMenuStrip = (ContextMenuStrip?)toolStripItem?.Owner;
+            var picture_box = contextMenuStrip?.SourceControl as PictureBox;
+
+            if (picture_box == null || picture_box.Image == null)
+                return;
+
+            var image_toSave = new Bitmap(picture_box.Image);
+
+            SaveImage(image_toSave);
+        }
+
+        private void SaveImage(Bitmap bmp)
+        {
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var stream = saveFileDialog.OpenFile();
+                if(stream != null)
+                {
+                    bmp.Save(stream, ImageFormat.Png);
+                }
+            }
         }
     }
 }

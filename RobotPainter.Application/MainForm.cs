@@ -10,6 +10,7 @@ namespace RobotPainter.Application
     {
         EventHandler<DrawingStartedEventArgs>? DrawingStarted;
         EventHandler? DrawingEnded;
+        EventHandler? LayerStarted;
         EventHandler<LayerCompletedEventArgs>? LayerCompleted;
         EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
 
@@ -39,6 +40,7 @@ namespace RobotPainter.Application
 
             DrawingStarted += controlPanel.onDrawingStarted;
             DrawingEnded += controlPanel.onDrawingEnded;
+            LayerStarted += controlPanel.onLayerStarted;
             LayerCompleted += controlPanel.onLayerCompletion;
             StrokeCompleted += controlPanel.onStrokeCompletion;
         }
@@ -241,6 +243,9 @@ namespace RobotPainter.Application
                 {
                     calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
+
+                    LayerStarted?.Invoke(this, EventArgs.Empty);
+
                     for(int j = 0; j < brushstrokes.Count; j++)
                     {
                         await painter.ApplyStrokes([Mapper.Map(brushstrokes[j])]);

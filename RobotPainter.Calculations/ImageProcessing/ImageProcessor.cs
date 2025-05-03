@@ -1,4 +1,5 @@
 ﻿using RobotPainter.Core;
+using System.Drawing;
 
 namespace RobotPainter.Calculations.ImageProcessing
 {
@@ -162,6 +163,70 @@ namespace RobotPainter.Calculations.ImageProcessing
                 }
             }
             return avg;
+        }
+
+        /*public static LabBitmap WhiteBalance(LabBitmap bmp, ColorLab perfect_white, ColorLab perfect_black)
+        {
+            var balanced_image = new LabBitmap(bmp.Width, bmp.Height);
+
+            var shift = new Point3D(perfect_black.L, perfect_black.a, perfect_black.b);
+            var multiplier = new Point3D(100.0 / perfect_white.L, 1.0, 1.0);
+
+            var balance_function = ((ColorLab color) =>
+            {
+                var balanced_color = ColorLab.ElementwiseMultiplication((color - shift), multiplier);
+                Bound(ref balanced_color.L, 0, 100);
+                Bound(ref balanced_color.a, -100, 100);
+                Bound(ref balanced_color.b, -100, 100);
+                return balanced_color;
+            });
+
+            for(int i = 0;  i < bmp.Width; i++)
+            {
+                for(int j = 0; j < bmp.Height; j++)
+                {
+                    balanced_image.SetPixel(i, j, balance_function.Invoke(bmp.GetPixel(i, j)));
+                }
+            }
+
+            return balanced_image;
+        }*/
+
+        public static void WhiteBalance(Bitmap bmp, Color perfect_white, Color perfect_black)
+        {
+            var balance_function = (Color color) =>
+            {
+                int r = Convert.ToInt32((color.R - perfect_black.R) * 255.0 / (perfect_white.R - perfect_black.R));
+                int g = Convert.ToInt32((color.G - perfect_black.G) * 255.0 / (perfect_white.G - perfect_black.G));
+                int b = Convert.ToInt32((color.B - perfect_black.B) * 255.0 / (perfect_white.B - perfect_black.B));
+                if (r < 0) r = 0; if (r > 255) r = 255;
+                if (g < 0) g = 0; if (g > 255) g = 255;
+                if (b < 0) b = 0; if (b > 255) b = 255;
+
+                return Color.FromArgb(r, g, b);
+            };
+
+            for (int i = 0; i < bmp.Width; i++)
+            {
+                for (int j = 0; j < bmp.Height; j++)
+                {
+                    bmp.SetPixel(i, j, balance_function.Invoke(bmp.GetPixel(i, j)));
+                }
+            }
+        }
+
+        private static void Bound(ref double x, double min, double max)
+        {
+            if (x < min)
+            {
+                x = min;
+                return;
+            }
+            if (x > max)
+            {
+                x = max;
+                return;
+            }
         }
     }
 }

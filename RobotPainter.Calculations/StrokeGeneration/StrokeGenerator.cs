@@ -8,7 +8,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
     {
         public class Options
         {
-            public double ErrorLeniency = 3.0;
+            public double ErrorTolerance = 3.0;
 
             public int RelaxationIterations = 5;
             public int LpullIterations = 2;
@@ -114,7 +114,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             foreach(var site_error in total_error)
             {
                 var avg_error = site_error.Value / pixel_count[site_error.Key];
-                if(avg_error > options.ErrorLeniency)
+                if(avg_error > options.ErrorTolerance)
                 {
                     result[site_error.Key] = true;
                 }

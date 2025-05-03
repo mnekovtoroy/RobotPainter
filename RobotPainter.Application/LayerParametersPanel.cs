@@ -57,9 +57,8 @@ namespace RobotPainter.Application
         {
             return new RobotPainterCalculator.LayerOptions()
             {
-                NVoronoi = int.Parse(textBox_voronoiSites.Text),
-
                 //StrokeGenerator
+                ErrorTolerance = double.Parse(textBox_errorTolerance.Text),
                 RelaxationIterations = int.Parse(textBox_relaxationIterations.Text),
                 LpullIterations = int.Parse(textBox_lPullIterations.Text),
                 LpullMaxStep = double.Parse(textBox_lPullMaxStep.Text),
@@ -87,9 +86,9 @@ namespace RobotPainter.Application
         {
             BrushModel = options.BrushModel;
 
-            textBox_voronoiSites.Text = options.NVoronoi.ToString();
 
             //sg options
+            textBox_errorTolerance.Text = options.ErrorTolerance.ToString();
             textBox_relaxationIterations.Text = options.RelaxationIterations.ToString();
             textBox_lPullIterations.Text = options.LpullIterations.ToString();
             textBox_lPullMaxStep.Text = options.LpullMaxStep.ToString();

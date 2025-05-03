@@ -28,7 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             pictureBox_sourceImage = new PictureBox();
+            contextMenuStrip_pictureBox = new ContextMenuStrip(components);
+            saveAsToolStripMenuItem = new ToolStripMenuItem();
             pictureBox_prediction = new PictureBox();
             pictureBox_lastPhoto = new PictureBox();
             label_sourceImage = new Label();
@@ -39,7 +42,9 @@
             label_parameters = new Label();
             consoleControl = new ConsoleControl();
             label_consoleOutput = new Label();
+            saveFileDialog = new SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)pictureBox_sourceImage).BeginInit();
+            contextMenuStrip_pictureBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox_prediction).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox_lastPhoto).BeginInit();
             SuspendLayout();
@@ -47,6 +52,7 @@
             // pictureBox_sourceImage
             // 
             pictureBox_sourceImage.BackColor = SystemColors.ControlLightLight;
+            pictureBox_sourceImage.ContextMenuStrip = contextMenuStrip_pictureBox;
             pictureBox_sourceImage.Location = new Point(40, 40);
             pictureBox_sourceImage.Name = "pictureBox_sourceImage";
             pictureBox_sourceImage.Size = new Size(400, 300);
@@ -55,9 +61,24 @@
             pictureBox_sourceImage.TabStop = false;
             pictureBox_sourceImage.DoubleClick += pictureBox_DoubleClick;
             // 
+            // contextMenuStrip_pictureBox
+            // 
+            contextMenuStrip_pictureBox.Items.AddRange(new ToolStripItem[] { saveAsToolStripMenuItem });
+            contextMenuStrip_pictureBox.Name = "contextMenuStrip_pictureBox";
+            contextMenuStrip_pictureBox.ShowImageMargin = false;
+            contextMenuStrip_pictureBox.Size = new Size(97, 26);
+            // 
+            // saveAsToolStripMenuItem
+            // 
+            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            saveAsToolStripMenuItem.Size = new Size(96, 22);
+            saveAsToolStripMenuItem.Text = "Save as...";
+            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            // 
             // pictureBox_prediction
             // 
             pictureBox_prediction.BackColor = SystemColors.ControlLightLight;
+            pictureBox_prediction.ContextMenuStrip = contextMenuStrip_pictureBox;
             pictureBox_prediction.Location = new Point(480, 40);
             pictureBox_prediction.Name = "pictureBox_prediction";
             pictureBox_prediction.Size = new Size(400, 300);
@@ -69,6 +90,7 @@
             // pictureBox_lastPhoto
             // 
             pictureBox_lastPhoto.BackColor = SystemColors.ControlLightLight;
+            pictureBox_lastPhoto.ContextMenuStrip = contextMenuStrip_pictureBox;
             pictureBox_lastPhoto.Location = new Point(40, 380);
             pictureBox_lastPhoto.Name = "pictureBox_lastPhoto";
             pictureBox_lastPhoto.Size = new Size(400, 300);
@@ -120,6 +142,7 @@
             // 
             parametersPanel.Location = new Point(920, 40);
             parametersPanel.Name = "parametersPanel";
+            parametersPanel.NumOfLayers = 1;
             parametersPanel.Size = new Size(320, 400);
             parametersPanel.TabIndex = 7;
             // 
@@ -152,6 +175,10 @@
             label_consoleOutput.TabIndex = 10;
             label_consoleOutput.Text = "Console output:";
             // 
+            // saveFileDialog
+            // 
+            saveFileDialog.Filter = "\"Image files (*.png)|*.png|All files (*.*)|*.*\"";
+            // 
             // MainForm
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -172,6 +199,7 @@
             Text = "RobotPainter";
             Load += MainForm_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox_sourceImage).EndInit();
+            contextMenuStrip_pictureBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox_prediction).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox_lastPhoto).EndInit();
             ResumeLayout(false);
@@ -191,5 +219,8 @@
         private Label label_parameters;
         private ConsoleControl consoleControl;
         private Label label_consoleOutput;
+        private SaveFileDialog saveFileDialog;
+        private ContextMenuStrip contextMenuStrip_pictureBox;
+        private ToolStripMenuItem saveAsToolStripMenuItem;
     }
 }

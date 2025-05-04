@@ -2,24 +2,25 @@ using RobotPainter.Application.CustomEventArgs;
 using RobotPainter.Application.PhotoTransforming;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
-using RobotPainter.Calculations.StrokeGeneration;
 using RobotPainter.Communications;
+using RobotPainter.Core;
 using System.Drawing.Imaging;
 
 namespace RobotPainter.Application
 {
     public partial class MainForm : Form
     {
-        EventHandler<DrawingStartedEventArgs>? DrawingStarted;
-        EventHandler? DrawingEnded;
-        EventHandler? LayerStarted;
-        EventHandler<LayerCompletedEventArgs>? LayerCompleted;
-        EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
+        private EventHandler<DrawingStartedEventArgs>? DrawingStarted;
+        private EventHandler? DrawingEnded;
+        private EventHandler? LayerStarted;
+        private EventHandler<LayerCompletedEventArgs>? LayerCompleted;
+        private EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
 
-        IPainter painter;
-        IPhotoTransformer photoTransformer;
+        private IPainter painter;
+        private IPhotoTransformer photoTransformer;
 
-        RobotPainterCalculator? calculator;
+        private RobotPainterCalculator? calculator;
+        private Palette? palette;
         private Bitmap? image;
 
         private Bitmap? lastPhoto;
@@ -33,6 +34,7 @@ namespace RobotPainter.Application
             photoTransformer = new DummyTransformer();
             FormBorderStyle = FormBorderStyle.FixedSingle;
             prediction_isRelevant = false;
+            palette = ManualPalette.GetPalette();
         }
 
         public void MainForm_Load(object? sender, EventArgs e)
@@ -163,6 +165,7 @@ namespace RobotPainter.Application
             await Task.Run(() =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
+                calculator.SavedPalette = palette;
                 calculator.AllLayersOptions = all_layers_options;
                 calculator.SetInitialCanvas(result);
 
@@ -174,6 +177,7 @@ namespace RobotPainter.Application
                     calculator.InitializeStrokeGenerator();
                     Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
                     var brushstrokes = calculator.GetAllBrushstrokes();
+                    calculator.ApplyPalette(brushstrokes);
                     num_of_strokes[i] = brushstrokes.Count;
                     Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
 
@@ -239,6 +243,7 @@ namespace RobotPainter.Application
             await Task.Run(async () =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
+                calculator.SavedPalette = palette;
                 calculator.AllLayersOptions = all_layers_options;
                 calculator.SetInitialCanvas(photoTransformer.Transform(photo, image.Width, image.Height));
 
@@ -249,6 +254,7 @@ namespace RobotPainter.Application
                 {
                     calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
+                    calculator.ApplyPalette(brushstrokes);
 
                     LayerStarted?.Invoke(this, EventArgs.Empty);
                     for (int j = 0; j < brushstrokes.Count; j++)

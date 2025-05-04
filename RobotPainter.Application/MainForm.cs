@@ -32,9 +32,12 @@ namespace RobotPainter.Application
         public MainForm()
         {
             InitializeComponent();
-            //painter = new BrushPainter();
+            //test
+            //photoTransformer = new DummyTransformer();
 
+            //real
             photoTransformer = new PhotoTransformer();
+
             FormBorderStyle = FormBorderStyle.FixedSingle;
             prediction_isRelevant = false;
             palette = ManualPalette.GetPalette();

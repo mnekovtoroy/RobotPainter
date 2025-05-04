@@ -34,7 +34,7 @@ namespace RobotPainter.Application
             InitializeComponent();
             //painter = new BrushPainter();
 
-            photoTransformer = new DummyTransformer();
+            photoTransformer = new PhotoTransformer();
             FormBorderStyle = FormBorderStyle.FixedSingle;
             prediction_isRelevant = false;
             palette = ManualPalette.GetPalette();

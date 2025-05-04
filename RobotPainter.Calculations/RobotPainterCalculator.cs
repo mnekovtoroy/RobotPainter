@@ -2,6 +2,7 @@
 using RobotPainter.Core;
 using RobotPainter.Calculations.StrokeGeneration;
 using System.Drawing;
+using RobotPainter.Calculations.Clustering;
 
 namespace RobotPainter.Calculations
 {
@@ -42,7 +43,7 @@ namespace RobotPainter.Calculations
         private LabBitmap targetLabBitmap;
         private LabBitmap lastFeedback;
 
-        private Palette palette;
+        public Palette SavedPalette { get; set; }
 
         private bool[,] isPaintedOn;
         private double[,] colorError;
@@ -121,6 +122,39 @@ namespace RobotPainter.Calculations
             return strokeGenerator.AreAllSitesAssigned();
         }
 
+        public void ApplyPalette(List<Brushstroke> brushstrokes)
+        {
+            if (SavedPalette == null)
+                throw new Exception("Palette must be set first.");
+            foreach(var stroke in brushstrokes)
+            {
+                ApplyPalette(stroke);
+            }
+        }
+
+        public void ApplyPalette(Brushstroke brushstroke)
+        {
+            brushstroke.Color = SavedPalette.Apply(brushstroke.Color);
+        }
+
+        public Palette CreatePalette(int n_colors, IClusterer<ColorLab> clusterer = null)
+        {
+            if (strokeGenerator == null)
+                throw new Exception("Stroke generator must be initialized first.");
+
+            if (clusterer == null)
+                clusterer = new KMeansClustering();
+
+            var colors = strokeGenerator.sites.Select(s =>
+            {
+                var centroid = s.Centroid;
+                return targetLabBitmap.GetPixel(Convert.ToInt32(centroid.X), Convert.ToInt32(centroid.Y));
+            }).ToList();
+
+            var palette_colors = clusterer.FindClusters(colors, n_colors);
+            return new Palette() { Colors = palette_colors };
+        }
+
         public bool AdvanceLayer()
         {
             if (CurrLayer >= AllLayersOptions.Count - 1)
@@ -154,9 +188,9 @@ namespace RobotPainter.Calculations
                     }
 
                     //calculating color error
-                    //var paletted_target = palette.Apply(targetLabBitmap.GetPixel(i, j));
-                    var paletted_target = targetLabBitmap.GetPixel(i, j);
-                    colorError[i, j] = paletted_target.DeltaE76(new_feedback.GetPixel(i,j));
+                    var targret_color = SavedPalette == null ? targetLabBitmap.GetPixel(i, j) : SavedPalette.Apply(targetLabBitmap.GetPixel(i, j));
+                    var feedback_color = SavedPalette == null ? new_feedback.GetPixel(i, j) : SavedPalette.Apply(new_feedback.GetPixel(i, j));
+                    colorError[i, j] = targret_color.DeltaE76(feedback_color);
                 }
             }
             lastFeedback = new_feedback;

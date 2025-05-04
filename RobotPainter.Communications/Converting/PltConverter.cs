@@ -8,6 +8,10 @@ namespace RobotPainter.Communications.Converting
         public int maxConsecStrokes;
         public int maxWithoutWashcycle;
 
+        public int consecStrokes = 0;
+        public int withousWashcycle = 0;
+        public ColorLab last_color = new ColorLab(double.MaxValue, double.MaxValue, double.MaxValue);
+
         private IColorToCoordConverter _colorToCoord;
 
         public PltConverter(IColorToCoordConverter color2coord, int max_consec_strokes = 5, int max_without_washcycle = 5)
@@ -32,25 +36,22 @@ namespace RobotPainter.Communications.Converting
         {
             var command_list = new List<IPltCommand>();
 
-            ColorLab last_color = new ColorLab(double.MaxValue, double.MaxValue, double.MaxValue);
-            int since_last_take_color = 0;
-            int since_last_wash_cycle = 0;
             foreach(var stroke in strokes)
             {
-                if(stroke.Color != last_color || since_last_wash_cycle == maxWithoutWashcycle)
+                if(stroke.Color != last_color || withousWashcycle == maxWithoutWashcycle)
                 {
                     AddWashCycle(command_list);
-                    since_last_wash_cycle = 0;
+                    withousWashcycle = 0;
                 }
-                if(stroke.Color != last_color || since_last_take_color == maxConsecStrokes)
+                if(stroke.Color != last_color || consecStrokes == maxConsecStrokes)
                 {                    
-                    //command_list.Add(new TakePaintCommand(_colorToCoord.ColorToCoord(stroke.Color)));
+                    command_list.Add(new TakePaintCommand(_colorToCoord.ColorToCoord(stroke.Color)));
                     last_color = stroke.Color;
-                    since_last_take_color = 0;
+                    consecStrokes = 0;
                 }
                 command_list.Add(new BrushstrokeCommand(stroke.RootPath));
-                since_last_take_color++;
-                since_last_wash_cycle++;
+                consecStrokes++;
+                withousWashcycle++;
             }
             AddWashCycle(command_list);
             return command_list;
@@ -58,10 +59,10 @@ namespace RobotPainter.Communications.Converting
 
         private static void AddWashCycle(List<IPltCommand> command_list)
         {
-            /*command_list.Add(new PlaceWasherCommand());
+            command_list.Add(new PlaceWasherCommand());
             command_list.Add(new TakeWasherCommand());
             command_list.Add(new PlaceDryerCommand());
-            command_list.Add(new TakeDryerCommand());*/
+            command_list.Add(new TakeDryerCommand());
         }
     }
 }

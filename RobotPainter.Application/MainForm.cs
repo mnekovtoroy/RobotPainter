@@ -3,7 +3,9 @@ using RobotPainter.Application.PhotoTransforming;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
 using RobotPainter.Communications;
+using RobotPainter.Communications.Converting;
 using RobotPainter.Core;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 
 namespace RobotPainter.Application
@@ -16,11 +18,11 @@ namespace RobotPainter.Application
         private EventHandler<LayerCompletedEventArgs>? LayerCompleted;
         private EventHandler<StrokeCompletedEventArgs>? StrokeCompleted;
 
-        private IPainter painter;
+        private IPainter? painter;
         private IPhotoTransformer photoTransformer;
 
         private RobotPainterCalculator? calculator;
-        private Palette? palette;
+        private Palette palette;
         private Bitmap? image;
 
         private Bitmap? lastPhoto;
@@ -30,7 +32,8 @@ namespace RobotPainter.Application
         public MainForm()
         {
             InitializeComponent();
-            painter = new BrushPainter();
+            //painter = new BrushPainter();
+
             photoTransformer = new DummyTransformer();
             FormBorderStyle = FormBorderStyle.FixedSingle;
             prediction_isRelevant = false;
@@ -232,7 +235,15 @@ namespace RobotPainter.Application
             double canvas_width = Convert.ToDouble(parametersPanel.CanvasWidth);
             double canvas_height = Convert.ToDouble(parametersPanel.CanvasHeight);
 
-            ((BrushPainter)painter).InitializePainter(new Bitmap(image.Width, image.Height), image.Width / canvas_width, image.Height / canvas_height, new BasicBrushModel());
+            //  real
+            var colorToCoord = new ManualColorToCoord(palette.Colors, new PointD(0, 0), 1.5, 1.5, 5, 2);
+            var pltConverter = new PltConverter(colorToCoord);
+            string temp_path = @"C:\Users\User\source\repos\RobotPainter\Temp";
+            string photo_path = @"C:\Users\User\source\repos\RobotPainter\Photos";
+            painter = await RobotController.Create(pltConverter, temp_path, photo_path, canvas_width, canvas_height);
+            //  testing
+            //painter = new BrushPainter();
+            //((BrushPainter)painter).InitializePainter(new Bitmap(image.Width, image.Height), image.Width / canvas_width, image.Height / canvas_height, new BasicBrushModel());
 
             var photo = await painter.GetFeedback();
             lastPhoto = photo;

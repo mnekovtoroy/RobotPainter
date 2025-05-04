@@ -16,6 +16,8 @@ namespace RobotPainter.Calculations.StrokeGeneration
             public double MaxBrushAngle = 30.0;
         }
 
+        public const int STROKE_SITES_LIMIT = 35;
+
         public static StrokeSites GenerateStrokeSites(StrokeGenerator parent, VoronoiSite starting_site, Options options)
         {
             var stroke_sites = new StrokeSites()
@@ -34,7 +36,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
 
             PointD prev_v = new PointD(0.0, 0.0);
 
-            while (curr_length < options.CanvasMaxStrokeLength)
+            while (curr_length < options.CanvasMaxStrokeLength && stroke_sites.involvedSites.Count < STROKE_SITES_LIMIT)
             {
                 int lc_ix = Convert.ToInt32(Math.Floor(last_centroid.X));
                 int lc_iy = Convert.ToInt32(Math.Floor(last_centroid.Y));
@@ -89,7 +91,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
                 prev_v.x = 0;
                 prev_v.y = 0;
             }
-            while (curr_length < options.CanvasMaxStrokeLength)
+            while (curr_length < options.CanvasMaxStrokeLength && stroke_sites.involvedSites.Count < STROKE_SITES_LIMIT)
             {
                 int lc_ix = Convert.ToInt32(Math.Floor(last_centroid.X));
                 int lc_iy = Convert.ToInt32(last_centroid.Y);

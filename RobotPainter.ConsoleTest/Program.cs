@@ -1,3 +1,4 @@
 ﻿using RobotPainter.ConsoleTest;
 
-TestCases.PhotoTransformingTest();
+var image_gen = new VKRImageGenerator();
+image_gen.GenerateImages();

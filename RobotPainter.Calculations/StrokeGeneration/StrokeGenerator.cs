@@ -21,7 +21,10 @@ namespace RobotPainter.Calculations.StrokeGeneration
             VoronoiPlane plane = new VoronoiPlane(0, 0, width - 1, height - 1);
             plane.GenerateRandomSites(n, PointGenerationMethod.Uniform);
             plane.Tessellate();
-            plane.Relax(relax_iterations);
+            if (relax_iterations > 0)
+            {
+                plane.Relax(relax_iterations);
+            }
             return plane.Sites;
         }
 

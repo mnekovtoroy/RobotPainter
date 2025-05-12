@@ -1,38 +1,59 @@
 ﻿using RobotPainter.Calculations.ImageProcessing;
+using Emgu.CV;
 
 namespace RobotPainter.Application.PhotoTransforming
 {
     public class PhotoTransformer : IPhotoTransformer
     {
-        private Point whitePoint = new Point(3015, 15);
-        private Point blackPoint = new Point(1803, 763);
+        private Point whitePoint = new Point(2926, 20);
+        private Point blackPoint = new Point(1696, 728);
 
-        private Point canvasUpperLeft = new Point(1024, 904);
-        private Size canvasSize = new Size(3397, 2542);
+        private Point canvasTopLeft = new Point(2909, 2407);
+        private Point canvasTopRight = new Point(3766, 2396);
+        private Point canvasBottomRight = new Point(3782, 3261);
+        private Point canvasBottomLeft = new Point(2921, 3271);
 
-        private Rectangle canvasArea;
+        private PointF[] canvas_bounds;
 
         public PhotoTransformer()
         {
-            canvasArea = new Rectangle(canvasUpperLeft, canvasSize);
+            canvas_bounds = new PointF[]
+            {
+                new PointF(canvasTopLeft.X, canvasTopLeft.Y),
+                new PointF(canvasTopRight.X, canvasTopRight.Y),
+                new PointF(canvasBottomRight.X, canvasBottomRight.Y),
+                new PointF(canvasBottomLeft.X, canvasBottomLeft.Y),
+            };
         }
 
         public Bitmap Transform(Bitmap bitmap, int target_width, int target_height)
         {
-            //cropping 
-            var cropped = bitmap.Clone(canvasArea, bitmap.PixelFormat);
-
-            //resizing
-            var resized = new Bitmap(cropped, new Size(target_width, target_height));
-
-            //white balance
+            var target_bounds = new PointF[]
+            {
+                new Point(0, 0),
+                new Point(target_width - 1, 0),
+                new Point(target_width - 1, target_height - 1),
+                new Point(0, target_height - 1)
+            };
             Color perfect_white = bitmap.GetPixel(whitePoint.X, whitePoint.Y);
             Color perfect_black = bitmap.GetPixel(blackPoint.X, blackPoint.Y);
-            ImageProcessor.WhiteBalance(resized, perfect_white, perfect_black);
+            Size target_size = new Size(target_width, target_height);
 
-            //idk if its needed
-            cropped.Dispose();
-            return resized;
+            //transforming
+            Bitmap transformed;
+            using (var orig = bitmap.ToMat())
+            using (var target = new Mat())
+            {
+                var matrix = CvInvoke.GetPerspectiveTransform(canvas_bounds, target_bounds);
+
+                CvInvoke.WarpPerspective(orig, target, matrix, target_size);
+
+                transformed = target.ToBitmap();
+            }
+            //white balance
+            ImageProcessor.WhiteBalance(transformed, perfect_white, perfect_black);
+
+            return transformed;
         }
     }
 }

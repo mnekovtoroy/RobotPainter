@@ -75,7 +75,7 @@ namespace RobotPainter.Communications
             await _controller.TakeaPhoto();
 
             //waiting a sec for the photo to be sent to pc
-            Thread.Sleep(1000);
+            Thread.Sleep(5000);
 
             //retrieve the photo
             string[] files = Directory.GetFiles(_photoFolderPath);
@@ -94,7 +94,7 @@ namespace RobotPainter.Communications
                     {
                         file_creation_times.Add(file, File.GetCreationTime(file));
                     }
-                    var files_sorted = file_creation_times.OrderBy(f => f.Value).ToList();
+                    var files_sorted = file_creation_times.OrderByDescending(f => f.Value).ToList();
 
                     photo = new Bitmap(files_sorted[0].Key);
 

@@ -11,7 +11,7 @@ namespace RobotPainter.Communications.Converting
             colorToCoord = new Dictionary<ColorLab, PointD>();
             for(int i =  0; i < colors.Count; i++)
             {
-                colorToCoord.Add(colors[i], p0 + new PointD(dx * i % width, dy * i / height));
+                colorToCoord.Add(colors[i], p0 + new PointD(dx * (i % width), dy * (i / width)));
             }
         }
 

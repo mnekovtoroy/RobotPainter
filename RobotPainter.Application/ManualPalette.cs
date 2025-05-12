@@ -8,16 +8,11 @@ namespace RobotPainter.Application
         {
             Colors = new List<ColorLab>()
             {
-                new ColorLab(0, 0, 0),
-                new ColorLab(15, 0, 0),
-                new ColorLab(30, 0, 0),
-                new ColorLab(45, 0, 0),
-                new ColorLab(60, 0, 0),
-                new ColorLab(70, 0, 0),
-                new ColorLab(80, 0, 0),
-                new ColorLab(87, 0, 0),
-                new ColorLab(94, 0, 0),
-                new ColorLab(100, 0, 0),
+                new ColorLab(100, 0.00526049995830391, -0.010408184525267927),
+                new ColorLab(85.92216328335641, 0.33380134184629595, -4.899097289445908),
+                new ColorLab(74.4664368086248, -0.8612887071016151, -4.895170616552158),
+                new ColorLab(43.34447699928772, -0.5178637597919034, -5.2847498204258825),
+                new ColorLab(1.9192144721665727, 0.0002611069104818675, -0.0005166356362107383)
             }
         };
 

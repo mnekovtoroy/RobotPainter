@@ -7,6 +7,8 @@ namespace RobotPainter.Communications.PltCommands
     {
         private static int scf = 40; // scale to PLT
 
+        private static Point3D p0 = new Point3D(220.0, 20.0, 0.0);
+
         public List<Point3D> rootPath;
 
         public BrushstrokeCommand(List<Point3D> root_path)
@@ -20,11 +22,12 @@ namespace RobotPainter.Communications.PltCommands
             strBuilder.Append("BS");
             foreach(var p in rootPath)
             {
-                strBuilder.Append(Convert.ToInt32(p.x * scf));
+                var p_moved = p + p0;
+                strBuilder.Append(Convert.ToInt32(p_moved.x * scf));
                 strBuilder.Append(',');
-                strBuilder.Append(Convert.ToInt32(p.y * scf));
+                strBuilder.Append(Convert.ToInt32(p_moved.y * scf));
                 strBuilder.Append(',');
-                strBuilder.Append(Convert.ToInt32(p.z * scf));
+                strBuilder.Append(Convert.ToInt32(p_moved.z * scf));
                 strBuilder.Append(',');
             }
             strBuilder.Remove(strBuilder.Length - 1, 1); //removing last ','

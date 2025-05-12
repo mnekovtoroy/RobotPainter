@@ -10,6 +10,8 @@ using RobotPainter.Visualization;
 using RobotPainter.Communications;
 using RobotPainter.Communications.Converting;
 using RobotPainter.Application.PhotoTransforming;
+using System;
+using Microsoft.ML;
 
 namespace RobotPainter.ConsoleTest
 {
@@ -527,9 +529,9 @@ namespace RobotPainter.ConsoleTest
 
         public static void WhiteBalanceTest()
         {
-            var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+            var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photo\";
 
-            var img = new Bitmap(path + "image_1.png");
+            var img = new Bitmap(path + "IMG_0008.JPG");
 
             Point white_point = new Point(1803, 763);
             Point black_point = new Point(3015, 15);
@@ -548,11 +550,147 @@ namespace RobotPainter.ConsoleTest
 
             var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
 
-            var img = new Bitmap(path + "image_1.png");
+            var img = new Bitmap(path + "bounds.png");
 
-            var transformed = transformer.Transform(img, 800, 600);
+            var transformed = transformer.Transform(img, 600, 600);
 
-            transformed.Save(path + "transformed.png");
+            transformed.Save(path + "transformed2.png");
+        }
+
+        public static async Task TakePaintTest()
+        {
+            var path_plt = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_plt\";
+            var path_img = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photo\";
+            //var path_bmp = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+
+            //test_calligraphy_sedov.m --"t"
+            /*var root_path = new List<Point3D> {
+                new Point3D(55.5483330293793, 32.8239968217536, 2.25000000000000),
+                new Point3D(51.9312381882220, 28.4611092298424, -0.155204257767549),
+                new Point3D(44.4715413462125, 19.4633305668608, -0.0264430111751386),
+                new Point3D(39.0385903206145, 14.6406734909229, -0.0162715460735159),
+                new Point3D(32.2177259241430, 10.2712769560302, -0.208608272197352),
+                new Point3D(27.7591012124281, 10.5706525800299, -0.549093190163909),
+                new Point3D(21.6248995867494, 18.7038029106224, -3.66149473090046),
+                new Point3D(31.6302034596677, 26.7376541346915, -4.07761195122949),
+                new Point3D(37.4663948369331, 32.8054355420039, -4.26132235156708),
+                new Point3D(39.8531305999195, 40.5486397480948, -4.31891438445548),
+                new Point3D(44.7707287653652, 44.2888645387676, -4.36614738202227),
+                new Point3D(43.7607136814139, 45.4291249989077, 2.25000000000000)
+            };*/
+            var root_path = new List<Point3D>
+            {
+                new Point3D(79.1348643424727, 69.7979796195486, 2.25000000000000),
+                new Point3D(69.2162539687767, 54.7869283492907, -5.27656858094736),
+                new Point3D(46.8331458347884, 20.9118217438251, -4.19301301594283),
+                new Point3D(45.0087648943768, 12.4938053593536, -3.92231554424775),
+                new Point3D(47.8931853077501, 7.88004688058137, -3.28521233126072),
+                new Point3D(52.2728778644053, 8.92587981698648, -0.885440783855692),
+                new Point3D(55.3188216484262, 9.96329089237358, -0.112914417531491),
+                new Point3D(58.5221790381474, 10.9406597235817, -0.0162715460735159),
+                new Point3D(64.8522550402678, 15.1513537503450, -1.21971654439470),
+                new Point3D(75.9234748628144, 28.3506089620225, -4.01365872093339),
+                new Point3D(75.4154467839344, 43.3083051158532, -5.15824682963130),
+                new Point3D(69.0541045064654, 44.6894621276125, -3.53969184353383),
+                new Point3D(71.9730808719019, 46.3033833910149, 2.25000000000000)
+            };
+
+            var colors = new List<ColorLab>()
+            {
+                new ColorLab(0, 0, 0),
+                new ColorLab(15, 0, 0),
+                new ColorLab(30, 0, 0),
+                new ColorLab(45, 0, 0),
+                new ColorLab(60, 0, 0)/*,
+                new ColorLab(70, 0, 0),
+                new ColorLab(80, 0, 0),
+                new ColorLab(87, 0, 0),
+                new ColorLab(94, 0, 0),
+                new ColorLab(100, 0, 0),*/
+            };
+
+            IColorToCoordConverter color2coord = new ManualColorToCoord(colors, new PointD(0, 0), 45, 45, 5, 1);
+            IPltConverter pltConverter = new DummyPltConverter(color2coord);
+
+            var robot = await RobotController.Create(pltConverter, path_plt, path_img, 400, 300);
+
+            /*var brushstrokeInfo = new BrushstrokeInfo()
+            {
+                Color = new ColorLab(),
+                RootPath = root_path
+            };*/
+
+            //List<BrushstrokeInfo> brushstroke_list = [ colors.Select(c => new BrushstrokeInfo() { Color = c, RootPath = root_path }).Last() ];
+            List<BrushstrokeInfo> brushstroke_list = colors.Select(c => new BrushstrokeInfo() { Color = c, RootPath = root_path }).ToList();
+
+            await robot.ApplyStrokes(brushstroke_list);
+        }
+
+        public static void ColorCalibration()
+        {
+            var path_bmp = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+            Bitmap image = new Bitmap(path_bmp + "color_calibration.JPG");
+
+            Point perfect_white = new Point(2922, 13);
+            Point perfect_black = new Point(1678, 716);
+
+            ImageProcessor.WhiteBalance(image, image.GetPixel(perfect_white.X, perfect_white.Y), image.GetPixel(perfect_black.X, perfect_black.Y));
+            image.Save(path_bmp + "balanced_3.png");
+
+            List<Point> colors_points = new List<Point>()
+            {
+                new Point(3827, 1932), //white
+                new Point(3574, 1946),
+                new Point(3083, 1934),
+                new Point(3334, 2242),
+                new Point(2842, 2205) //black
+            };
+
+            List<Color> colorsRGB = colors_points.Select(c => image.GetPixel(c.X, c.Y)).ToList();
+            List<ColorLab> colorsLab = colorsRGB.Select(c => ColorLab.FromRgb(c)).ToList();
+
+            foreach (var color in colorsLab)
+            {
+                Console.WriteLine(color);
+            }
+        }
+
+        public static async Task BoundsFinder()
+        {
+            var path_plt = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_plt\";
+            var path_img = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photo\";
+            var path_bmp = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
+
+            var root_path = new List<Point3D>
+            {
+                new Point3D(0,0,20),
+                new Point3D(0,0,-0.8),
+                new Point3D(0,0,20),
+
+                new Point3D(0,100,20),
+                new Point3D(0,100,-0.8),
+                new Point3D(0,100,20),
+
+                new Point3D(100,100,20),
+                new Point3D(100,100,-0.8),
+                new Point3D(100,100,20),
+
+                new Point3D(100,0,20),
+                new Point3D(100,0,-0.8),
+                new Point3D(100,0,20),
+            };
+
+            IPltConverter pltConverter = new Dummy2PltConverter();
+
+            var robot = await RobotController.Create(pltConverter, path_plt, path_img, 100, 100);
+
+            List<BrushstrokeInfo> brushstroke_list = [ new BrushstrokeInfo() { Color = new ColorLab(), RootPath = root_path } ];
+
+            //await robot.ApplyStrokes(brushstroke_list);
+            var photo = await robot.GetFeedback();
+
+            photo.Save(path_bmp + "bounds.png");
+
         }
     }
 }

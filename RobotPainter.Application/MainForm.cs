@@ -248,7 +248,7 @@ namespace RobotPainter.Application
             double canvas_height = Convert.ToDouble(parametersPanel.CanvasHeight);
 
             //  real
-            var colorToCoord = new ManualColorToCoord(palette.Colors, new PointD(0, 0), 1.5, 1.5, 5, 2);
+            var colorToCoord = new ManualColorToCoord(palette.Colors, new PointD(0, 0), 45, 45, 5, 1);
             var pltConverter = new PltConverter(colorToCoord);
             string temp_path = @"C:\Users\User\source\repos\RobotPainter\Temp";
             string photo_path = @"C:\Users\User\source\repos\RobotPainter\Photos";

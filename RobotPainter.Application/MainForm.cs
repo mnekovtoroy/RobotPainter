@@ -2,6 +2,7 @@ using RobotPainter.Application.CustomEventArgs;
 using RobotPainter.Application.PhotoTransforming;
 using RobotPainter.Calculations;
 using RobotPainter.Calculations.Brushes;
+using RobotPainter.Calculations.Clustering;
 using RobotPainter.Communications;
 using RobotPainter.Core;
 using System.Drawing.Imaging;
@@ -166,6 +167,7 @@ namespace RobotPainter.Application
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.SavedPalette = palette;
+                IClusterer<ColorLab> clusterer = new KMeansClustering();
                 calculator.AllLayersOptions = all_layers_options;
                 calculator.SetInitialCanvas(result);
 
@@ -177,6 +179,13 @@ namespace RobotPainter.Application
                     calculator.InitializeStrokeGenerator();
                     Console.WriteLine($"Layer {i + 1} prediction calculation: calculator initialized");
                     var brushstrokes = calculator.GetAllBrushstrokes();
+                    /*if(calculator.SavedPalette == null)
+                    {
+                        calculator.SavedPalette = new Palette()
+                        {
+                            Colors = clusterer.FindClusters(brushstrokes.Select(b => new ColorLab(b.Color.L, 0, 0)).ToList(), 5)
+                        };
+                    }*/
                     calculator.ApplyPalette(brushstrokes);
                     num_of_strokes[i] = brushstrokes.Count;
                     Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");

@@ -65,7 +65,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             sites = GenerateRandomRelaxedMesh(n_voronoi, width, height, options.RelaxationIterations);
             Lfit(options.LpullIterations, options.LpullMaxStep);
             ClearSitesList();
-            sites = sites.OrderByDescending(s => image.GetPixel(Convert.ToInt32(Math.Floor(s.Centroid.X)), Convert.ToInt32(Math.Floor(s.Centroid.Y))).L).ToList();
+            sites = sites.OrderBy(s => image.GetPixel(Convert.ToInt32(Math.Floor(s.Centroid.X)), Convert.ToInt32(Math.Floor(s.Centroid.Y))).L).ToList();
             
             sitesToPaint = CalculateSitesToPaint(is_painted, error);
             

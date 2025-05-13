@@ -186,10 +186,16 @@ namespace RobotPainter.Calculations
                     {
                         isPaintedOn[i, j] = true;
                     }
+                    else if(SavedPalette != null && new_feedback.GetPixel(i, j).DeltaE76(SavedPalette.Apply(targetLabBitmap.GetPixel(i, j))) > margin_of_error)
+                    {
+                        isPaintedOn[i, j] = true;
+                    }
 
                     //calculating color error
-                    var targret_color = SavedPalette == null ? targetLabBitmap.GetPixel(i, j) : SavedPalette.Apply(targetLabBitmap.GetPixel(i, j));
-                    var feedback_color = SavedPalette == null ? new_feedback.GetPixel(i, j) : SavedPalette.Apply(new_feedback.GetPixel(i, j));
+                    /*var targret_color = SavedPalette == null ? targetLabBitmap.GetPixel(i, j) : SavedPalette.Apply(targetLabBitmap.GetPixel(i, j));
+                    var feedback_color = SavedPalette == null ? new_feedback.GetPixel(i, j) : SavedPalette.Apply(new_feedback.GetPixel(i, j));*/
+                    var targret_color = targetLabBitmap.GetPixel(i, j);
+                    var feedback_color = new_feedback.GetPixel(i, j);
                     colorError[i, j] = targret_color.DeltaE76(feedback_color);
                 }
             }

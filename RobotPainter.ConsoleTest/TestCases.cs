@@ -610,7 +610,7 @@ namespace RobotPainter.ConsoleTest
             };
 
             IColorToCoordConverter color2coord = new ManualColorToCoord(colors, new PointD(0, 0), 45, 45, 5, 1);
-            IPltConverter pltConverter = new DummyPltConverter(color2coord);
+            IPltConverter pltConverter = new Dummy3PltConverter();
 
             var robot = await RobotController.Create(pltConverter, path_plt, path_img, 400, 300);
 
@@ -620,10 +620,14 @@ namespace RobotPainter.ConsoleTest
                 RootPath = root_path
             };*/
 
-            //List<BrushstrokeInfo> brushstroke_list = [ colors.Select(c => new BrushstrokeInfo() { Color = c, RootPath = root_path }).Last() ];
-            List<BrushstrokeInfo> brushstroke_list = colors.Select(c => new BrushstrokeInfo() { Color = c, RootPath = root_path }).ToList();
+            List<BrushstrokeInfo> brushstroke_list = [ colors.Select(c => new BrushstrokeInfo() { Color = c, RootPath = root_path }).Last() ];
+            //List<BrushstrokeInfo> brushstroke_list = colors.Select(c => new BrushstrokeInfo() { Color = c, RootPath = root_path }).ToList();
+            foreach (var brushstrokeinfo in brushstroke_list)
+            {
+                await robot.ApplyStrokes([brushstrokeinfo]);
+            }
 
-            await robot.ApplyStrokes(brushstroke_list);
+            //await robot.ApplyStrokes(brushstroke_list);
         }
 
         public static void ColorCalibration()
@@ -681,15 +685,17 @@ namespace RobotPainter.ConsoleTest
             };
 
             IPltConverter pltConverter = new Dummy2PltConverter();
+            IPhotoTransformer transformer = new PhotoTransformer();
 
             var robot = await RobotController.Create(pltConverter, path_plt, path_img, 100, 100);
 
             List<BrushstrokeInfo> brushstroke_list = [ new BrushstrokeInfo() { Color = new ColorLab(), RootPath = root_path } ];
 
             //await robot.ApplyStrokes(brushstroke_list);
-            var photo = await robot.GetFeedback();
-
+            /*var photo = await robot.GetFeedback();
+            var bounded = transformer.Transform(photo, 600, 600);
             photo.Save(path_bmp + "bounds.png");
+            bounded.Save(path_bmp + "bounds_test.png");*/
 
         }
     }

@@ -4,4 +4,5 @@
 //image_gen.GenerateImages();
 
 //TestCases.ColorCalibration();
-TestCases.PhotoTransformingTest();
+//TestCases.PhotoTransformingTest();
+await TestCases.TakePaintTest();

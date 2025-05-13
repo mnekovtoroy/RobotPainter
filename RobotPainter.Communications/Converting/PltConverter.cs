@@ -14,7 +14,7 @@ namespace RobotPainter.Communications.Converting
 
         private IColorToCoordConverter _colorToCoord;
 
-        public PltConverter(IColorToCoordConverter color2coord, int max_consec_strokes = 5, int max_without_washcycle = 5)
+        public PltConverter(IColorToCoordConverter color2coord, int max_consec_strokes = 3, int max_without_washcycle = 6)
         {
             _colorToCoord = color2coord;
             this.maxConsecStrokes = max_consec_strokes;
@@ -43,7 +43,7 @@ namespace RobotPainter.Communications.Converting
                     AddWashCycle(command_list);
                     withousWashcycle = 0;
                 }
-                if(stroke.Color != last_color || consecStrokes == maxConsecStrokes)
+                if(stroke.Color != last_color || consecStrokes == maxConsecStrokes || withousWashcycle == 0)
                 {                    
                     command_list.Add(new TakePaintCommand(_colorToCoord.ColorToCoord(stroke.Color)));
                     last_color = stroke.Color;
@@ -53,7 +53,6 @@ namespace RobotPainter.Communications.Converting
                 consecStrokes++;
                 withousWashcycle++;
             }
-            AddWashCycle(command_list);
             return command_list;
         }
 

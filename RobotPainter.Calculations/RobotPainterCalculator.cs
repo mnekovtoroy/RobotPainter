@@ -165,6 +165,7 @@ namespace RobotPainter.Calculations
             return true;
         }
 
+        private bool first_feedback = true;
         public void ApplyFeedback(Bitmap feedback)
         {
             if(lastFeedback == null)
@@ -174,7 +175,7 @@ namespace RobotPainter.Calculations
 
             var new_feedback = new LabBitmap(feedback);
 
-            const double margin_of_error = 0.5;
+            const double margin_of_error = 2.0;
 
             for(int i = 0; i < feedback.Width; i++)
             {
@@ -186,7 +187,9 @@ namespace RobotPainter.Calculations
                     {
                         isPaintedOn[i, j] = true;
                     }
-                    else if(SavedPalette != null && new_feedback.GetPixel(i, j).DeltaE76(SavedPalette.Apply(targetLabBitmap.GetPixel(i, j))) > margin_of_error)
+                    else if(SavedPalette != null && 
+                        !first_feedback &&
+                        new_feedback.GetPixel(i, j).DeltaE76(SavedPalette.Apply(targetLabBitmap.GetPixel(i, j))) < margin_of_error)
                     {
                         isPaintedOn[i, j] = true;
                     }
@@ -200,6 +203,7 @@ namespace RobotPainter.Calculations
                 }
             }
             lastFeedback = new_feedback;
+            first_feedback = false;
         }
 
         private StrokeGenerator.Options MapStrokeGeneratorOptions(LayerOptions layerOptions)

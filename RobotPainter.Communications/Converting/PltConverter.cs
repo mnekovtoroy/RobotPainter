@@ -14,7 +14,7 @@ namespace RobotPainter.Communications.Converting
 
         private IColorToCoordConverter _colorToCoord;
 
-        public PltConverter(IColorToCoordConverter color2coord, int max_consec_strokes = 3, int max_without_washcycle = 6)
+        public PltConverter(IColorToCoordConverter color2coord, int max_consec_strokes = 20, int max_without_washcycle = 40)
         {
             _colorToCoord = color2coord;
             this.maxConsecStrokes = max_consec_strokes;

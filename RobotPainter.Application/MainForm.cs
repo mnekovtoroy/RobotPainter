@@ -257,19 +257,22 @@ namespace RobotPainter.Application
             //painter = new BrushPainter();
             //((BrushPainter)painter).InitializePainter(new Bitmap(image.Width, image.Height), image.Width / canvas_width, image.Height / canvas_height, new BasicBrushModel());
 
+            var initial = new Bitmap(@"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\transformed2.png");
+            var initial_resized = new Bitmap(initial, new Size(image.Width, image.Height));
             var photo = await painter.GetFeedback();
             lastPhoto = photo;
             _ = UpdatePhoto(new Bitmap(lastPhoto));
 
             var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
-
+            
             await Task.Run(async () =>
             {
                 calculator = new RobotPainterCalculator(image, canvas_width, canvas_height);
                 calculator.SavedPalette = palette;
                 calculator.AllLayersOptions = all_layers_options;
-                calculator.SetInitialCanvas(photoTransformer.Transform(photo, image.Width, image.Height));
-
+                //calculator.SetInitialCanvas(photoTransformer.Transform(photo, image.Width, image.Height));
+                calculator.SetInitialCanvas(initial_resized);
+                calculator.ApplyFeedback(photoTransformer.Transform(lastPhoto, image.Width, image.Height));
                 DrawingStarted?.Invoke(this, new DrawingStartedEventArgs() { TotalLayers = calculator.NumOfLayers });
 
                 //for every layer

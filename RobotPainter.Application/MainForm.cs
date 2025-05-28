@@ -186,7 +186,7 @@ namespace RobotPainter.Application
                             Colors = clusterer.FindClusters(brushstrokes.Select(b => new ColorLab(b.Color.L, 0, 0)).ToList(), 5)
                         };
                     }*/
-                    calculator.ApplyPalette(brushstrokes);
+                    //calculator.ApplyPalette(brushstrokes);
                     num_of_strokes[i] = brushstrokes.Count;
                     Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
 
@@ -263,7 +263,7 @@ namespace RobotPainter.Application
                 {
                     calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
-                    calculator.ApplyPalette(brushstrokes);
+                    //calculator.ApplyPalette(brushstrokes);
 
                     LayerStarted?.Invoke(this, EventArgs.Empty);
                     for (int j = 0; j < brushstrokes.Count; j++)

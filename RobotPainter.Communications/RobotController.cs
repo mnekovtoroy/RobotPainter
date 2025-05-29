@@ -75,7 +75,7 @@ namespace RobotPainter.Communications
             await _controller.TakeaPhoto();
 
             //waiting a sec for the photo to be sent to pc
-            Thread.Sleep(5000);
+            Thread.Sleep(10000);
 
             //retrieve the photo
             string[] files = Directory.GetFiles(_photoFolderPath);

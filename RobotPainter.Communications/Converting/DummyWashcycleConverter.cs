@@ -2,13 +2,10 @@
 
 namespace RobotPainter.Communications.Converting
 {
-    public class DummyPltConverter : IPltConverter
+    public class DummyWashcycleConverter : IPltConverter
     {
-        private IColorToCoordConverter _colorToCoord;
-
-        public DummyPltConverter(IColorToCoordConverter color2coord)
+        public DummyWashcycleConverter()
         {
-            _colorToCoord = color2coord;
         }
 
         public void SavePlt(List<IPltCommand> commands, string path)
@@ -27,9 +24,17 @@ namespace RobotPainter.Communications.Converting
             var command_list = new List<IPltCommand>();
             foreach (BrushstrokeInfo stroke in strokes)
             {
-                command_list.Add(new TakePaintCommand(_colorToCoord.ColorToCoord(stroke.Color)));
+                AddWashCycle(command_list);
             }
             return command_list;
+        }
+
+        private static void AddWashCycle(List<IPltCommand> command_list)
+        {
+            command_list.Add(new PlaceWasherCommand());
+            command_list.Add(new TakeWasherCommand());
+            command_list.Add(new PlaceDryerCommand());
+            command_list.Add(new TakeDryerCommand());
         }
     }
 }

@@ -7,7 +7,7 @@ namespace RobotPainter.Communications.PltCommands
     {
         private static int scf = 40; // scale to PLT
 
-        private static Point3D p0 = new Point3D(0.0, 0.0, 0.0);
+        private static Point3D p0 = new Point3D(220.0, 20.0, 0.0);
 
         public List<Point3D> rootPath;
 

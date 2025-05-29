@@ -550,11 +550,11 @@ namespace RobotPainter.ConsoleTest
 
             var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
 
-            var img = new Bitmap(@"C:\Users\User\source\repos\RobotPainter\Photos\IMG_0082.JPG");
+            var img = new Bitmap(path + "bounds.png");
 
-            var transformed = transformer.Transform(img, 1200, 900);
+            var transformed = transformer.Transform(img, 452, 452);
 
-            transformed.Save(path + "transformed3.png");
+            transformed.Save(path + "transformed.png");
         }
 
         public static async Task TakePaintTest()
@@ -610,9 +610,11 @@ namespace RobotPainter.ConsoleTest
             };
 
             IColorToCoordConverter color2coord = new ManualColorToCoord(colors, new PointD(0, 0), 45, 45, 5, 1);
-            IPltConverter pltConverter = new Dummy3PltConverter();
+            IPltConverter pltConverter = new DummyColorConverter(color2coord);
+            //IPltConverter pltConverter = new DummyStrokeConverter();
+            //IPltConverter pltConverter = new DummyWashcycleConverter();
 
-            var robot = await RobotController.Create(pltConverter, path_plt, path_img, 400, 300);
+            var robot = await RobotController.Create(pltConverter, path_plt, path_img, 100, 100);
 
             /*var brushstrokeInfo = new BrushstrokeInfo()
             {
@@ -661,8 +663,8 @@ namespace RobotPainter.ConsoleTest
 
         public static async Task BoundsFinder()
         {
-            var path_plt = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_plt\";
-            var path_img = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_photo\";
+            var path_plt = @"C:\Users\User\source\repos\RobotPainter\Temp\";
+            var path_img = @"C:\Users\User\source\repos\RobotPainter\Photos\";
             var path_bmp = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
 
             var root_path = new List<Point3D>
@@ -684,7 +686,7 @@ namespace RobotPainter.ConsoleTest
                 new Point3D(100,0,20),
             };
 
-            IPltConverter pltConverter = new Dummy2PltConverter();
+            IPltConverter pltConverter = new DummyStrokeConverter();
             IPhotoTransformer transformer = new PhotoTransformer();
 
             var robot = await RobotController.Create(pltConverter, path_plt, path_img, 100, 100);
@@ -692,10 +694,10 @@ namespace RobotPainter.ConsoleTest
             List<BrushstrokeInfo> brushstroke_list = [ new BrushstrokeInfo() { Color = new ColorLab(), RootPath = root_path } ];
 
             //await robot.ApplyStrokes(brushstroke_list);
-            /*var photo = await robot.GetFeedback();
+            var photo = await robot.GetFeedback();
             var bounded = transformer.Transform(photo, 600, 600);
             photo.Save(path_bmp + "bounds.png");
-            bounded.Save(path_bmp + "bounds_test.png");*/
+            bounded.Save(path_bmp + "bounds_test.png");
 
         }
     }

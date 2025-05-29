@@ -4,8 +4,9 @@
 //image_gen.GenerateImages();
 
 //TestCases.ColorCalibration();
-TestCases.PhotoTransformingTest();
-//await TestCases.TakePaintTest();
+//TestCases.PhotoTransformingTest();
+await TestCases.TakePaintTest();
+//await TestCases.BoundsFinder();
 
 
 /*var calib = await Calibration.Create();

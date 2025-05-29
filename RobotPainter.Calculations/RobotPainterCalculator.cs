@@ -165,7 +165,7 @@ namespace RobotPainter.Calculations
             return true;
         }
 
-        private bool first_feedback = true;
+        private bool first_feedback = false;
         public void ApplyFeedback(Bitmap feedback)
         {
             if(lastFeedback == null)
@@ -175,7 +175,7 @@ namespace RobotPainter.Calculations
 
             var new_feedback = new LabBitmap(feedback);
 
-            const double margin_of_error = 2.0;
+            const double margin_of_error = 8.0;
 
             for(int i = 0; i < feedback.Width; i++)
             {
@@ -193,7 +193,7 @@ namespace RobotPainter.Calculations
                     {
                         isPaintedOn[i, j] = true;
                     }
-
+                    isPaintedOn[i, j] = true;
                     //calculating color error
                     /*var targret_color = SavedPalette == null ? targetLabBitmap.GetPixel(i, j) : SavedPalette.Apply(targetLabBitmap.GetPixel(i, j));
                     var feedback_color = SavedPalette == null ? new_feedback.GetPixel(i, j) : SavedPalette.Apply(new_feedback.GetPixel(i, j));*/

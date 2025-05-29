@@ -2,9 +2,9 @@
 
 namespace RobotPainter.Communications.Converting
 {
-    public class Dummy2PltConverter : IPltConverter
+    public class DummyStrokeConverter : IPltConverter
     {
-        public Dummy2PltConverter()
+        public DummyStrokeConverter()
         {
         }
 

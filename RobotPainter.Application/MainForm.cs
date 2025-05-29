@@ -155,7 +155,7 @@ namespace RobotPainter.Application
             EnableControls();
         }
 
-        //to do: change for multi-layer
+        private static readonly string initial_canvas = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\transformed.png";
         private async Task<Bitmap> CalculatePrediction(ParametersPanel parametersPanel)
         {
             if (image == null)
@@ -167,7 +167,7 @@ namespace RobotPainter.Application
 
             var all_layers_options = parametersPanel.Invoke(() => parametersPanel.GetAllLayerOptions());
 
-            Bitmap result = new Bitmap(image.Width, image.Height);
+            Bitmap result = new Bitmap(initial_canvas);
 
             await Task.Run(() =>
             {
@@ -175,7 +175,8 @@ namespace RobotPainter.Application
                 calculator.SavedPalette = palette;
                 IClusterer<ColorLab> clusterer = new KMeansClustering();
                 calculator.AllLayersOptions = all_layers_options;
-                calculator.SetInitialCanvas(result);
+                calculator.SetInitialCanvas(new Bitmap(result.Width, result.Height));
+                calculator.ApplyFeedback(result);
 
                 int[] num_of_strokes = new int[calculator.NumOfLayers];
                 //for every layer
@@ -192,7 +193,7 @@ namespace RobotPainter.Application
                             Colors = clusterer.FindClusters(brushstrokes.Select(b => new ColorLab(b.Color.L, 0, 0)).ToList(), 5)
                         };
                     }*/
-                    //calculator.ApplyPalette(brushstrokes);
+                    calculator.ApplyPalette(brushstrokes);
                     num_of_strokes[i] = brushstrokes.Count;
                     Console.WriteLine($"Layer {i + 1} prediction calculation: brushstrokes calculated");
 
@@ -280,7 +281,7 @@ namespace RobotPainter.Application
                 {
                     calculator.InitializeStrokeGenerator();
                     var brushstrokes = calculator.GetAllBrushstrokes();
-                    //calculator.ApplyPalette(brushstrokes);
+                    calculator.ApplyPalette(brushstrokes);
 
                     LayerStarted?.Invoke(this, EventArgs.Empty);
                     for (int j = 0; j < brushstrokes.Count; j++)

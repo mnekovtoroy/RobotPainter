@@ -550,11 +550,11 @@ namespace RobotPainter.ConsoleTest
 
             var path = @"C:\Users\User\source\repos\RobotPainter\RobotPainter.ConsoleTest\test_bmp\";
 
-            var img = new Bitmap(path + "bounds.png");
+            var img = new Bitmap(@"C:\Users\User\source\repos\RobotPainter\Photos\IMG_0082.JPG");
 
-            var transformed = transformer.Transform(img, 600, 600);
+            var transformed = transformer.Transform(img, 1200, 900);
 
-            transformed.Save(path + "transformed2.png");
+            transformed.Save(path + "transformed3.png");
         }
 
         public static async Task TakePaintTest()

@@ -161,7 +161,7 @@ namespace RobotPainter.Calculations.StrokeGeneration
             return null;
         }
 
-        private static List<Point3D> AddRunaways(List<Point3D> list, Options options)
+        public static List<Point3D> AddRunaways(List<Point3D> list, Options options)
         {
             double start_length, end_length;
             start_length = (options.StartRunawayAngle == 90.0 || options.StartRunawayAngle == 0.0) ?

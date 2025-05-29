@@ -372,5 +372,6 @@ FodyWeavers.xsd
 /RobotPainter.ConsoleTest/test_bmp
 /RobotPainter.ConsoleTest/vkr_images
 /Photos
-Tempcommands.plt
+/RobotPainter.Documentation/Secrets/vkr-documentation-70ac96aedc96.json
 /RobotPainter.Documentation
+Tempcommands.plt

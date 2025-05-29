@@ -8,10 +8,10 @@ namespace RobotPainter.Application.PhotoTransforming
         private Point whitePoint = new Point(2926, 20);
         private Point blackPoint = new Point(1696, 728);
 
-        private Point canvasTopLeft = new Point(2896, 2402);
-        private Point canvasTopRight = new Point(3755, 2390);
-        private Point canvasBottomRight = new Point(3769, 3256);
-        private Point canvasBottomLeft = new Point(2908, 3265);
+        private Point canvasTopLeft = new Point(989, 883);
+        private Point canvasTopRight = new Point(4406, 879);
+        private Point canvasBottomRight = new Point(4400, 3418);
+        private Point canvasBottomLeft = new Point(990, 3440);
         
         
         /*private Point canvasTopLeft = new Point(2909, 2407);
